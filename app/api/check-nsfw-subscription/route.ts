@@ -1,28 +1,21 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/src/lib/prisma";
 
-/**
- * Checks if a user has an ACTIVE NSFW subscription to a creator.
- */
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user?.email) {
+    if (!session?.user?.name) {
       return NextResponse.json({ subscribed: false }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
-    const viewerUsername = session.user.name; // user.name = username
     const creatorUsername = searchParams.get("creator");
+    const viewerUsername = session.user.name;
 
     if (!creatorUsername) {
-      return NextResponse.json(
-        { error: "Missing creator" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing creator" }, { status: 400 });
     }
 
     const sub = await prisma.billingSubscription.findFirst({
@@ -36,9 +29,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ subscribed: !!sub });
   } catch (err) {
-    return NextResponse.json(
-      { error: "Subscription check failed", details: String(err) },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Subscription check failed" }, { status: 500 });
   }
 }

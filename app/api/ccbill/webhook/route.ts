@@ -1,81 +1,36 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-
-/**
- * CCBill MOCK MODE Webhook
- * -------------------------
- *  - Accepts CCBill-style POST form-data
- *  - Writes to BillingSubscription table
- *  - NO MD5 validation yet (no credentials)
- *  - Safe for CCBill pre-approval
- */
+import prisma from "@/src/lib/prisma";
 
 export async function POST(req: Request) {
   try {
     const form = await req.formData();
 
-    const eventType = form.get("eventType") as string | null;
-    const subscriptionId = form.get("subscriptionId") as string | null;
-    const subscriberUsername = form.get("subscriberUsername") as string | null;
-    const creatorUsername = form.get("creatorUsername") as string | null;
-    const siteSection = form.get("siteSection") as string | null;
-    const price = form.get("price") as string | null;
+    const eventType = form.get("eventType");
+    const subscriptionId = form.get("subscriptionId");
+    const subscriberUsername = form.get("subscriberUsername");
+    const creatorUsername = form.get("creatorUsername");
+    const siteSection = form.get("siteSection");
 
-    if (!eventType || !subscriberUsername || !creatorUsername || !siteSection) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    let status = "UNKNOWN";
-
-    switch (eventType) {
-      case "NewSaleSuccess":
-      case "RenewalSuccess":
-        status = "ACTIVE";
-        break;
-      case "CancelSubscription":
-      case "Void":
-      case "Chargeback":
-        status = "CANCELLED";
-        break;
-      default:
-        status = "UNKNOWN";
+    if (!subscriberUsername || !creatorUsername || !siteSection) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
     await prisma.billingSubscription.upsert({
-      where: {
-        subscriberUsername_creatorUsername_siteSection: {
-          subscriberUsername,
-          creatorUsername,
-          siteSection,
-        },
-      },
+      where: { subscriptionId: String(subscriptionId || "") },
       update: {
-        status,
-        price: price ? Number(price) : undefined,
-        subscriptionId: subscriptionId ?? undefined,
+        status: String(eventType || "Unknown"),
       },
       create: {
-        subscriberUsername,
-        creatorUsername,
-        siteSection,
-        status,
-        price: price ? Number(price) : 0,
-        subscriptionId: subscriptionId ?? "mock-subscription-id",
+        subscriptionId: String(subscriptionId || ""),
+        eventType: String(eventType || "Unknown"),
+        subscriberUsername: String(subscriberUsername),
+        creatorUsername: String(creatorUsername),
+        siteSection: String(siteSection),
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      eventReceived: eventType,
-      mockMode: true,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Webhook error", details: String(error) },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json({ error: "Webhook failure", details: String(err) }, { status: 500 });
   }
 }
