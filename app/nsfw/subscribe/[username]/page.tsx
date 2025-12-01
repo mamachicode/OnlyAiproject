@@ -1,4 +1,4 @@
-import { prisma } from "@/src/lib/prisma";
+import prisma from "@/src/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";

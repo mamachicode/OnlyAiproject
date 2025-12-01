@@ -1,4 +1,4 @@
-import { prisma } from "@/src/lib/prisma";
+import prisma from "@/src/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
 
