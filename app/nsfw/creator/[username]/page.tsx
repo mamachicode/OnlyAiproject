@@ -1,5 +1,5 @@
 // @ts-nocheck
-import prisma from "@/src/lib/prisma";
+import prisma from "@/lib/prisma";
 
 export default async function CreatorPage({ params }) {
   const { username } = params;

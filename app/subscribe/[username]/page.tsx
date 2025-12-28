@@ -1,5 +1,5 @@
 // @ts-nocheck
-import prisma from "@/src/lib/prisma";
+import prisma from "@/lib/prisma";
 import { getServerAuthSession } from "@/src/auth";
 
 export default async function SubscribePage({ params }) {

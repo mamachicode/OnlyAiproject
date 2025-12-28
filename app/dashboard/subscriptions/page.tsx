@@ -1,6 +1,6 @@
 import { getAuthSession } from "@/src/lib/auth";
 import { auth } from "@/src/auth";
-import prisma from "@/src/lib/prisma";
+import prisma from "@/lib/prisma";
 
 export default async function SubscriptionsDashboard() {
   const session = await getAuthSession();

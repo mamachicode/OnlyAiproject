@@ -1,5 +1,5 @@
 import { getAuthSession } from "@/src/lib/auth";
-import prisma from "@/src/lib/prisma";
+import prisma from "@/lib/prisma";
 import { auth } from "@/src/auth";
 import { NextResponse } from "next/server";
 
