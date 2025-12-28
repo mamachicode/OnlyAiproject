@@ -1,25 +1,21 @@
-import Link from "next/link";
-import { auth } from "@/src/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/lib/auth-options";
+import { redirect } from "next/navigation";
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getServerSession(authOptions);
 
-  if (!session) return <div className="p-10 text-red-600">Not logged in</div>;
+  if (!session) {
+    redirect("/login");
+  }
 
   return (
-    <div className="flex">
-      <aside className="w-64 p-6 border-r min-h-screen space-y-4">
-        <h2 className="text-xl font-bold mb-4">OnlyAI Creator</h2>
-        <nav className="space-y-3">
-          <Link className="block" href="/dashboard">🏠 Overview</Link>
-          <Link className="block" href="/dashboard/upload">📤 Upload</Link>
-          <Link className="block" href="/dashboard/posts">🖼 Your Posts</Link>
-          <Link className="block" href="/dashboard/settings">💵 Subscription Price</Link>
-          <Link className="block" href="/dashboard/subscribers">📚 Subscribers</Link>
-        </nav>
-      </aside>
-
-      <main className="flex-1">{children}</main>
+    <div className="min-h-screen bg-gray-100">
+      {children}
     </div>
   );
 }

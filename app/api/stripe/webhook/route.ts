@@ -1,70 +1,46 @@
-import { NextRequest } from 'next/server';
-import Stripe from 'stripe';
-import { PrismaClient } from '@prisma/client';
-
-export const runtime = 'nodejs';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-08-16',
-});
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const sig = req.headers.get('stripe-signature')!;
+export async function POST(req: Request) {
+  const sig = req.headers.get("stripe-signature");
 
-  let event: Stripe.Event;
+  if (!sig) {
+    return NextResponse.json({ error: "Missing Stripe signature" }, { status: 400 });
+  }
+
+  const buf = Buffer.from(await req.arrayBuffer());
+
+  let event;
 
   try {
     event = stripe.webhooks.constructEvent(
-      body,
+      buf,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
-    console.error('❌ Webhook signature verification failed.', err.message);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+    return NextResponse.json(
+      { error: `Webhook signature verification failed: ${err.message}` },
+      { status: 400 }
+    );
   }
 
-  // ✅ Log event type and full payload
-  console.log("✅ Stripe Event Received:", event.type);
-  console.log("📦 Full Payload:", JSON.stringify(event, null, 2));
+  // Handle subscription events (adapt this as needed)
+  switch (event.type) {
+    case "customer.subscription.created":
+    case "customer.subscription.updated":
+    case "customer.subscription.deleted": {
+      const subscription = event.data.object;
 
-  // ✅ Handle checkout.session.completed
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session;
-
-    const customerEmail = session.customer_email;
-    const subscriptionId = session.subscription as string;
-    const customerId = session.customer as string;
-
-    if (customerEmail && subscriptionId && customerId) {
-      try {
-        await prisma.subscription.upsert({
-          where: { userId: customerEmail },
-          update: {
-            status: 'active',
-            stripeCustomerId: customerId,
-            stripeSubscriptionId: subscriptionId,
-            currentPeriodEnd: new Date((session.expires_at || 0) * 1000),
-          },
-          create: {
-            userId: customerEmail,
-            status: 'active',
-            stripeCustomerId: customerId,
-            stripeSubscriptionId: subscriptionId,
-            currentPeriodEnd: new Date((session.expires_at || 0) * 1000),
-          },
-        });
-        console.log(`✅ Subscription saved for ${customerEmail}`);
-      } catch (err: any) {
-        console.error('❌ Failed to save subscription:', err.message);
-      }
-    } else {
-      console.warn("⚠️ Missing customerEmail, subscriptionId, or customerId");
+      // TODO: Map subscription to your Subscription or BillingSubscription model
+      console.log("Received subscription event:", subscription);
+      break;
     }
   }
 
-  return new Response('✅ Webhook received', { status: 200 });
+  return NextResponse.json({ received: true });
 }

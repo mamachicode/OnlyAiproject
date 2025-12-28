@@ -1,8 +1,9 @@
+import { getAuthSession } from "@/src/lib/auth";
 import { auth } from "@/src/auth";
 import prisma from "@/src/lib/prisma";
 
 export default async function SubscriptionsDashboard() {
-  const session = await auth();
+  const session = await getAuthSession();
 
   if (!session) {
     return <div className="p-10 text-red-500">You must be logged in to view your subscriptions.</div>;

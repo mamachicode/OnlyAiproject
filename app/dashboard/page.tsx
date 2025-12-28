@@ -1,15 +1,25 @@
-import { auth } from "@/src/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/lib/auth-options";
 
 export default async function Dashboard() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
 
-  if (!session) return <div className="p-10 text-red-600">Not logged in</div>;
+  if (!session) {
+    return (
+      <div className="p-10 text-red-600">
+        Not logged in
+      </div>
+    );
+  }
 
   return (
     <div className="p-10">
-      <h1 className="text-3xl font-bold mb-4">Creator Dashboard</h1>
-      <p>Welcome, {session.user?.email}</p>
-      <p className="mt-2 text-gray-600">Use the left menu to manage your content.</p>
+      <h1 className="text-2xl font-bold">
+        Dashboard
+      </h1>
+      <p className="mt-4">
+        Logged in as <strong>{session.user?.email}</strong>
+      </p>
     </div>
   );
 }

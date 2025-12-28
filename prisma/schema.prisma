@@ -1,76 +1,86 @@
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String
   username  String   @unique
+  password  String
 
-  // NEW: creator tier prices
-  sfwPrice  Int?     @default(5)   // Minimum will be enforced in API
-  nsfwPrice Int?     @default(10)
-
+  sfwPrice  Int      @default(5)
+  nsfwPrice Int      @default(10)
   isNsfw    Boolean  @default(false)
 
   posts     Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Post {
   id        String   @id @default(cuid())
+  title     String
+  content   String
+  isNsfw    Boolean  @default(false)
+
   creator   User     @relation(fields: [creatorId], references: [id])
   creatorId String
 
-  url       String
-  publicId  String
-  caption   String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([creatorId])
 }
 
-// ----- CCBILL SUBSCRIPTIONS -----
-
-enum SiteSection {
-  SFW
-  NSFW
+enum WebhookProvider {
+  CCBILL
+  STRIPE
 }
 
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELLED
-  EXPIRED
-  CHARGEBACK
+enum WebhookProcessStatus {
+  RECEIVED
+  VERIFIED
+  REJECTED
+  PROCESSED
+  FAILED
 }
 
-model Subscription {
-  id                   Int                 @id @default(autoincrement())
+model WebhookEvent {
+  id            String              @id @default(cuid())
+  provider      WebhookProvider
+  externalId    String              // transactionId if available, else derived id
+  eventType     String
+  subscriptionId String?            // convenience
+  transactionId String?             // convenience
+  rawBody       String?
+  payloadJson   Json?
+  status        WebhookProcessStatus @default(RECEIVED)
+  error         String?
+  receivedAt    DateTime            @default(now())
+  processedAt   DateTime?
 
-  subscriberEmail      String       // We will match this to OnlyAI.user.email
-  creatorEmail         String       // The creator’s OnlyAI email
-
-  siteSection          SiteSection  // SFW or NSFW
-  ccbillSubscriptionId String?      @unique
-  status               SubscriptionStatus @default(ACTIVE)
-
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
+  @@unique([provider, externalId])
+  @@index([provider, receivedAt])
+  @@index([subscriptionId])
 }
 
-model BillingSubscription {
-  id              Int      @id @default(autoincrement())
-  subscriberUsername String
-  creatorUsername    String
-  siteSection        String   // "SFW" or "NSFW"
-  price              Int
-  status             String   // ACTIVE, CANCELLED, EXPIRED
-  subscriptionId     String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+model BillingAuditLog {
+  id           String   @id @default(cuid())
+  provider     WebhookProvider
+  action       String
+  subscriptionId String?
+  userEmail    String?
+  creatorEmail String?
+  metadata     Json?
+  createdAt    DateTime @default(now())
 
-  @@unique([subscriberUsername, creatorUsername, siteSection])
+  @@index([provider, createdAt])
+  @@index([subscriptionId])
 }

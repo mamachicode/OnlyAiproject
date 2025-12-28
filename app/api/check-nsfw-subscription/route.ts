@@ -1,11 +1,13 @@
+import { getServerAuthSession } from '@/src/auth';
+
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
 import prisma from "@/src/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerAuthSession();
     if (!session?.user?.name) {
       return NextResponse.json({ subscribed: false }, { status: 401 });
     }

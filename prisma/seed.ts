@@ -1,5 +1,7 @@
-import prisma from "../src/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+
+const prisma = new PrismaClient();
 
 async function main() {
   const hashed = await bcrypt.hash("test123", 10);
@@ -11,17 +13,17 @@ async function main() {
       email: "creator@onlyai.com",
       password: hashed,
       username: "creator",
-      subscriptionPrice: 5,
-      isNsfw: true,   // This creator belongs to the NSFW section
+      sfwPrice: 5,      // correct
+      nsfwPrice: 10,    // correct
+      isNsfw: true       // correct
     },
   });
-
-  console.log("🌱 Seed complete: creator@onlyai.com with isNsfw = true");
 }
 
 main()
-  .catch((e) => {
+  .then(() => prisma.$disconnect())
+  .catch(async (e) => {
     console.error(e);
+    await prisma.$disconnect();
     process.exit(1);
-  })
-  .finally(() => process.exit());
+  });

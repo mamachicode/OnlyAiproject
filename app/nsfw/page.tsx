@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import prisma from "@/src/lib/prisma";
 import Link from "next/link";
 
@@ -32,6 +34,7 @@ export default async function NsfwLandingPage() {
             <img
               src={creator.posts[0]?.url ?? "/placeholder-nsfw.jpg"}
               className="w-full h-48 object-cover group-hover:scale-105 transition duration-300"
+              alt={creator.username}
             />
             <div className="p-4">
               <p className="font-semibold text-lg">@{creator.username}</p>

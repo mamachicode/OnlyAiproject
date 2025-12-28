@@ -1,8 +1,9 @@
+import { getAuthSession } from "@/src/lib/auth";
 import { auth } from "@/src/auth";
 import prisma from "@/src/lib/prisma";
 
 export default async function SubscribersPage() {
-  const session = await auth();
+  const session = await getAuthSession();
 
   if (!session?.user?.id) {
     return <div className="p-10 text-red-600">Not logged in</div>;

@@ -1,6 +1,17 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/lib/auth-options";
 
-export async function auth() {
+/**
+ * Canonical OnlyAI App Router Auth
+ * auth() is the primary helper used by API routes & server components
+ */
+export function auth() {
+  return getServerSession(authOptions);
+}
+
+/**
+ * Backwards-compatible alias (used by some server layouts)
+ */
+export function getServerAuthSession() {
   return getServerSession(authOptions);
 }

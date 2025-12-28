@@ -1,9 +1,10 @@
+import { getAuthSession } from "@/src/lib/auth";
 import prisma from "@/src/lib/prisma";
 import { auth } from "@/src/auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const session = await auth();
+  const session = await getAuthSession();
   if (!session)
     return NextResponse.json({ posts: [] });
 

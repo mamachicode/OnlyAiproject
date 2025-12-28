@@ -1,3 +1,4 @@
+import { getAuthSession } from "@/src/lib/auth";
 import { NextResponse } from "next/server";
 import prisma from "@/src/lib/prisma";
 import { v2 as cloudinary } from "cloudinary";
@@ -10,7 +11,7 @@ cloudinary.config({
 });
 
 export async function POST(req: Request) {
-  const session = await auth();
+  const session = await getAuthSession();
   if (!session) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
