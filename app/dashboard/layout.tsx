@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/src/lib/auth-options";
+import { authOptions } from "@/lib/auth-options";
 import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({

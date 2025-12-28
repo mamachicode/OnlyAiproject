@@ -1,10 +1,10 @@
-import { getServerAuthSession } from '@/src/auth';
+import { getServerAuthSession } from '@/auth';
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import prisma from "@/lib/prisma";
-import cloudinary from "@/src/lib/cloudinary";
+import cloudinary from "@/lib/cloudinary";
 
 export async function POST(req: NextRequest) {
   try {

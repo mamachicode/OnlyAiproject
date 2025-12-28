@@ -1,5 +1,5 @@
-import { getAuthSession } from "@/src/lib/auth";
-import { auth } from "@/src/auth";
+import { getAuthSession } from "@/lib/auth";
+import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 
 export default async function SubscriptionsDashboard() {

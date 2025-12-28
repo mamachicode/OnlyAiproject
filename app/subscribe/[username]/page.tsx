@@ -1,6 +1,6 @@
 // @ts-nocheck
 import prisma from "@/lib/prisma";
-import { getServerAuthSession } from "@/src/auth";
+import { getServerAuthSession } from "@/auth";
 
 export default async function SubscribePage({ params }) {
   const { username } = params;

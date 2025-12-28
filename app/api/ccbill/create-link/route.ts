@@ -1,4 +1,4 @@
-import { getServerAuthSession } from '@/src/auth';
+import { getServerAuthSession } from '@/auth';
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
