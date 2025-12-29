@@ -1,9 +1,9 @@
-import { getServerSession } from "next-auth";
+import { auth as nextAuth } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
 
 export async function auth() {
-  const session = await getServerSession(authOptions);
+  const session = await nextAuth(authOptions);
 
   if (!session?.user?.email) return null;
 
@@ -20,4 +20,3 @@ export async function auth() {
 export async function getServerAuthSession() {
   return auth();
 }
-
