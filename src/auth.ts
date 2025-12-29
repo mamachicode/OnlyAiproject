@@ -1,17 +1,23 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
+import prisma from "@/lib/prisma";
 
-/**
- * Canonical OnlyAI App Router Auth
- * auth() is the primary helper used by API routes & server components
- */
-export function auth() {
-  return getServerSession(authOptions);
+export async function auth() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.email) return null;
+
+  const exists = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  });
+
+  if (!exists) return null;
+
+  return session;
 }
 
-/**
- * Backwards-compatible alias (used by some server layouts)
- */
-export function getServerAuthSession() {
-  return getServerSession(authOptions);
+export async function getServerAuthSession() {
+  return auth();
 }
+
