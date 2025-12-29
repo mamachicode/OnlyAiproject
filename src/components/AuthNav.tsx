@@ -6,21 +6,12 @@ export default function AuthNav() {
   const { data: session } = useSession();
 
   return (
-    <div className="fixed top-4 right-6 z-[9999] pointer-events-auto text-sm flex gap-3 text-black bg-white/90 backdrop-blur px-4 py-2 rounded shadow">
-      {!session && (
-        <>
-          <a href="/create-account">Create Account</a>
-          <a href="/login">Login</a>
-        </>
-      )}
-
+    <div className="fixed top-0 left-0 w-full z-[2147483647] bg-red-600 text-white text-center py-3 font-bold">
+      NAVBAR ACTIVE — SESSION = {session ? "LOGGED IN" : "LOGGED OUT"}
       {session && (
-        <>
-          <a href="/dashboard">Dashboard</a>
-          <button onClick={()=>signOut({ callbackUrl: "/" })} className="underline">
-            Logout
-          </button>
-        </>
+        <span className="ml-6 underline cursor-pointer" onClick={()=>signOut({ callbackUrl: "/" })}>
+          LOGOUT
+        </span>
       )}
     </div>
   );
