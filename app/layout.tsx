@@ -1,3 +1,4 @@
+import AuthNav from "@/components/AuthNav";
 import "./globals.css";
 import type { Metadata } from "next";
 import AgeBanner from "@/components/AgeBanner";
@@ -13,6 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="bg-gray-50 text-black min-h-screen flex flex-col">
         <AgeBanner />
+        <AuthNav />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>
