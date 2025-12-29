@@ -1,11 +1,13 @@
-import { auth as nextAuth } from "next-auth";
+import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import prisma from "@/lib/prisma";
 
 export async function auth() {
-  const session = await nextAuth(authOptions);
+  const session = await getServerSession(authOptions);
 
-  if (!session?.user?.email) return null;
+  if (!session || !session.user || typeof session.user.email !== "string") {
+    return null;
+  }
 
   const exists = await prisma.user.findUnique({
     where: { email: session.user.email },
