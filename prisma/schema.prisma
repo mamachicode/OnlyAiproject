@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -13,13 +12,12 @@ model User {
   email     String   @unique
   username  String   @unique
   password  String
-
-  sfwPrice  Int      @default(5)
-  nsfwPrice Int      @default(10)
-  isNsfw    Boolean  @default(false)
-
+  sfwPrice  Int
+  nsfwPrice Int
+  isNsfw    Boolean @default(false)
   posts     Post[]
-
+  subscriptions BillingSubscription[]
+  webhookEvents WebhookEvent[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -27,60 +25,28 @@ model User {
 model Post {
   id        String   @id @default(cuid())
   title     String
-  content   String
-  isNsfw    Boolean  @default(false)
+  content   String?
+  imageUrl  String?
+  isNsfw    Boolean @default(false)
 
-  creator   User     @relation(fields: [creatorId], references: [id])
-  creatorId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([creatorId])
+  authorId  String
+  author    User   @relation(fields: [authorId], references: [id])
 }
 
-enum WebhookProvider {
-  CCBILL
-  STRIPE
-}
-
-enum WebhookProcessStatus {
-  RECEIVED
-  VERIFIED
-  REJECTED
-  PROCESSED
-  FAILED
+model BillingSubscription {
+  id              String   @id @default(cuid())
+  stripeSubId     String   @unique
+  status          String
+  currentPeriodEnd DateTime
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
 }
 
 model WebhookEvent {
-  id            String              @id @default(cuid())
-  provider      WebhookProvider
-  externalId    String              // transactionId if available, else derived id
-  eventType     String
-  subscriptionId String?            // convenience
-  transactionId String?             // convenience
-  rawBody       String?
-  payloadJson   Json?
-  status        WebhookProcessStatus @default(RECEIVED)
-  error         String?
-  receivedAt    DateTime            @default(now())
-  processedAt   DateTime?
-
-  @@unique([provider, externalId])
-  @@index([provider, receivedAt])
-  @@index([subscriptionId])
-}
-
-model BillingAuditLog {
-  id           String   @id @default(cuid())
-  provider     WebhookProvider
-  action       String
-  subscriptionId String?
-  userEmail    String?
-  creatorEmail String?
-  metadata     Json?
-  createdAt    DateTime @default(now())
-
-  @@index([provider, createdAt])
-  @@index([subscriptionId])
+  id        String   @id @default(cuid())
+  type      String
+  payload   Json
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
