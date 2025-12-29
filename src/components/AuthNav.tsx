@@ -6,7 +6,7 @@ export default function AuthNav() {
   const { data: session } = useSession();
 
   return (
-    <div className="fixed top-4 right-6 z-50 text-sm flex gap-3 text-black bg-white/80 backdrop-blur px-4 py-2 rounded shadow">
+    <div className="fixed top-4 right-6 z-[9999] pointer-events-auto text-sm flex gap-3 text-black bg-white/90 backdrop-blur px-4 py-2 rounded shadow">
       {!session && (
         <>
           <a href="/create-account">Create Account</a>
