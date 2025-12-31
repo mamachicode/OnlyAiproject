@@ -16,7 +16,7 @@ export default function AuthNav() {
 
       {session && (
         <>
-          <a href="/dashboard">Dashboard</a>
+          <a href="/creator">Dashboard</a>
           <button onClick={()=>signOut({ callbackUrl: "/" })} className="underline">
             Logout
           </button>
