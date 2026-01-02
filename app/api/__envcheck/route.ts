@@ -5,6 +5,6 @@ export async function GET() {
     DATABASE_URL: process.env.DATABASE_URL || null,
     DIRECT_URL: process.env.DIRECT_URL || null,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL || null,
-    NODE_ENV: process.env.NODE_ENV,
+    NODE_ENV: process.env.NODE_ENV || null,
   });
 }
