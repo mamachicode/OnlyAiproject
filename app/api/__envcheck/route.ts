@@ -6,5 +6,6 @@ export async function GET() {
     DIRECT_URL: process.env.DIRECT_URL || null,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL || null,
     NODE_ENV: process.env.NODE_ENV || null,
+    VERCEL_ENV: process.env.VERCEL_ENV || null,
   });
 }
