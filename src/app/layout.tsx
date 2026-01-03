@@ -3,7 +3,7 @@ import AgeBanner from "@/components/AgeBanner";
 import Footer from "./(public)/footer";
 import type { Metadata } from "next";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
-import "./globals.css";
+import "./(public)/globals.css";
 
 export const metadata: Metadata = {
   title: "OnlyAI",
