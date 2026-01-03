@@ -1,5 +1,4 @@
 {
-  "redirects": [
-    { "source": "/dashboard", "destination": "/creator", "permanent": true }
-  ]
+  "framework": "nextjs",
+  "rootDirectory": "src"
 }
