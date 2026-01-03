@@ -1,7 +1,7 @@
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import AuthNav from "@/components/AuthNav";
 import AgeBanner from "@/components/AgeBanner";
-import Footer from "@/app/footer";
+import Footer from "@/app/(public)/footer";
 import "./globals.css";
 import type { Metadata } from "next";
 
