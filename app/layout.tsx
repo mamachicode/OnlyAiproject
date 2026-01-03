@@ -1,30 +1,30 @@
-import "./(public)/globals.css";
-import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import AuthNav from "@/components/AuthNav";
 import AgeBanner from "@/components/AgeBanner";
 import Footer from "./(public)/footer";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
 import type { Metadata } from "next";
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OnlyAI – AI Creator Platform",
-  description: "AI-powered SFW & NSFW creator platform",
+  title: "OnlyAI",
+  description: "AI Creator Platform",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions);
-
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-black min-h-screen flex flex-col">
-        <SessionProviderWrapper session={session}>
+      <SessionProviderWrapper>
+        <body className="bg-gray-50 text-black min-h-screen flex flex-col">
           <AgeBanner />
           <AuthNav />
           <main className="flex-1">{children}</main>
           <Footer />
-        </SessionProviderWrapper>
-      </body>
+        </body>
+      </SessionProviderWrapper>
     </html>
   );
 }
