@@ -13,8 +13,9 @@ export const authOptions: AuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
+
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null;
+        if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
@@ -28,17 +29,13 @@ export const authOptions: AuthOptions = {
         return {
           id: user.id,
           email: user.email,
-          name: user.name,
+          name: user.username,   // ✅ FIXED
         };
       },
     }),
   ],
 
   session: { strategy: "jwt" },
-
   secret: process.env.NEXTAUTH_SECRET,
-
-  pages: {
-    signIn: "/login",
-  },
+  pages: { signIn: "/login" },
 };
