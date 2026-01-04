@@ -1,0 +1,5 @@
+{
+  "routes": [
+    { "src": "/api/stripe/(.*)", "dest": "/_api/stripe/$1" }
+  ]
+}
