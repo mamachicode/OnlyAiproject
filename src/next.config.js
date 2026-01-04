@@ -1,10 +1,15 @@
+const path = require("path");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
 
-  // Canonical Next 16 production config
   turbopack: {},
-  webpack: (config) => config,
+
+  webpack: (config) => {
+    config.resolve.alias["@"] = path.resolve(__dirname);
+    return config;
+  },
 };
 
 module.exports = nextConfig;
