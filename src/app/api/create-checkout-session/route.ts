@@ -1,23 +1,8 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-export async function POST(req: Request) {
-  const body = await req.json();
-
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    line_items: [
-      {
-        price: body.priceId,
-        quantity: 1,
-      },
-    ],
-    success_url: body.successUrl,
-    cancel_url: body.cancelUrl,
-    customer_email: body.email,
-  });
-
-  return NextResponse.json({ url: session.url });
+export async function POST() {
+  return NextResponse.json(
+    { error: "410 – Stripe moved to /pages/api/stripe/checkout" },
+    { status: 410 }
+  );
 }

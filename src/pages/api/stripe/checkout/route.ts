@@ -1,24 +1,27 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { stripe } from "@/lib/stripe";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2023-10-16",
+});
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).end();
 
   try {
-    const { priceId } = req.body;
+    const { priceId, successUrl, cancelUrl, email } = req.body;
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: process.env.NEXT_PUBLIC_APP_URL + "/dashboard",
-      cancel_url: process.env.NEXT_PUBLIC_APP_URL + "/",
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+      customer_email: email,
     });
 
     return res.status(200).json({ url: session.url });
-  } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+  } catch (err) {
+    console.error("Stripe checkout error:", err);
+    return res.status(500).json({ error: "Stripe error" });
   }
 }
