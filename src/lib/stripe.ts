@@ -1,5 +1,5 @@
-import Stripe from "stripe";
+// Stripe helper intentionally unused.
+// Stripe execution lives ONLY in /pages/api/stripe/*
+// Do not import this file inside App Router.
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2023-10-16",
-});
+export {}
