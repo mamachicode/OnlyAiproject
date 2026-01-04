@@ -2,9 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Hard override Next 16 turbopack auto-enable
+  // Canonical Next 16 production config
   turbopack: {},
-
   webpack: (config) => config,
 };
 
