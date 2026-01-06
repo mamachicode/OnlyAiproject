@@ -1,17 +1,15 @@
-import { getAuthSession } from "@/lib/auth";
-import prisma from "@/lib/prisma";
-import { auth } from "@/auth";
-import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
+import prisma from "@/lib/prisma"
 
 export async function GET() {
-  const session = await getAuthSession();
-  if (!session)
-    return NextResponse.json({ posts: [] });
+  const session = await getServerSession(authOptions)
 
-  const posts = await prisma.post.findMany({
-    where: { creatorId: session.user.id },
-    orderBy: { createdAt: "desc" }
-  });
+  if (!session?.user?.email) {
+    return new Response("Unauthorized", { status: 401 })
+  }
 
-  return NextResponse.json({ posts });
+  const posts = await prisma.post.findMany()
+
+  return Response.json(posts)
 }

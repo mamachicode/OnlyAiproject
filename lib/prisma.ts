@@ -1,11 +1,17 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client"
+import { PrismaPg } from "@prisma/adapter-pg"
 
-const prisma =
-  global.prisma ||
+const globalForPrisma = globalThis as any
+
+export const prisma =
+  globalForPrisma.prisma ??
   new PrismaClient({
-    log: ['query', 'info', 'warn', 'error'],
+    adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
+    log: ["error"],
   })
 
-if (process.env.NODE_ENV !== 'production') global.prisma = prisma
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma
+}
 
 export default prisma

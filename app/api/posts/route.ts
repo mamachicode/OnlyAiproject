@@ -1,38 +1,15 @@
-import { getAuthSession } from "@/lib/auth";
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
+import prisma from "@/lib/prisma"
 
 export async function GET() {
-  const session = await getAuthSession();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.email) {
+    return new Response("Unauthorized", { status: 401 })
   }
 
-  const posts = await prisma.post.findMany({
-    where: { creatorId: session.user.id },
-    orderBy: { createdAt: "desc" },
-  });
+  const posts = await prisma.post.findMany()
 
-  return NextResponse.json(posts);
-}
-
-export async function POST(req: Request) {
-  const session = await getAuthSession();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { url, publicId, caption } = await req.json();
-
-  const post = await prisma.post.create({
-    data: {
-      url,
-      publicId,
-      caption,
-      creatorId: session.user.id,
-    },
-  });
-
-  return NextResponse.json(post);
+  return Response.json(posts)
 }

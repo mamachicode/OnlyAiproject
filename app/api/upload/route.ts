@@ -1,54 +1,56 @@
-import { getAuthSession } from "@/lib/auth";
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { v2 as cloudinary } from "cloudinary";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
+import prisma from "@/lib/prisma"
+import { v2 as cloudinary } from "cloudinary"
 
 cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+})
 
 export async function POST(req: Request) {
-  const session = await getAuthSession();
-  if (!session) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.email) {
+    return new Response("Unauthorized", { status: 401 })
   }
 
-  const form = await req.formData();
-  const file = form.get("file") as File;
-  const caption = form.get("caption") as string;
+  const formData = await req.formData()
+  const file = formData.get("file") as File
+  const title = formData.get("title") as string | null
+  const content = formData.get("content") as string | null
+  const isNsfw = formData.get("isNsfw") === "true"
 
-  if (!file) {
-    return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-  }
+  if (!file || !title) return new Response("Missing fields", { status: 400 })
 
-  // Convert file → buffer for Cloudinary
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const buffer = Buffer.from(await file.arrayBuffer())
 
-  // Upload to Cloudinary
-  const uploaded = await new Promise((resolve, reject) => {
+  const upload = await new Promise<any>((resolve, reject) => {
     cloudinary.uploader
-      .upload_stream({ folder: "onlyai_uploads" }, (err, result) => {
-        if (err) reject(err);
-        else resolve(result);
+      .upload_stream({ resource_type: "image" }, (err, result) => {
+        if (err) reject(err)
+        else resolve(result)
       })
-      .end(buffer);
-  });
+      .end(buffer)
+  })
 
-  const result = uploaded as any;
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  })
 
-  // Save post in Prisma
+  if (!user) return new Response("User not found", { status: 404 })
+
   await prisma.post.create({
     data: {
-      url: result.secure_url,
-      publicId: result.public_id,
-      caption: caption || "",
-      creatorId: session.user.id,
+      title,
+      content,
+      isNsfw,
+      imageUrl: upload.secure_url,
+      authorId: user.id,
     },
-  });
+  })
 
-  return NextResponse.json({ success: true });
+  return new Response("OK", { status: 200 })
 }

@@ -1,23 +1,20 @@
-import { getAuthSession } from "@/lib/auth";
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
+import prisma from "@/lib/prisma"
 
-export async function GET(req) {
-  const session = await getAuthSession();
-  if (!session) return NextResponse.json({ subscribed: false });
+export async function POST() {
+  const session = await getServerSession(authOptions)
 
-  const { searchParams } = new URL(req.url);
-  const creatorId = searchParams.get("creatorId");
-  if (!creatorId) return NextResponse.json({ subscribed: false });
+  if (!session?.user?.email) {
+    return new Response("Unauthorized", { status: 401 })
+  }
 
-  const sub = await prisma.subscription.findFirst({
+  const sub = await prisma.billingSubscription.findFirst({
     where: {
-      userId: session.user.id,
-      creatorId,
-      active: true,
+      user: { email: session.user.email },
+      status: "ACTIVE",
     },
-  });
+  })
 
-  return NextResponse.json({ subscribed: Boolean(sub) });
+  return new Response(JSON.stringify({ active: !!sub }), { status: 200 })
 }

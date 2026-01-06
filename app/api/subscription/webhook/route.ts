@@ -1,26 +1,43 @@
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"
 
-export async function POST(req) {
-  const body = await req.json();
+export async function POST(req: Request) {
+  const body = await req.json()
 
-  const { userId, creatorId } = body;
+  const {
+    subscriptionId,
+    userEmail,
+    status,
+    stripeSubId,
+    periodEnd,
+  } = body
 
-  if (!userId || !creatorId) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+  if (!subscriptionId || !userEmail || !status) {
+    return new Response("Invalid payload", { status: 400 })
   }
 
-  await prisma.subscription.upsert({
-    where: {
-      userId_creatorId: { userId, creatorId }
-    },
-    update: { active: true },
-    create: {
-      userId,
-      creatorId,
-      active: true
-    }
-  });
+  const user = await prisma.user.findUnique({
+    where: { email: userEmail },
+    select: { id: true },
+  })
 
-  return NextResponse.json({ success: true });
+  if (!user) return new Response("User not found", { status: 404 })
+
+  await prisma.billingSubscription.upsert({
+    where: { subscriptionId },
+
+    update: {
+      status,
+      currentPeriodEnd: periodEnd ? new Date(periodEnd) : undefined,
+    },
+
+    create: {
+      subscriptionId,
+      stripeSubId: stripeSubId || subscriptionId,
+      status,
+      currentPeriodEnd: periodEnd ? new Date(periodEnd) : new Date(),
+      userId: user.id,
+    },
+  })
+
+  return new Response("OK", { status: 200 })
 }

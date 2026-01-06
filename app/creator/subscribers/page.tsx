@@ -1,41 +1,44 @@
-import { getAuthSession } from "@/lib/auth";
-import { auth } from "@/auth";
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/prisma"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
 
 export default async function SubscribersPage() {
-  const session = await getAuthSession();
+  const session = await getServerSession(authOptions)
 
-  if (!session?.user?.id) {
-    return <div className="p-10 text-red-600">Not logged in</div>;
+  if (!session?.user?.email) {
+    return <div>Unauthorized</div>
   }
 
-  // Fetch all subscribers of this creator
-  const subscribers = await prisma.subscription.findMany({
-    where: { creatorId: session.user.id },
-    include: {
-      subscriber: { select: { email: true } }
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  })
+
+  if (!user) return <div>User not found</div>
+
+  const subs = await prisma.billingSubscription.findMany({
+    where: {
+      userId: user.id,
+      status: "ACTIVE",
     },
-    orderBy: { createdAt: "desc" },
-  });
+    include: {
+      user: true,
+    },
+  })
 
   return (
-    <div className="p-10">
-      <h1 className="text-3xl font-bold mb-6">Your Subscribers</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Your Subscribers</h1>
+      {subs.length === 0 && <p>No active subscribers yet.</p>}
 
-      {subscribers.length === 0 ? (
-        <p className="text-gray-600">You have no subscribers yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {subscribers.map((sub) => (
-            <div key={sub.id} className="border p-4 rounded">
-              <p className="font-semibold">{sub.subscriber.email}</p>
-              <p className="text-gray-600 text-sm">
-                Subscribed on: {new Date(sub.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
+      <ul className="space-y-2">
+        {subs.map((s) => (
+          <li key={s.id} className="border rounded p-2">
+            <p>{s.user.email}</p>
+            <p className="text-sm text-gray-500">Status: {s.status}</p>
+          </li>
+        ))}
+      </ul>
     </div>
-  );
+  )
 }

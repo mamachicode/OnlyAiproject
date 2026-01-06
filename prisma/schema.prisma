@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  
 }
 
 model User {
@@ -37,6 +37,7 @@ model BillingSubscription {
   id              String   @id @default(cuid())
   stripeSubId     String   @unique
   status          String
+  subscriptionId String @unique
   currentPeriodEnd DateTime
   userId          String
   user            User     @relation(fields: [userId], references: [id])
@@ -47,6 +48,16 @@ model WebhookEvent {
   type      String
   payload   Json
   createdAt DateTime @default(now())
+  provider   String
+  externalId String
+  status    String   @default("PENDING")
+  rawBody        String
+  payloadJson    Json
+  eventType      String
+  subscriptionId String?
+  transactionId  String?
+  error          String?
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+  @@unique([provider, externalId], name: "provider_externalId")
 }

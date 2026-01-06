@@ -1,24 +1,27 @@
-import { getAuthSession } from "@/lib/auth";
-import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
+import prisma from "@/lib/prisma"
 
-export async function PUT(req: Request) {
-  const session = await getAuthSession();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function POST() {
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user?.email) {
+    return new Response("Unauthorized", { status: 401 })
   }
 
-  const { price } = await req.json();
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  })
 
-  if (!price || price < 1) {
-    return NextResponse.json({ error: "Invalid price" }, { status: 400 });
-  }
+  if (!user) return new Response("User not found", { status: 404 })
 
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: { subscriptionPrice: price },
-  });
+  const sub = await prisma.billingSubscription.findFirst({
+    where: {
+      userId: user.id,
+      status: "ACTIVE",
+    },
+  })
 
-  return NextResponse.json({ success: true });
+  return new Response(JSON.stringify({ active: !!sub }), { status: 200 })
 }
