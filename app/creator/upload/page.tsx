@@ -27,7 +27,7 @@ export default function UploadPage() {
     }
 
     alert("Upload successful!");
-    router.push("/dashboard/posts");
+    router.push("/creator/posts");
   }
 
   return (

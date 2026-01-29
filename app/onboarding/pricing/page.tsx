@@ -15,7 +15,7 @@ export default function Pricing() {
       headers: { "Content-Type": "application/json" }
     });
 
-    if (res.ok) router.push("/dashboard");
+    if (res.ok) router.push("/creator");
   }
 
   return (

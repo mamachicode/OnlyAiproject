@@ -18,7 +18,7 @@ export default async function HomePage() {
 
         {session ? (
           <Link
-            href="/dashboard"
+            href="/creator"
             className="px-6 py-3 bg-green-600 text-white rounded"
           >
             Go to Dashboard
