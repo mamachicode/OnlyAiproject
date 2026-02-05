@@ -9,9 +9,19 @@ export async function POST() {
     return new Response("Unauthorized", { status: 401 })
   }
 
-  const sub = await prisma.billingSubscription.findFirst({
+  // Find the user first
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  })
+
+  if (!user) {
+    return new Response(JSON.stringify({ active: false }), { status: 200 })
+  }
+
+  // Check active subscription in new Subscription model
+  const sub = await prisma.subscription.findFirst({
     where: {
-      user: { email: session.user.email },
+      userId: user.id,
       status: "ACTIVE",
     },
   })

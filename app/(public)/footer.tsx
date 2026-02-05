@@ -17,7 +17,7 @@ export default function Footer() {
           <h3 className="font-semibold mb-2">Compliance</h3>
           <ul className="space-y-1">
             <li><Link href="/(legal)/dmca">DMCA</Link></li>
-            <li><Link href="/(legal)/age">18+ Age Disclaimer</Link></li>
+            <li><Link href="/age">18+ Age Disclaimer</Link></li>
             <li><Link href="/(legal)/billing">Billing Support</Link></li>
           </ul>
         </div>

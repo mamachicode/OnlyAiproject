@@ -4,60 +4,129 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  password  String
+  id       String @id @default(cuid())
+  email    String @unique
+  username String @unique
+  password String
+
+  // Keep for now (so the app doesn't break).
+  // Later we will migrate these into Creator when the creator-aware subscribe flow is implemented.
   sfwPrice  Int
   nsfwPrice Int
   isNsfw    Boolean @default(false)
-  posts     Post[]
-  subscriptions BillingSubscription[]
+
+  posts         Post[]
+  subscriptions Subscription[]
   webhookEvents WebhookEvent[]
+
+  // Optional creator profile (Phase 1 marketplace pivot)
+  creatorProfile Creator?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  imageUrl  String?
-  isNsfw    Boolean @default(false)
+  id       String  @id @default(cuid())
+  title    String
+  content  String?
+  imageUrl String?
+  isNsfw   Boolean @default(false)
 
-  authorId  String
-  author    User   @relation(fields: [authorId], references: [id])
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
 }
 
-model BillingSubscription {
-  id              String   @id @default(cuid())
-  stripeSubId     String   @unique
-  status          String
-  subscriptionId String @unique
-  currentPeriodEnd DateTime
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
+// =======================
+// Marketplace Pivot Models
+// =======================
+
+enum PaymentProcessor {
+  STRIPE
+  CCBILL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
+model Creator {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // Public identity
+  handle         String  @unique
+  displayName    String?
+  classification String  @default("SFW") // SFW or NSFW; one creator account = one classification
+
+  // Founder strategy: store per-creator platform fee (basis points)
+  // Example: 2000 = 20.00%, 1200 = 12.00%
+  platformFeeBps Int @default(2000)
+
+  // Subscription pricing (creator-controlled)
+  priceCents        Int      @default(1000)
+  currency          String   @default("USD")
+  billingPeriodDays Int      @default(30)
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id String @id @default(cuid())
+
+  userId    String
+  creatorId String
+
+  processor  PaymentProcessor
+  externalId String
+
+  status SubscriptionStatus
+
+  currentPeriodEnd DateTime?
+
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, creatorId, processor], name: "uniq_user_creator_processor")
+  @@unique([processor, externalId], name: "uniq_processor_externalId")
+  @@index([userId, processor, status])
+  @@index([creatorId, processor, status])
 }
 
 model WebhookEvent {
-  id        String   @id @default(cuid())
-  type      String
-  payload   Json
-  createdAt DateTime @default(now())
-  provider   String
-  externalId String
-  status    String   @default("PENDING")
-  rawBody        String
-  payloadJson    Json
-  eventType      String
-  subscriptionId String?
-  transactionId  String?
-  error          String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  @@unique([provider, externalId], name: "provider_externalId")
+  id String @id @default(cuid())
+
+  processor PaymentProcessor
+  eventId   String
+  eventType String
+  status    String           @default("RECEIVED")
+
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  payload Json?
+  rawBody String?
+
+  error  String?
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  @@unique([processor, eventId], name: "uniq_processor_eventId")
+  @@index([processor, receivedAt])
 }

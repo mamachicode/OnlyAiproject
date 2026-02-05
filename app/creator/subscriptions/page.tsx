@@ -16,26 +16,36 @@ export default async function CreatorSubscriptionsPage() {
 
   if (!user) return <div>User not found</div>
 
-  const subs = await prisma.billingSubscription.findMany({
+  // Subscriptions where THIS user is the subscriber
+  const subs = await prisma.subscription.findMany({
     where: {
       userId: user.id,
       status: "ACTIVE",
     },
     include: {
-      user: true,
+      creator: {
+        include: {
+          user: true,
+        },
+      },
     },
   })
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Your Active Subscriptions</h1>
+
       {subs.length === 0 && <p>No active subscriptions.</p>}
 
       <ul className="space-y-2">
         {subs.map((s) => (
           <li key={s.id} className="border rounded p-2">
-            <p>{s.user.email}</p>
-            <p className="text-sm text-gray-500">Status: {s.status}</p>
+            <p>
+              {s.creator?.user?.email ?? "Unknown Creator"}
+            </p>
+            <p className="text-sm text-gray-500">
+              Status: {s.status}
+            </p>
           </li>
         ))}
       </ul>

@@ -9,6 +9,7 @@ export default async function SubscribersPage() {
     return <div>Unauthorized</div>
   }
 
+  // Find logged-in user
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     select: { id: true },
@@ -16,19 +17,31 @@ export default async function SubscribersPage() {
 
   if (!user) return <div>User not found</div>
 
-  const subs = await prisma.billingSubscription.findMany({
+  // Find creator profile
+  const creator = await prisma.creator.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  })
+
+  if (!creator) {
+    return <div>You do not have a creator profile yet.</div>
+  }
+
+  // Find active subscriptions for this creator
+  const subs = await prisma.subscription.findMany({
     where: {
-      userId: user.id,
+      creatorId: creator.id,
       status: "ACTIVE",
     },
     include: {
-      user: true,
+      user: true, // subscriber
     },
   })
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Your Subscribers</h1>
+
       {subs.length === 0 && <p>No active subscribers yet.</p>}
 
       <ul className="space-y-2">
