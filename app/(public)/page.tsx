@@ -1,37 +1,43 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth-options";
 import Link from "next/link";
 
-export default async function HomePage() {
-  const session = await getServerSession(authOptions);
-
+export default function HomePage() {
   return (
-    <div className="relative z-0">
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Welcome to OnlyAI
+    <div className="flex items-center justify-center px-6 py-24">
+      <div className="max-w-3xl text-center space-y-8">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          OnlyAI
         </h1>
 
-        <p className="text-lg text-gray-600 mb-6">
-          AI-powered creator platform for adults.
+        <p className="text-lg text-neutral-300">
+          A subscription platform for AI-driven and creator-managed adult content.
         </p>
 
-        {session ? (
-          <Link
-            href="/creator"
-            className="px-6 py-3 bg-green-600 text-white rounded"
-          >
-            Go to Dashboard
-          </Link>
-        ) : (
+        <p className="text-neutral-400">
+          Creators publish premium AI and original content.
+          Fans subscribe for access to exclusive material.
+          Secure recurring billing powered by CCBill.
+        </p>
+
+        <div className="flex gap-4 justify-center pt-4">
           <Link
             href="/login"
-            className="px-6 py-3 bg-blue-600 text-white rounded"
+            className="px-6 py-3 rounded-lg bg-white text-black font-semibold hover:opacity-90 transition"
           >
             Sign In
           </Link>
-        )}
-      </main>
+
+          <Link
+            href="/onboarding"
+            className="px-6 py-3 rounded-lg border border-neutral-700 hover:border-white transition"
+          >
+            Become a Creator
+          </Link>
+        </div>
+
+        <div className="pt-10 text-sm text-neutral-500">
+          18+ Only • All billing managed securely through CCBill
+        </div>
+      </div>
     </div>
   );
 }

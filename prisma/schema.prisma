@@ -12,8 +12,6 @@ model User {
   username String @unique
   password String
 
-  // Keep for now (so the app doesn't break).
-  // Later we will migrate these into Creator when the creator-aware subscribe flow is implemented.
   sfwPrice  Int
   nsfwPrice Int
   isNsfw    Boolean @default(false)
@@ -22,7 +20,6 @@ model User {
   subscriptions Subscription[]
   webhookEvents WebhookEvent[]
 
-  // Optional creator profile (Phase 1 marketplace pivot)
   creatorProfile Creator?
 
   createdAt DateTime @default(now())
@@ -30,19 +27,42 @@ model User {
 }
 
 model Post {
-  id       String  @id @default(cuid())
-  title    String
-  content  String?
-  imageUrl String?
-  isNsfw   Boolean @default(false)
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  isNsfw    Boolean  @default(false)
+
+  isLocked   Boolean @default(false)
+  priceCents Int?
 
   authorId String
-  author   User   @relation(fields: [authorId], references: [id])
+  author   User @relation(fields: [authorId], references: [id])
+
+  media PostMedia[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-// =======================
-// Marketplace Pivot Models
-// =======================
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model PostMedia {
+  id       String    @id @default(cuid())
+  postId   String
+  url      String
+  publicId String?
+  blurUrl  String?
+  type     MediaType
+  order    Int       @default(0)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, order])
+  @@index([publicId])
+}
 
 enum PaymentProcessor {
   STRIPE
@@ -59,20 +79,15 @@ model Creator {
   id     String @id @default(cuid())
   userId String @unique
 
-  // Public identity
   handle         String  @unique
   displayName    String?
-  classification String  @default("SFW") // SFW or NSFW; one creator account = one classification
+  classification String  @default("SFW")
 
-  // Founder strategy: store per-creator platform fee (basis points)
-  // Example: 2000 = 20.00%, 1200 = 12.00%
   platformFeeBps Int @default(2000)
 
-  // Subscription pricing (creator-controlled)
   priceCents        Int      @default(1000)
   currency          String   @default("USD")
   billingPeriodDays Int      @default(30)
-
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

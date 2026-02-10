@@ -4,34 +4,47 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(req: any) {
   const { pathname } = req.nextUrl;
 
-  // 🔥 1. ALWAYS ALLOW these routes
+  // WEBHOOK BYPASS (Stripe + CCBill)
   if (
-    pathname.startsWith("/auth") ||     // login, signup
-    pathname.startsWith("/api/auth") || // NextAuth internal API
-    pathname === "/" ||                 // homepage
-    pathname.startsWith("/_next") ||    // Next.js internal
-    pathname.startsWith("/static") ||   // static assets
-    pathname.startsWith("/favicon")     // favicon
+    pathname.startsWith("/api/ccbill/webhook") ||
+    pathname.startsWith("/api/webhooks/stripe")
   ) {
     return NextResponse.next();
   }
 
-  // 🔥 2. Get token (JWT)
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  // Allow public & legal routes
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/static") ||
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/create-account") ||
+    pathname.startsWith("/legal") ||
+    pathname === "/" ||
+    pathname === "/age"
+  ) {
+    return NextResponse.next();
+  }
 
-  // 🔥 3. Protect creator & nsfw-only routes
-  if (pathname.startsWith("/creator") || pathname.startsWith("/exclusive")) {
-    if (!token?.email) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
+  // AGE GATE
+  if (pathname.startsWith("/nsfw")) {
+    const ageVerified = req.cookies.get("age_verified")?.value;
+
+    if (ageVerified !== "true") {
+      return NextResponse.redirect(new URL("/age", req.url));
     }
+  }
 
-    // TEMP: subscription gating placeholder
-    const subscribed = token?.subscribed || false;
-    if (!subscribed) {
-      return NextResponse.redirect(new URL("/subscribe", req.url));
+  // AUTH PROTECTION
+  if (pathname.startsWith("/creator") || pathname.startsWith("/exclusive")) {
+    const token = await getToken({
+      req,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+
+    if (!token?.email) {
+      return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
@@ -39,9 +52,5 @@ export async function middleware(req: any) {
 }
 
 export const config = {
-  matcher: [
-    "/creator/:path*",
-    "/exclusive/:path*",
-    "/(.*)",
-  ],
+  matcher: ["/((?!_next|static|favicon.ico).*)"],
 };

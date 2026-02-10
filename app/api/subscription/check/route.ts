@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import prisma from "@/lib/prisma"
+import { hasActiveSubscription } from "@/lib/entitlement"
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
@@ -17,7 +18,6 @@ export async function POST(req: Request) {
   }
 
   const creatorId = String(body?.creatorId ?? "").trim()
-  const processor = String(body?.processor ?? "CCBILL").toUpperCase()
 
   if (!creatorId) {
     return new Response("creatorId required", { status: 400 })
@@ -32,18 +32,7 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ active: false }), { status: 200 })
   }
 
-  const sub = await prisma.subscription.findUnique({
-    where: {
-      uniq_user_creator_processor: {
-        userId: user.id,
-        creatorId,
-        processor: processor as any,
-      },
-    },
-    select: { status: true },
-  })
-
-  const active = !!sub && sub.status === "ACTIVE"
+  const active = await hasActiveSubscription(user.id, creatorId)
 
   return new Response(JSON.stringify({ active }), { status: 200 })
 }

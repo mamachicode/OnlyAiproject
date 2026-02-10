@@ -40,8 +40,9 @@ export default function TermsPage() {
         <h2 className="text-2xl font-semibold">4. Subscriptions, Billing, and Cancellations</h2>
         <p>
           Subscriptions grant access to a specific Creator’s content for the subscription period. Subscriptions are billed
-          through our payment processors (e.g., CCBill for adult content). You may cancel at any time; cancellation stops
-          renewal, and access continues until the end of the paid period unless otherwise required by law or processor rules.
+          through our payment processors (e.g., CCBill for adult content). You may cancel at any time through the applicable
+          payment processor’s support portal or by contacting support; cancellation stops renewal, and access continues until
+          the end of the paid period unless otherwise required by law or processor rules.
         </p>
         <p>
           Billing descriptor and payment support information are provided at checkout and/or on billing communications.
