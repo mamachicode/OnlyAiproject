@@ -35,7 +35,7 @@ export default function HomePage() {
         </div>
 
         <div className="pt-10">
-          <div className="w-full max-w-md mx-auto bg-neutral-900 border border-neutral-600 px-6 py-4 rounded-xl text-lg md:text-xl font-bold text-white tracking-wider uppercase">
+          <div className="w-full max-w-md mx-auto bg-neutral-900/60 border border-neutral-700 px-6 py-3 rounded-xl text-base md:text-lg font-semibold text-neutral-200 tracking-wide">
           18+ Only • All billing managed securely through CCBill
           </div>
         </div>
