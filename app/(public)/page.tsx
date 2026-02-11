@@ -34,8 +34,10 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="pt-10 text-sm text-neutral-500">
+        <div className="pt-10">
+          <div className="w-full max-w-md mx-auto bg-neutral-900 border border-neutral-600 px-6 py-4 rounded-xl text-lg md:text-xl font-bold text-white tracking-wider uppercase">
           18+ Only • All billing managed securely through CCBill
+          </div>
         </div>
       </div>
     </div>
