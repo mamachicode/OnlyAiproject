@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row md:justify-between md:items-center gap-6">
 
         <div>
-          <p className="font-semibold text-lg">OnlyAI</p>
+          <p className="font-semibold text-lg">OnlyAi</p>
           <p className="text-sm text-gray-600">AI-Powered Creator Platform</p>
         </div>
 

@@ -4,7 +4,7 @@ export default function TermsPage() {
       <h1 className="text-4xl font-bold">Terms of Service</h1>
 
       <p>
-        By accessing or using OnlyAI (the “Platform”), you agree to these Terms of Service (“Terms”).
+        By accessing or using OnlyAi (the “Platform”), you agree to these Terms of Service (“Terms”).
         If you do not agree, do not use the Platform.
       </p>
 
@@ -20,8 +20,8 @@ export default function TermsPage() {
       <section className="space-y-2">
         <h2 className="text-2xl font-semibold">2. Platform Role</h2>
         <p>
-          OnlyAI provides a subscription platform that allows independent creators (“Creators”) to publish and monetize
-          digital content. OnlyAI does not produce or direct Creator content. Creators control their own content,
+          OnlyAi provides a subscription platform that allows independent creators (“Creators”) to publish and monetize
+          digital content. OnlyAi does not produce or direct Creator content. Creators control their own content,
           pricing, and availability, subject to these Terms and our policies.
         </p>
       </section>

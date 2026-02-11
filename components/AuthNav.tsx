@@ -11,7 +11,7 @@ export default function AuthNav() {
       <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
 
         <Link href="/" className="text-xl font-semibold tracking-tight text-white">
-          OnlyAI
+          OnlyAi
         </Link>
 
         <nav className="flex items-center gap-6 text-sm text-neutral-400">

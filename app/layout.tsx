@@ -3,7 +3,7 @@ import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OnlyAI",
+  title: "OnlyAi",
   description: "AI-powered creator subscription platform for adults.",
 };
 
@@ -23,7 +23,7 @@ export default function RootLayout({
           <footer className="border-t border-neutral-800 text-neutral-400 text-sm py-6 px-6">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between gap-4">
               <div>
-                © 2026 OnlyAI. All rights reserved.
+                © 2026 OnlyAi. All rights reserved.
               </div>
 
               <div className="flex flex-wrap gap-4">

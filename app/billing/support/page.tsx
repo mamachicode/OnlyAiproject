@@ -4,7 +4,7 @@ export default function BillingSupportPage() {
       <h1 className="text-3xl font-bold">Manage Subscription</h1>
 
       <p>
-        Adult subscriptions on OnlyAI are processed securely through CCBill.
+        Adult subscriptions on OnlyAi are processed securely through CCBill.
       </p>
 
       <p>

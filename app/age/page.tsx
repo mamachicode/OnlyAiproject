@@ -15,7 +15,7 @@ export default function AgeGatePage() {
       <h1 className="text-4xl font-bold">Age Verification</h1>
 
       <p>
-        OnlyAI contains adult-oriented content. Access is restricted to individuals 18 years or older.
+        OnlyAi contains adult-oriented content. Access is restricted to individuals 18 years or older.
       </p>
 
       <ul className="list-disc pl-6 space-y-1">

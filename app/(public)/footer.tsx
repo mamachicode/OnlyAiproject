@@ -35,7 +35,7 @@ export default function Footer() {
       </div>
 
       <div className="text-center mt-6 text-xs text-gray-500">
-        © 2025 OnlyAI. All rights reserved.
+        © 2025 OnlyAi. All rights reserved.
       </div>
     </footer>
   );

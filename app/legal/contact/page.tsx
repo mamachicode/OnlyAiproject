@@ -4,7 +4,7 @@ export default function ContactPage() {
       <h1 className="text-4xl font-bold">Contact Us</h1>
 
       <p>
-        OnlyAI is operated by its founding team and committed to maintaining
+        OnlyAi is operated by its founding team and committed to maintaining
         high standards of compliance, transparency, and customer support.
         For support, billing questions, compliance inquiries, or legal notices,
         please use the appropriate contact channel below.
