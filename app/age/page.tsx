@@ -26,9 +26,9 @@ export default function AgeGatePage() {
 
       <button
         onClick={confirmAge}
-        className="mt-6 px-6 py-3 bg-black text-white rounded"
+        className="mt-8 px-8 py-4 bg-white text-black font-bold rounded-lg hover:bg-neutral-200 transition-all duration-200"
       >
-        I am 18+ — Enter
+        I CONFIRM I AM 18+ — ENTER SITE
       </button>
     </div>
   );
