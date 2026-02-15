@@ -10,6 +10,11 @@ cloudinary.config({
 })
 
 export default async function NsfwPage() {
+  const hasCloudinaryConfig =
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+
   const expiresAt = Math.floor(Date.now() / 1000) + 300 // 5 minutes
 
   const users = await prisma.user.findMany({
@@ -36,7 +41,7 @@ export default async function NsfwPage() {
 
         const displayUrl = post.isLocked
           ? media.blurUrl ?? null
-          : media.publicId
+          : media.publicId && hasCloudinaryConfig
             ? cloudinary.url(media.publicId, {
                 secure: true,
                 sign_url: true,
