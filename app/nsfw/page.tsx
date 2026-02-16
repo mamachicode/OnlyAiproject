@@ -1,13 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import prisma from "@/lib/prisma"
-import { v2 as cloudinary } from "cloudinary"
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
-  api_key: process.env.CLOUDINARY_API_KEY!,
-  api_secret: process.env.CLOUDINARY_API_SECRET!,
-})
 
 export default async function NsfwPage() {
   const hasCloudinaryConfig =
@@ -41,13 +35,7 @@ export default async function NsfwPage() {
 
         const displayUrl = post.isLocked
           ? media.blurUrl ?? null
-          : media.publicId && hasCloudinaryConfig
-            ? cloudinary.url(media.publicId, {
-                secure: true,
-                sign_url: true,
-                expires_at: expiresAt,
-              })
-            : media.url
+          : media.url
 
         if (!displayUrl) return null
 
