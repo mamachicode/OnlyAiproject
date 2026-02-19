@@ -27,7 +27,7 @@ export default async function NsfwPage() {
           if (!media) return null;
 
           const displayUrl = post.isLocked
-            ? media.blurUrl ?? null
+            ? media.blurUrl ?? media.url
             : media.url;
 
           if (!displayUrl) return null;
