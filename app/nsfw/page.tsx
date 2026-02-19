@@ -1,59 +1,67 @@
 export const dynamic = "force-dynamic";
 
-import prisma from "@/lib/prisma"
-
+import prisma from "@/lib/prisma";
 
 export default async function NsfwPage() {
-  const hasCloudinaryConfig =
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
-
-  const expiresAt = Math.floor(Date.now() / 1000) + 300 // 5 minutes
-
-  const users = await prisma.user.findMany({
+  const posts = await prisma.post.findMany({
+    where: { isNsfw: true },
+    orderBy: { createdAt: "desc" },
     include: {
-      posts: {
-        take: 1,
-        where: { isNsfw: true },
+      author: {
         include: {
-          media: {
-            take: 1,
-            orderBy: { order: "asc" },
-          },
+          creatorProfile: true,
         },
       },
+      media: {
+        take: 1,
+        orderBy: { order: "asc" },
+      },
     },
-  })
+  });
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
-      {users.map((u) => {
-        const post = u.posts[0]
-        const media = post?.media?.[0]
-        if (!media) return null
+    <div className="max-w-7xl mx-auto py-12 px-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {posts.map((post) => {
+          const media = post.media?.[0];
+          if (!media) return null;
 
-        const displayUrl = post.isLocked
-          ? media.blurUrl ?? null
-          : media.url
+          const displayUrl = post.isLocked
+            ? media.blurUrl ?? null
+            : media.url;
 
-        if (!displayUrl) return null
+          if (!displayUrl) return null;
 
-        return media.type === "IMAGE" ? (
-          <img
-            key={u.id}
-            src={displayUrl}
-            className="rounded shadow"
-          />
-        ) : (
-          <video
-            key={u.id}
-            src={displayUrl}
-            className="rounded shadow"
-            controls={!post.isLocked}
-          />
-        )
-      })}
+          return (
+            <div
+              key={post.id}
+              className="bg-neutral-900 rounded-xl overflow-hidden shadow hover:scale-[1.02] transition"
+            >
+              {media.type === "IMAGE" ? (
+                <img
+                  src={displayUrl}
+                  className="w-full h-64 object-cover"
+                />
+              ) : (
+                <video
+                  src={displayUrl}
+                  className="w-full h-64 object-cover"
+                  controls={!post.isLocked}
+                />
+              )}
+
+              <div className="p-3">
+                <p className="text-sm font-semibold text-white truncate">
+                  {post.title}
+                </p>
+                <p className="text-xs text-neutral-400">
+                  @{post.author.creatorProfile?.handle ?? post.author.username}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
-  )
+  );
 }
