@@ -37,19 +37,38 @@ export default async function NsfwPage() {
               key={post.id}
               className="bg-neutral-900 rounded-xl overflow-hidden shadow hover:scale-[1.02] transition"
             >
-              {media.type === "IMAGE" ? (
-                <img
-                  src={displayUrl}
-                  className="w-full h-64 object-cover"
-                />
-              ) : (
-                <video
-                  src={displayUrl}
-                  className="w-full h-64 object-cover"
-                  controls={!post.isLocked}
-                />
-              )}
+              {/* Media Wrapper */}
+              <div className="relative">
+                {media.type === "IMAGE" ? (
+                  <img
+                    src={displayUrl}
+                    className="w-full h-64 object-cover"
+                  />
+                ) : (
+                  <video
+                    src={displayUrl}
+                    className="w-full h-64 object-cover"
+                    controls={!post.isLocked}
+                  />
+                )}
 
+                {/* LOCK OVERLAY */}
+                {post.isLocked && (
+                  <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center">
+                    <div className="text-center px-4">
+                      <div className="text-3xl mb-2">🔒</div>
+                      <p className="text-sm font-semibold text-white">
+                        Locked Content
+                      </p>
+                      <p className="text-xs text-neutral-300 mt-1">
+                        Subscribe to unlock
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Card Footer */}
               <div className="p-3">
                 <p className="text-sm font-semibold text-white truncate">
                   {post.title}
