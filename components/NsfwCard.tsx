@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 
 type Props = {
   postId: string;
@@ -19,18 +18,12 @@ export default function NsfwCard({
   mediaType,
   displayUrl,
 }: Props) {
-  const router = useRouter();
 
-  const handleClick = () => {
-    if (isLocked) {
-      router.push(`/subscribe/${handle}`);
-    }
-  };
 
   return (
     <div
-      onClick={handleClick}
-      className="bg-neutral-900 rounded-xl overflow-hidden shadow hover:scale-[1.02] transition cursor-pointer"
+      
+      className="bg-neutral-900 rounded-xl overflow-hidden shadow hover:scale-[1.02] transition "
     >
       {/* Media Wrapper */}
       <div className="relative">
