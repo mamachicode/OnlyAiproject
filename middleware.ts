@@ -27,8 +27,15 @@ export async function middleware(req: any) {
     return NextResponse.next();
   }
 
-  // AGE GATE
-  if (pathname.startsWith("/nsfw")) {
+  // AGE GATE (Expanded for full adult ecosystem)
+  if (
+    pathname.startsWith("/nsfw") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/subscribe") ||
+    pathname.startsWith("/creator") ||
+    pathname.startsWith("/ccbill") ||
+    pathname.startsWith("/billing")
+  ) {
     const ageVerified = req.cookies.get("age_verified")?.value;
 
     if (ageVerified !== "true") {
