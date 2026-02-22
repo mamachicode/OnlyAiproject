@@ -24,10 +24,10 @@ export default function OnboardingPage() {
       </div>
 
       <a
-        href="/create-account"
+        href="/nsfw"
         className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition"
       >
-        Continue as Adult Creator
+        Continue to Platform
       </a>
     </main>
   );
