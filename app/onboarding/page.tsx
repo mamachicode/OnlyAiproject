@@ -1,44 +1,34 @@
-'use client';
-
-import { useRouter } from "next/navigation";
-
-export default function Onboarding() {
-  const router = useRouter();
-
-  async function choose(isNsfw: boolean) {
-    await fetch("/api/user/set-lane", {
-      method: "POST",
-      body: JSON.stringify({ isNsfw }),
-      headers: { "Content-Type": "application/json" }
-    });
-    router.push("/onboarding/pricing");
-  }
-
+export default function OnboardingPage() {
   return (
-    <div className="max-w-lg mx-auto mt-20 text-center">
-      <h1 className="text-3xl mb-6 font-semibold">
-        Choose Your Creator Category
+    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Become an Adult Creator
       </h1>
 
-      <p className="text-neutral-400 mb-10">
-        All subscriptions are processed securely through CCBill.
+      <p className="text-neutral-400 text-center max-w-md mb-8">
+        OnlyAI is an 18+ subscription platform. All creators must be 18 years
+        or older and publish adult content in compliance with our Terms of
+        Service and CCBill requirements.
       </p>
 
-      <div className="flex gap-6 justify-center">
-        <button
-          onClick={() => choose(false)}
-          className="bg-neutral-800 hover:bg-neutral-700 p-6 rounded-lg w-44 transition"
-        >
-          General Audience
-        </button>
+      <div className="bg-neutral-900 p-6 rounded-xl max-w-md w-full text-center mb-6">
+        <p className="text-sm text-neutral-300 mb-4">
+          By continuing, you confirm that:
+        </p>
 
-        <button
-          onClick={() => choose(true)}
-          className="bg-neutral-800 hover:bg-neutral-700 p-6 rounded-lg w-44 transition"
-        >
-          Adult (18+)
-        </button>
+        <ul className="text-sm text-neutral-400 space-y-2 text-left">
+          <li>• You are 18 years of age or older</li>
+          <li>• You will only upload legal adult content</li>
+          <li>• You agree to our Terms and 2257 compliance policy</li>
+        </ul>
       </div>
-    </div>
+
+      <a
+        href="/create-account"
+        className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition"
+      >
+        Continue as Adult Creator
+      </a>
+    </main>
   );
 }
