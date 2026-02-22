@@ -7,7 +7,7 @@ export default function CreateAccount() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  async function handleSignup(e:any) {
+  async function handleSignup(e: any) {
     e.preventDefault();
 
     const res = await fetch("/api/auth/signup", {
@@ -18,6 +18,8 @@ export default function CreateAccount() {
 
     if (res.ok) {
       await signIn("credentials", { email, password, callbackUrl: "/onboarding" });
+    } else {
+      alert("Signup failed. Please try again.");
     }
   }
 
@@ -27,18 +29,20 @@ export default function CreateAccount() {
 
       <form onSubmit={handleSignup}>
         <input
-          className="w-full p-2 mb-3 text-black"
+          className="w-full p-2 mb-3 bg-white text-black rounded"
           placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
-          onChange={e=>setEmail(e.target.value)}
         />
 
         <input
           type="password"
-          className="w-full p-2 mb-3 text-black"
+          className="w-full p-2 mb-3 bg-white text-black rounded"
           placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           required
-          onChange={e=>setPassword(e.target.value)}
         />
 
         <button className="w-full bg-pink-600 p-2 rounded">
