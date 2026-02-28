@@ -27,7 +27,7 @@ export async function middleware(req: any) {
     return NextResponse.next();
   }
 
-  // AGE GATE (Expanded for full adult ecosystem)
+  // AGE GATE
   if (
     pathname.startsWith("/nsfw") ||
     pathname.startsWith("/onboarding") ||
@@ -44,7 +44,11 @@ export async function middleware(req: any) {
   }
 
   // AUTH PROTECTION
-  if (pathname.startsWith("/creator") || pathname.startsWith("/exclusive")) {
+  if (
+    pathname.startsWith("/creator") ||
+    pathname.startsWith("/exclusive") ||
+    pathname.startsWith("/onboarding")
+  ) {
     const token = await getToken({
       req,
       secret: process.env.NEXTAUTH_SECRET,
