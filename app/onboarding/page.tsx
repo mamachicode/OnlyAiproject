@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function OnboardingPage() {
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6">
@@ -23,12 +25,12 @@ export default function OnboardingPage() {
         </ul>
       </div>
 
-      <a
-        href="/nsfw"
+      <Link
+        href="/onboarding/pricing"
         className="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition"
       >
-        Continue to Platform
-      </a>
+        Continue to Pricing
+      </Link>
     </main>
   );
 }
