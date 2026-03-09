@@ -23,19 +23,22 @@ export default function Pricing() {
       <h1 className="text-2xl mb-4">Set your creator profile</h1>
 
       <input
-        className="w-full p-2 mb-3 text-black"
+        className="w-full p-2 mb-3 text-white bg-neutral-900 border border-neutral-700 rounded"
         placeholder="Public username"
-        onChange={e=>setUsername(e.target.value)}
+        onChange={e => setUsername(e.target.value)}
       />
 
       <input
         type="number"
-        className="w-full p-2 mb-3 text-black"
+        className="w-full p-2 mb-3 text-white bg-neutral-900 border border-neutral-700 rounded"
         value={price}
-        onChange={e=>setPrice(parseInt(e.target.value))}
+        onChange={e => setPrice(parseInt(e.target.value))}
       />
 
-      <button onClick={save} className="w-full bg-pink-600 p-2 rounded">
+      <button
+        onClick={save}
+        className="w-full bg-pink-600 p-2 rounded font-semibold hover:opacity-90 transition"
+      >
         Continue
       </button>
     </div>
