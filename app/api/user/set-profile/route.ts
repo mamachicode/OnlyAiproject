@@ -2,60 +2,71 @@ import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const { username, price } = await req.json();
-  const session = await auth();
+  try {
+    const body = await req.json();
+    const username = body.username;
+    const price = Number(body.price);
 
-  if (!session?.user?.email) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+    const session = await auth();
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  });
+    if (!session?.user?.email) {
+      return new Response("Unauthorized", { status: 401 });
+    }
 
-  if (!user) {
-    return new Response("User not found", { status: 404 });
-  }
+    if (!username || !price) {
+      return new Response("Missing username or price", { status: 400 });
+    }
 
-  // Update user basic info
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      username,
-      ...(user.isNsfw
-        ? { nsfwPrice: price }
-        : { sfwPrice: price }),
-    },
-  });
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
 
-  // Check if creator profile already exists
-  const existingCreator = await prisma.creator.findUnique({
-    where: { userId: user.id },
-  });
+    if (!user) {
+      return new Response("User not found", { status: 404 });
+    }
 
-  const classification = user.isNsfw ? "NSFW" : "SFW";
+    const classification = user.isNsfw ? "NSFW" : "SFW";
 
-  if (!existingCreator) {
-    await prisma.creator.create({
+    await prisma.user.update({
+      where: { id: user.id },
       data: {
-        userId: user.id,
-        handle: username,
-        classification,
-        priceCents: price * 100,
-        currency: "USD",
-        billingPeriodDays: 30,
+        username,
+        ...(user.isNsfw
+          ? { nsfwPrice: price }
+          : { sfwPrice: price }),
       },
     });
-  } else {
-    await prisma.creator.update({
+
+    const existingCreator = await prisma.creator.findUnique({
       where: { userId: user.id },
-      data: {
-        handle: username,
-        classification,
-        priceCents: price * 100,
-      },
     });
-  }
 
-  return Response.json({ ok: true });
+    if (!existingCreator) {
+      await prisma.creator.create({
+        data: {
+          userId: user.id,
+          handle: username,
+          classification,
+          priceCents: price * 100,
+          currency: "USD",
+          billingPeriodDays: 30,
+        },
+      });
+    } else {
+      await prisma.creator.update({
+        where: { userId: user.id },
+        data: {
+          handle: username,
+          classification,
+          priceCents: price * 100,
+        },
+      });
+    }
+
+    return Response.json({ ok: true });
+
+  } catch (error) {
+    console.error("Creator setup error:", error);
+    return new Response("Server error", { status: 500 });
+  }
 }
