@@ -1,5 +1,8 @@
 {
-  "routes": [
-    { "src": "/api/stripe/(.*)", "dest": "/_api/stripe/$1" }
+  "crons": [
+    {
+      "path": "/api/ping",
+      "schedule": "*/5 * * * *"
+    }
   ]
 }
