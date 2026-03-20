@@ -25,6 +25,18 @@ export async function POST(req: Request) {
       return new Response("User not found", { status: 404 });
     }
 
+    // 🔥 CHECK DUPLICATE USERNAME
+    const existingUsername = await prisma.user.findFirst({
+      where: {
+        username,
+        NOT: { id: user.id },
+      },
+    });
+
+    if (existingUsername) {
+      return new Response("Username already taken", { status: 400 });
+    }
+
     const classification = user.isNsfw ? "NSFW" : "SFW";
 
     await prisma.user.update({
@@ -65,8 +77,8 @@ export async function POST(req: Request) {
 
     return Response.json({ ok: true });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Creator setup error:", error);
-    return new Response("Server error", { status: 500 });
+    return new Response(error.message || "Server error", { status: 500 });
   }
 }
