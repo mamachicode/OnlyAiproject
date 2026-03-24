@@ -19,66 +19,49 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
+      include: { creatorProfile: true },
     });
 
     if (!user) {
       return new Response("User not found", { status: 404 });
     }
 
-    // 🔥 CHECK DUPLICATE USERNAME
-    const existingUsername = await prisma.user.findFirst({
-      where: {
-        username,
-        NOT: { id: user.id },
-      },
-    });
-
-    if (existingUsername) {
-      return new Response("Username already taken", { status: 400 });
+    if (!user.creatorProfile) {
+      return new Response("Creator lane not selected", { status: 400 });
     }
 
-    const classification = user.isNsfw ? "NSFW" : "SFW";
+    const classification = user.creatorProfile.classification;
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
         username,
-        ...(user.isNsfw
+        ...(classification === "NSFW"
           ? { nsfwPrice: price }
           : { sfwPrice: price }),
       },
     });
 
-    const existingCreator = await prisma.creator.findUnique({
+    await prisma.creator.upsert({
       where: { userId: user.id },
+      update: {
+        handle: username,
+        classification,
+        priceCents: price * 100,
+      },
+      create: {
+        userId: user.id,
+        handle: username,
+        classification,
+        priceCents: price * 100,
+        currency: "USD",
+        billingPeriodDays: 30,
+      },
     });
 
-    if (!existingCreator) {
-      await prisma.creator.create({
-        data: {
-          userId: user.id,
-          handle: username,
-          classification,
-          priceCents: price * 100,
-          currency: "USD",
-          billingPeriodDays: 30,
-        },
-      });
-    } else {
-      await prisma.creator.update({
-        where: { userId: user.id },
-        data: {
-          handle: username,
-          classification,
-          priceCents: price * 100,
-        },
-      });
-    }
-
     return Response.json({ ok: true });
-
-  } catch (error: any) {
+  } catch (error) {
     console.error("Creator setup error:", error);
-    return new Response(error.message || "Server error", { status: 500 });
+    return new Response("Server error", { status: 500 });
   }
 }

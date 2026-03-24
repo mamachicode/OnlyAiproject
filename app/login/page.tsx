@@ -13,23 +13,21 @@ export default function Login() {
     await signIn("credentials", {
       email,
       password,
-      callbackUrl: "/nsfw"
+      callbackUrl: "/"
     });
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white relative">
-
       <div className="absolute top-6 right-6 text-xs bg-neutral-800 px-3 py-1 rounded-full border border-neutral-700">
-        18+ Adults Only
+        Members
       </div>
 
       <div className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl p-8 shadow-2xl">
-
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-semibold">Sign In</h1>
           <p className="text-sm text-neutral-400 mt-2">
-            Secure member access • Adult subscription platform
+            Secure member access
           </p>
         </div>
 
@@ -63,7 +61,6 @@ export default function Login() {
             <a href="/legal/privacy" className="underline hover:text-white">Privacy Policy</a>.
           </p>
         </form>
-
       </div>
     </div>
   );
