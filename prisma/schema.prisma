@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,8 +13,7 @@ model User {
   password  String
   username  String   @unique
 
-  // NEW: creator tier prices
-  sfwPrice  Int?     @default(5)   // Minimum will be enforced in API
+  sfwPrice  Int?     @default(5)
   nsfwPrice Int?     @default(10)
 
   isNsfw    Boolean  @default(false)
@@ -33,8 +32,6 @@ model Post {
   createdAt DateTime @default(now())
 }
 
-// ----- CCBILL SUBSCRIPTIONS -----
-
 enum SiteSection {
   SFW
   NSFW
@@ -50,10 +47,10 @@ enum SubscriptionStatus {
 model Subscription {
   id                   Int                 @id @default(autoincrement())
 
-  subscriberEmail      String       // We will match this to OnlyAI.user.email
-  creatorEmail         String       // The creator’s OnlyAI email
+  subscriberEmail      String
+  creatorEmail         String
 
-  siteSection          SiteSection  // SFW or NSFW
+  siteSection          SiteSection
   ccbillSubscriptionId String?      @unique
   status               SubscriptionStatus @default(ACTIVE)
 
@@ -62,23 +59,13 @@ model Subscription {
 }
 
 model BillingSubscription {
-
   id                 Int      @id @default(autoincrement())
-
   subscriptionId     String   @unique
-
   eventType          String?
-
   subscriberUsername String
-
   creatorUsername    String
-
   siteSection        String
-
   status             String
-
   createdAt          DateTime @default(now())
-
   updatedAt          DateTime @updatedAt
-
 }
