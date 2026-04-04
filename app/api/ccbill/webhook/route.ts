@@ -21,6 +21,7 @@ export async function POST(req: Request) {
         status: String(eventType || "Unknown"),
       },
       create: {
+        status: String(eventType || "Unknown"),
         subscriptionId: String(subscriptionId || ""),
         eventType: String(eventType || "Unknown"),
         subscriberUsername: String(subscriberUsername),

@@ -22,7 +22,7 @@ export default async function Page({ params }) {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4">{creator.username}</h1>
-      <p className="text-gray-500 mb-6">NSFW Creator Profile</p>
+      <p className="text-gray-500 mb-6">Creator Profile</p>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {creator.posts.map((post) => (

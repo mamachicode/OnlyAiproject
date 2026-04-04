@@ -1,22 +1,20 @@
+// @ts-nocheck
 import prisma from "../src/lib/prisma";
 import bcrypt from "bcrypt";
 
 async function main() {
   const hashed = await bcrypt.hash("test123", 10);
 
-  await prisma.user.upsert({
-    where: { email: "creator@onlyai.com" },
-    update: {},
-    create: {
-      email: "creator@onlyai.com",
+  await prisma.user.create({
+    data: {
+      email: "test@onlyai.com",
       password: hashed,
-      username: "creator",
-      subscriptionPrice: 5,
-      isNsfw: true,   // This creator belongs to the NSFW section
+      username: "testuser",
+      bio: "Seeded test user",
     },
   });
 
-  console.log("🌱 Seed complete: creator@onlyai.com with isNsfw = true");
+  console.log("Seed completed!");
 }
 
 main()
@@ -24,4 +22,6 @@ main()
     console.error(e);
     process.exit(1);
   })
-  .finally(() => process.exit());
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

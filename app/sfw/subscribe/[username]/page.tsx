@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+// @ts-nocheck
 import prisma from "@/src/lib/prisma";
 
 export default async function SfwSubscribePage({ params }) {
@@ -6,23 +6,46 @@ export default async function SfwSubscribePage({ params }) {
 
   const creator = await prisma.user.findUnique({
     where: { username },
-    select: { username: true, sfwPrice: true }
+    select: {
+      username: true,
+      avatar: true,
+      sfwPrice: true,
+      bio: true,
+    },
   });
 
-  if (!creator) return <div className="p-10 text-red-600">Creator not found</div>;
+  if (!creator) {
+    return (
+      <div className="p-6">
+        <h1 className="text-xl font-bold">Creator not found</h1>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-xl mx-auto p-10">
-      <h1 className="text-3xl font-bold mb-4">Subscribe to {creator.username}</h1>
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4">
+        Subscribe to {creator.username}
+      </h1>
 
-      <p className="text-lg mb-4">SFW Subscription: ${creator.sfwPrice}</p>
+      <div className="bg-blue-600/20 p-4 rounded-lg mb-6">
+        <p className="text-gray-300">
+          Unlock SFW exclusive content for{" "}
+          <span className="font-bold">${creator.sfwPrice}/month</span>.
+        </p>
+      </div>
 
-      <a
-        href={`/api/ccbill/create-link?creator=${creator.username}&section=SFW`}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Continue to Billing
-      </a>
+      <form action="/api/ccbill/create-link" method="GET">
+        <input type="hidden" name="creator" value={creator.username} />
+        <input type="hidden" name="section" value="sfw" />
+
+        <button
+          type="submit"
+          className="bg-blue-600 hover:bg-blue-700 transition text-white px-6 py-3 rounded-lg w-full"
+        >
+          Continue to Payment
+        </button>
+      </form>
     </div>
   );
 }

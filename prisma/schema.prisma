@@ -62,15 +62,23 @@ model Subscription {
 }
 
 model BillingSubscription {
-  id              Int      @id @default(autoincrement())
+
+  id                 Int      @id @default(autoincrement())
+
+  subscriptionId     String   @unique
+
+  eventType          String?
+
   subscriberUsername String
+
   creatorUsername    String
-  siteSection        String   // "SFW" or "NSFW"
-  price              Int
-  status             String   // ACTIVE, CANCELLED, EXPIRED
-  subscriptionId     String?
+
+  siteSection        String
+
+  status             String
+
   createdAt          DateTime @default(now())
+
   updatedAt          DateTime @updatedAt
 
-  @@unique([subscriberUsername, creatorUsername, siteSection])
 }

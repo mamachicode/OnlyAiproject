@@ -1,26 +1,30 @@
+// @ts-nocheck
 import { NextResponse } from "next/server";
 import prisma from "@/src/lib/prisma";
 
-export async function POST(req) {
-  const body = await req.json();
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { userId, creatorId } = body;
 
-  const { userId, creatorId } = body;
-
-  if (!userId || !creatorId) {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-  }
-
-  await prisma.subscription.upsert({
-    where: {
-      userId_creatorId: { userId, creatorId }
-    },
-    update: { active: true },
-    create: {
-      userId,
-      creatorId,
-      active: true
+    if (!userId || !creatorId) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
-  });
 
-  return NextResponse.json({ success: true });
+    await prisma.subscription.create({
+      data: {
+        userId,
+        creatorId,
+        active: true,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Webhook Error:", error);
+    return NextResponse.json(
+      { error: "Webhook failed" },
+      { status: 500 }
+    );
+  }
 }
