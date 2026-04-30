@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   const features = [
-    "SFW-first MVP",
+    "Secure Infrastructure Launch",
     "Creator subscriptions",
     "Moderated uploads",
     "Secure creator dashboard",
@@ -15,7 +15,7 @@ export default function HomePage() {
     },
     {
       title: "Upload approved content",
-      text: "Publish clean, moderated content through a safe creator workflow.",
+      text: "Publish approved content through a moderated creator workflow.",
     },
     {
       title: "Set monthly access",
@@ -75,7 +75,7 @@ export default function HomePage() {
               <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-300 md:text-xl">
                 OnlyAI helps creators publish approved content, build private
                 memberships, and prepare a premium subscription page without
-                exposing sensitive content on the public homepage.
+                exposing gated content on the public homepage.
               </p>
 
               <div className="mt-9 flex flex-col gap-4 sm:flex-row">
@@ -139,11 +139,11 @@ export default function HomePage() {
 
                   <div className="mt-5 rounded-2xl border border-pink-400/20 bg-pink-500/10 p-4">
                     <p className="text-sm font-bold text-pink-200">
-                      Stripe-safe public homepage
+                      Payment-Safe Public Gateway
                     </p>
                     <p className="mt-1 text-sm leading-6 text-zinc-300">
-                      SFW-first messaging. Sensitive lanes remain gated and
-                      separate from public marketing pages.
+                      Public-facing marketing stays clean while advanced content
+                      lanes remain gated, private, and separate.
                     </p>
                   </div>
                 </div>
@@ -222,14 +222,14 @@ export default function HomePage() {
                 Monetization
               </p>
               <h2 className="text-4xl font-black tracking-tight md:text-5xl">
-                Monthly memberships for safe creator content.
+                Monthly memberships for private creator feeds.
               </h2>
             </div>
 
             <p className="text-lg leading-8 text-zinc-300">
               OnlyAI is designed for creator subscriptions, private feeds, and
-              moderated uploads. The public MVP stays SFW-first for payment
-              safety while advanced content lanes remain gated and separate.
+              moderated uploads. The public launch stays payment-safe while advanced content
+              lanes remain gated, private, and separate.
             </p>
           </div>
         </div>
@@ -241,7 +241,7 @@ export default function HomePage() {
             Launch your creator page today.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-zinc-300">
-            Build a premium AI creator world, publish safely, and prepare your
+            Build a premium AI creator world, publish with controls, and prepare your
             subscription page for real paying subscribers.
           </p>
           <Link
