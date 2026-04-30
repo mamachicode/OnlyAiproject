@@ -117,8 +117,9 @@ export default function HomePage() {
                       Creator launch system
                     </p>
                     <p className="mt-2 text-sm leading-6 text-zinc-400">
-                      No fake creators. No fake earnings. The public directory
-                      opens once real creator pages are ready.
+                      Creator pages will appear here once verified profiles are
+                      ready. Until then, OnlyAI focuses on onboarding,
+                      moderation, pricing, and protected subscriber access.
                     </p>
                   </div>
 
@@ -190,22 +191,23 @@ export default function HomePage() {
                 Creator directory
               </p>
               <h2 className="text-4xl font-black tracking-tight md:text-5xl">
-                Real creator pages coming soon.
+                Creator directory opening soon.
               </h2>
             </div>
 
             <div>
               <p className="text-lg leading-8 text-zinc-300">
-                The creator showcase will stay hidden until real creator
-                profiles are live. This keeps the homepage honest, premium, and
-                focused on the platform instead of fake demo accounts.
+                The creator directory will open once verified creator profiles
+                are live. For now, the homepage focuses on the platform
+                workflow: onboarding, moderation, membership pricing, and
+                protected subscriber access.
               </p>
 
               <Link
                 href="/login"
                 className="mt-8 inline-flex rounded-2xl border border-white/10 bg-white px-6 py-3 font-bold text-black transition hover:bg-zinc-200"
               >
-                Create first creator page
+                Create your creator page
               </Link>
             </div>
           </div>
