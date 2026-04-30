@@ -15,7 +15,7 @@ export default function HomePage() {
     },
     {
       title: "Upload approved content",
-      text: "Publish approved content through a moderated creator workflow.",
+      text: "Publish approved public-safe content through a moderated creator workflow.",
     },
     {
       title: "Set monthly access",
@@ -28,10 +28,10 @@ export default function HomePage() {
   ];
 
   const platformPreview = [
-    ["Creator profile", "Ready"],
-    ["Upload moderation", "Active"],
-    ["Membership pricing", "Built in"],
-    ["Subscriber access", "Protected"],
+    ["Creator profiles", "Live"],
+    ["Public-safe posting", "Moderated"],
+    ["Membership pricing", "Ready"],
+    ["Protected access", "Protected"],
   ];
 
   return (
@@ -191,7 +191,7 @@ export default function HomePage() {
                 Creator directory
               </p>
               <h2 className="text-4xl font-black tracking-tight md:text-5xl">
-                Creator directory opening soon.
+                Approved creator pages.
               </h2>
             </div>
 
