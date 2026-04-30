@@ -35,7 +35,7 @@ export default function HomePage() {
           <div className="flex flex-1 items-center py-20">
             <div className="max-w-4xl">
               <p className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
-                AI-powered creator memberships
+                Private creator memberships
               </p>
 
               <h1 className="text-6xl font-black leading-[0.95] tracking-tight md:text-8xl">
@@ -49,7 +49,7 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-8 max-w-2xl text-xl leading-9 text-zinc-300 md:text-2xl">
-                Build a private AI-powered creator page. Share approved content,
+                Build a private AI-powered creator page. Share exclusive content,
                 offer memberships, and grow your subscriber world.
               </p>
 
