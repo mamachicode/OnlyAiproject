@@ -1,56 +1,79 @@
 // @ts-nocheck
-import prisma from "@/src/lib/prisma";
-import Link from "next/link";
-import Image from "next/image";
+export const dynamic = "force-dynamic";
 
-export default async function Page({ params }) {
+import Link from "next/link";
+import prisma from "@/src/lib/prisma";
+
+export default async function SubscribePage({ params }) {
+  const resolvedParams = await Promise.resolve(params);
+  const username = String(resolvedParams?.username || "").trim().toLowerCase();
+
   const creator = await prisma.user.findUnique({
-    where: { username: params.username },
-    include: {
-      posts: true,
-      _count: {
-        select: { subscribers: true },
-      },
+    where: { username },
+    select: {
+      username: true,
+      sfwPrice: true,
     },
   });
 
   if (!creator) {
     return (
-      <div className="p-10">
-        <h1 className="text-xl font-bold">Creator not found</h1>
-      </div>
+      <main className="min-h-screen bg-[#07050d] text-white">
+        <section className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-20">
+          <h1 className="text-5xl font-black">Creator not found.</h1>
+          <Link href="/" className="mt-8 w-fit rounded-2xl bg-white px-6 py-3 font-black text-black">
+            Back to OnlyAi
+          </Link>
+        </section>
+      </main>
     );
   }
 
+  const price = creator.sfwPrice ?? 5;
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-2">{creator.username}</h1>
-      <p className="text-gray-500 mb-6">
-        Subscribe to unlock all exclusive posts.
-      </p>
+    <main className="min-h-screen bg-[#07050d] text-white">
+      <section className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-20">
+        <Link href="/" className="mb-10 text-4xl font-black tracking-tight">
+          Only<span className="text-pink-400">Ai</span>
+        </Link>
 
-      <Link
-        href={`/api/subscribe/start?creator=${creator.username}`}
-        className="inline-block bg-blue-600 text-white px-4 py-2 rounded mb-6"
-      >
-        Subscribe Now
-      </Link>
+        <p className="mb-5 inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-300">
+          Creator membership
+        </p>
 
-      <h2 className="text-xl font-semibold mb-3">Public Posts</h2>
+        <h1 className="text-5xl font-black tracking-tight md:text-7xl">
+          Subscribe to @{creator.username}
+        </h1>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {creator.posts.map((post) => (
-          <div key={post.id} className="rounded overflow-hidden shadow bg-black/30">
-            <Image
-              src={post.url}
-              alt="Post Image"
-              width={400}
-              height={400}
-              className="object-cover w-full h-full"
-            />
-          </div>
-        ))}
-      </div>
-    </div>
+        <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-6">
+          <p className="text-sm font-semibold text-zinc-500">Monthly access</p>
+          <p className="mt-3 text-5xl font-black">${price}</p>
+          <p className="mt-3 text-zinc-400">
+            Unlock private creator posts when billing is connected.
+          </p>
+        </div>
+
+        <div className="mt-8 rounded-2xl border border-yellow-300/20 bg-yellow-300/10 p-4 text-sm font-semibold text-yellow-100">
+          Checkout connection is the next sprint. This page is ready for Stripe wiring.
+        </div>
+
+        <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+          <Link
+            href={`/public/creator/${creator.username}`}
+            className="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-center text-lg font-black text-white hover:bg-white/10"
+          >
+            Back to creator page
+          </Link>
+
+          <Link
+            href="/login"
+            className="rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 text-center text-lg font-black text-white"
+          >
+            Creator login
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }
