@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export default function HomePage() {
   const highlights = [
-    "Private creator pages",
-    "Monthly memberships",
-    "Approved uploads",
-    "Gated content lanes",
+    "Creator pages",
+    "Fan subscriptions",
+    "Exclusive posts",
+    "Gated access",
   ];
 
   return (
@@ -33,7 +33,7 @@ export default function HomePage() {
           </nav>
 
           <div className="flex flex-1 items-center py-20">
-            <div className="max-w-4xl">
+            <div className="max-w-5xl">
               <p className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
                 Private creator memberships
               </p>
@@ -48,9 +48,10 @@ export default function HomePage() {
                 </span>
               </h1>
 
-              <p className="mt-8 max-w-2xl text-xl leading-9 text-zinc-300 md:text-2xl">
-                Build a private AI-powered creator page. Share exclusive content,
-                offer memberships, and grow your subscriber world.
+              <p className="mt-8 max-w-3xl text-xl leading-9 text-zinc-300 md:text-2xl">
+                A private creator membership platform for AI-powered content.
+                Creators launch pages. Fans subscribe. Exclusive posts stay
+                behind the gate.
               </p>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -58,14 +59,14 @@ export default function HomePage() {
                   href="/login"
                   className="rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 text-center text-lg font-black text-white shadow-2xl shadow-pink-500/20 transition hover:scale-[1.02]"
                 >
-                  Start as Creator
+                  Start a Creator Page
                 </Link>
 
                 <Link
                   href="/login"
                   className="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-center text-lg font-black text-white transition hover:bg-white/10"
                 >
-                  Log in
+                  Join a Creator
                 </Link>
               </div>
 
