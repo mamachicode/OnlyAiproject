@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function HomePage() {
   const highlights = [
     "Creator pages",
-    "Fan subscriptions",
+    "Creator subscriptions",
     "Exclusive posts",
     "Gated access",
   ];
@@ -49,9 +49,9 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-8 max-w-3xl text-xl leading-9 text-zinc-300 md:text-2xl">
-                A private creator membership platform for AI-powered content.
-                Creators launch pages. Fans subscribe. Exclusive posts stay
-                behind the gate.
+                A private membership platform for AI-powered creators.
+                Start a page, share exclusive posts, or subscribe to the
+                creators you follow.
               </p>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -66,7 +66,7 @@ export default function HomePage() {
                   href="/login"
                   className="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-center text-lg font-black text-white transition hover:bg-white/10"
                 >
-                  Join a Creator
+                  Subscribe to a Creator
                 </Link>
               </div>
 
