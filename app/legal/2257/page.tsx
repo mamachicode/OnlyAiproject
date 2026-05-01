@@ -9,10 +9,10 @@ export default function Compliance2257Page() {
       </p>
       <p className="mb-4">
         Records required to be maintained are held by the respective content creators (Models) 
-        who upload and manage their own material on OnlyAI.
+        who upload and manage their own material on OnlyAi.
       </p>
       <p className="mb-4">
-        OnlyAI is a hosting and publishing platform. We do not produce, direct, or participate 
+        OnlyAi is a hosting and publishing platform. We do not produce, direct, or participate 
         in the creation of user-submitted content.
       </p>
       <p className="mt-6 text-gray-700">

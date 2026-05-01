@@ -3,7 +3,7 @@ export default function PrivacyPage() {
     <div className="max-w-3xl mx-auto p-8">
       <h1 className="text-4xl font-bold mb-6">Privacy Policy</h1>
       <p className="mb-4">
-        OnlyAI values your privacy. We collect only the information required to operate the platform,
+        OnlyAi values your privacy. We collect only the information required to operate the platform,
         process subscriptions, and maintain security.
       </p>
       <p className="mb-4">

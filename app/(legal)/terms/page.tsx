@@ -2,7 +2,7 @@ export default function TermsPage() {
   return (
     <div className="p-10 max-w-3xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
-      <p>By using OnlyAI you agree to follow our policies and respect content rules.</p>
+      <p>By using OnlyAi you agree to follow our policies and respect content rules.</p>
 
       <h2 className="text-2xl font-semibold mt-4">1. Eligibility</h2>
       <p>You must be at least 18 years old to access NSFW areas.</p>

@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import AgeBanner from "@/components/AgeBanner";
 
 export const metadata: Metadata = {
-  title: "OnlyAI – AI Creator Platform",
+  title: "OnlyAi – AI Creator Platform",
   description: "AI-powered SFW & NSFW creator platform",
 };
 

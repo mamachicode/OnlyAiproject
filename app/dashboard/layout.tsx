@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex">
       <aside className="w-64 p-6 border-r min-h-screen space-y-4">
-        <h2 className="text-xl font-bold mb-4">OnlyAI Creator</h2>
+        <h2 className="text-xl font-bold mb-4">OnlyAi Creator</h2>
         <nav className="space-y-3">
           <Link className="block" href="/dashboard">🏠 Overview</Link>
           <Link className="block" href="/dashboard/upload">📤 Upload</Link>
