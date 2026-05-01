@@ -8,24 +8,6 @@ export default function HomePage() {
     "Gated access",
   ];
 
-  const previewItems = [
-    {
-      label: "Private feed",
-      title: "Exclusive creator posts",
-      detail: "Members unlock more",
-    },
-    {
-      label: "Locked access",
-      title: "Subscribe to view",
-      detail: "Gated for fans",
-    },
-    {
-      label: "Membership",
-      title: "Creator page access",
-      detail: "Monthly subscription",
-    },
-  ];
-
   return (
     <main className="min-h-screen bg-[#07050d] text-white">
       <section className="relative min-h-screen overflow-hidden">
@@ -41,6 +23,7 @@ export default function HomePage() {
               <Link href="/login" className="hover:text-pink-300">
                 Log in
               </Link>
+
               <Link
                 href="/login"
                 className="rounded-full border border-white/10 bg-white/10 px-5 py-2 hover:bg-white/15"
@@ -50,7 +33,7 @@ export default function HomePage() {
             </div>
           </nav>
 
-          <div className="grid flex-1 items-center gap-14 py-20 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid flex-1 items-center gap-14 py-20 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="max-w-5xl">
               <p className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
                 Private creator memberships
@@ -99,73 +82,47 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="relative hidden lg:block">
-              <div className="absolute -inset-10 rounded-full bg-pink-500/20 blur-3xl" />
-              <div className="relative ml-auto max-w-md rounded-[2rem] border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-pink-950/40 backdrop-blur-xl">
+            <div className="relative hidden lg:flex justify-end">
+              <div className="absolute -inset-8 rounded-full bg-pink-500/15 blur-3xl" />
+
+              <div className="relative w-full max-w-sm rounded-[2rem] border border-white/10 bg-white/[0.055] p-5 shadow-2xl shadow-pink-950/30 backdrop-blur-xl">
                 <div className="mb-5 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-semibold text-pink-300">
-                      Creator page preview
+                      Preview
                     </p>
                     <h2 className="mt-1 text-2xl font-black">
-                      Private feed
+                      Private post
                     </h2>
                   </div>
 
                   <div className="rounded-full border border-pink-300/20 bg-pink-400/10 px-4 py-2 text-sm font-black text-pink-200">
-                    Members
+                    Locked
                   </div>
                 </div>
 
-                <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#11091a] p-5">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(236,72,153,0.34),_transparent_45%)]" />
-
-                  <div className="relative">
-                    <div className="mb-5 h-44 rounded-[1.25rem] border border-white/10 bg-gradient-to-br from-pink-500/40 via-purple-500/30 to-black">
-                      <div className="flex h-full items-center justify-center">
-                        <div className="rounded-full border border-white/20 bg-black/35 px-5 py-3 text-sm font-black backdrop-blur">
-                          🔒 Subscribe to unlock
-                        </div>
-                      </div>
+                <div className="rounded-[1.5rem] border border-white/10 bg-[#100816] p-4">
+                  <div className="flex h-40 items-center justify-center rounded-[1.25rem] border border-white/10 bg-gradient-to-br from-pink-500/35 via-purple-500/25 to-black">
+                    <div className="rounded-full border border-white/15 bg-black/35 px-5 py-3 text-sm font-black backdrop-blur">
+                      🔒 Subscribe to unlock
                     </div>
-
-                    <p className="text-sm font-semibold text-zinc-400">
-                      Locked post
-                    </p>
-                    <h3 className="mt-1 text-2xl font-black">
-                      Exclusive content for fans
-                    </h3>
-                    <p className="mt-3 text-sm leading-6 text-zinc-400">
-                      A cleaner way for creators to share private posts with
-                      subscribers.
-                    </p>
                   </div>
+
+                  <p className="mt-5 text-sm font-semibold text-zinc-400">
+                    Exclusive content
+                  </p>
+
+                  <h3 className="mt-1 text-xl font-black">
+                    For members only
+                  </h3>
+
+                  <p className="mt-3 text-sm leading-6 text-zinc-400">
+                    Fans subscribe to unlock private creator posts.
+                  </p>
                 </div>
 
-                <div className="mt-4 space-y-3">
-                  {previewItems.map((item) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-4"
-                    >
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
-                          {item.label}
-                        </p>
-                        <p className="mt-1 font-black text-white">
-                          {item.title}
-                        </p>
-                      </div>
-
-                      <p className="text-sm font-semibold text-zinc-400">
-                        {item.detail}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-5 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-5 py-4 text-center text-base font-black shadow-xl shadow-pink-500/20">
-                  Unlock the creator page
+                <div className="mt-4 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-5 py-4 text-center text-base font-black shadow-xl shadow-pink-500/20">
+                  Unlock creator page
                 </div>
               </div>
             </div>
