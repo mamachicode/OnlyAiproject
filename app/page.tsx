@@ -23,11 +23,12 @@ export default function HomePage() {
               <Link href="/login" className="hover:text-pink-300">
                 Log in
               </Link>
+
               <Link
                 href="/login"
                 className="rounded-full border border-white/10 bg-white/10 px-5 py-2 hover:bg-white/15"
               >
-                Create
+                Sign up
               </Link>
             </div>
           </nav>
@@ -49,9 +50,8 @@ export default function HomePage() {
               </h1>
 
               <p className="mt-8 max-w-3xl text-xl leading-9 text-zinc-300 md:text-2xl">
-                A private membership platform for AI-powered creators.
-                Start a page, share exclusive posts, or subscribe to the
-                creators you follow.
+                Create your private creator page. Share exclusive posts. Fans
+                subscribe to unlock more.
               </p>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -59,7 +59,7 @@ export default function HomePage() {
                   href="/login"
                   className="rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 text-center text-lg font-black text-white shadow-2xl shadow-pink-500/20 transition hover:scale-[1.02]"
                 >
-                  Start a Creator Page
+                  Become a Creator
                 </Link>
 
                 <Link
