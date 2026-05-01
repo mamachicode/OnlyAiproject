@@ -154,12 +154,6 @@ export default async function SettingsPage({ searchParams }) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-            <p className="text-sm font-bold text-zinc-300">Advanced content lane</p>
-            <p className="mt-2 text-sm leading-6 text-zinc-500">
-              Disabled for launch. OnlyAi will start with clean SFW creator memberships before adult billing/compliance is activated.
-            </p>
-          </div>
 
           <button
             type="submit"

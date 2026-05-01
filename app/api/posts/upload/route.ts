@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import cloudinary from "@/src/lib/cloudinary";
+import cloudinary, { cloudinaryEnvStatus } from "@/src/lib/cloudinary";
 import prisma from "@/src/lib/prisma";
 import { auth } from "@/src/auth";
 import { assertSafeText } from "@/src/lib/moderation";
@@ -14,6 +14,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
+    if (cloudinaryEnvStatus.missing.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Cloudinary is not configured on the server. Missing: ${cloudinaryEnvStatus.missing.join(", ")}`,
+        },
+        { status: 500 }
+      );
+    }
+
     const formData = await req.formData();
 
     const file = formData.get("file") as File | null;
@@ -24,11 +33,17 @@ export async function POST(req: Request) {
     }
 
     if (!file.type?.startsWith("image/")) {
-      return NextResponse.json({ error: "Only image uploads are allowed" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Only image uploads are allowed" },
+        { status: 400 }
+      );
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: "Image must be under 10MB" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Image must be under 10MB" },
+        { status: 400 }
+      );
     }
 
     assertSafeText([caption]);
@@ -52,7 +67,10 @@ export async function POST(req: Request) {
     });
 
     if (!uploadResult?.secure_url || !uploadResult?.public_id) {
-      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Cloudinary upload did not return a valid image URL." },
+        { status: 500 }
+      );
     }
 
     const post = await prisma.post.create({
@@ -69,7 +87,7 @@ export async function POST(req: Request) {
     console.error("UPLOAD ERROR:", error);
 
     return NextResponse.json(
-      { error: error.message || "Upload failed" },
+      { error: error?.message || "Upload failed" },
       { status: 500 }
     );
   }
