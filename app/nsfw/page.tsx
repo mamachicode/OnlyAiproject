@@ -1,56 +1,43 @@
-// @ts-nocheck
 import Link from "next/link";
-import prisma from "@/src/lib/prisma";
 
-export default async function Page() {
-  const rawCreators = await prisma.user.findMany({
-    where: { isNsfw: true },
-    select: {
-      username: true
-    },
-  });
-
-  // 🛡️ SAFE MAPPING (keeps UI working)
-  const creators = rawCreators.map((user) => ({
-    ...user,
-    avatar: null,
-    bio: null
-  }));
-
+export default function NsfwPage() {
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">NSFW Creators</h1>
+    <main className="min-h-screen bg-[#07050d] text-white">
+      <section className="mx-auto flex min-h-screen max-w-4xl flex-col justify-center px-6 py-20">
+        <Link href="/" className="mb-10 text-4xl font-black tracking-tight">
+          Only<span className="text-pink-400">Ai</span>
+        </Link>
 
-      {creators.length === 0 && <p>No creators found.</p>}
+        <p className="mb-5 inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-300">
+          Advanced creator lane
+        </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-        {creators.map((creator: any) => (
+        <h1 className="text-5xl font-black tracking-tight md:text-7xl">
+          Not open yet.
+        </h1>
+
+        <p className="mt-6 max-w-2xl text-xl leading-9 text-zinc-300">
+          OnlyAi is launching first with clean creator memberships. Advanced
+          content lanes will open only after dedicated billing and compliance
+          systems are ready.
+        </p>
+
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
           <Link
-            key={creator.username}
-            href={`/nsfw/creator/${creator.username}`}
-            className="block border rounded-lg overflow-hidden shadow bg-black/20 hover:bg-black/30 transition"
+            href="/"
+            className="rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 text-center text-lg font-black text-white shadow-2xl shadow-pink-500/20"
           >
-            <div className="aspect-square bg-gray-200 flex items-center justify-center">
-              {creator.avatar ? (
-                <img
-                  src={creator.avatar}
-                  alt={creator.username}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <span className="text-gray-500">No Avatar</span>
-              )}
-            </div>
-
-            <div className="p-4">
-              <h2 className="font-semibold">{creator.username}</h2>
-              <p className="text-sm text-gray-400">
-                {creator.bio || "No bio"}
-              </p>
-            </div>
+            Back to OnlyAi
           </Link>
-        ))}
-      </div>
-    </div>
+
+          <Link
+            href="/login"
+            className="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-center text-lg font-black text-white hover:bg-white/10"
+          >
+            Creator login
+          </Link>
+        </div>
+      </section>
+    </main>
   );
 }

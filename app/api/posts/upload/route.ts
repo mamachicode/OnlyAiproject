@@ -1,39 +1,46 @@
 import { NextResponse } from "next/server";
 import cloudinary from "@/src/lib/cloudinary";
 import prisma from "@/src/lib/prisma";
+import { auth } from "@/src/auth";
 import { assertSafeText } from "@/src/lib/moderation";
+
+export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
     const formData = await req.formData();
 
-    const file = formData.get("file") as File;
-    const caption = formData.get("caption") as string || "";
-    const title = formData.get("title") as string || "";
-    const incomingIsNsfw = formData.get("isNsfw") === "true";
+    const file = formData.get("file") as File | null;
+    const caption = String(formData.get("caption") || "").trim();
 
     if (!file) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });
     }
 
-    // 🛡️ STEP 1 — TEXT MODERATION (BEFORE UPLOAD)
-    assertSafeText([title, caption]);
+    if (!file.type?.startsWith("image/")) {
+      return NextResponse.json({ error: "Only image uploads are allowed" }, { status: 400 });
+    }
 
-    // 🛡️ STEP 2 — FORCE SFW MODE (BACKEND ENFORCED)
-    const nsfwEnabled = process.env.PLATFORM_MODE_NSFW_ENABLED === "true";
-    const isNsfw = nsfwEnabled ? incomingIsNsfw : false;
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: "Image must be under 10MB" }, { status: 400 });
+    }
 
-    // Convert file to buffer
+    assertSafeText([caption]);
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload to Cloudinary with moderation
     const uploadResult: any = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
           folder: "onlyai/posts",
           resource_type: "image",
-          moderation: "aws_rek"
         },
         (error, result) => {
           if (error) reject(error);
@@ -44,42 +51,23 @@ export async function POST(req: Request) {
       stream.end(buffer);
     });
 
-    // 🛡️ STEP 3 — IMAGE MODERATION CHECK
-    const moderation = Array.isArray(uploadResult.moderation)
-      ? uploadResult.moderation[0]
-      : null;
-
-    const status = moderation?.status || "unknown";
-
-    if (status !== "approved") {
-      // Delete flagged image immediately
-      if (uploadResult.public_id) {
-        await cloudinary.uploader.destroy(uploadResult.public_id, {
-          invalidate: true
-        });
-      }
-
-      return NextResponse.json(
-        { error: "Image rejected by moderation system" },
-        { status: 400 }
-      );
+    if (!uploadResult?.secure_url || !uploadResult?.public_id) {
+      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
 
-    // ✅ STEP 4 — SAFE TO SAVE
     const post = await prisma.post.create({
       data: {
-        title,
-        caption,
-        isNsfw,
+        url: uploadResult.secure_url,
         publicId: uploadResult.public_id,
-        url: uploadResult.secure_url
-      }
+        caption,
+        creatorId: session.user.id,
+      },
     });
 
-    return NextResponse.json(post);
-
+    return NextResponse.json({ post });
   } catch (error: any) {
     console.error("UPLOAD ERROR:", error);
+
     return NextResponse.json(
       { error: error.message || "Upload failed" },
       { status: 500 }
