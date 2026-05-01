@@ -128,10 +128,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="pb-10 text-sm text-zinc-500">
-            Public pages stay clean. Advanced content lanes stay gated until
-            dedicated billing and compliance are ready.
-          </div>
         </div>
       </section>
     </main>
