@@ -1,94 +1,186 @@
 "use client";
 
-import Link from "next/link";
-import useSWR from "swr";
+import { useEffect, useState } from "react";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+type PostMedia = {
+  id: string;
+  url: string;
+  type: "IMAGE" | "VIDEO";
+  publicId?: string | null;
+};
 
 type Post = {
   id: string;
-  url?: string | null;
-  caption?: string | null;
-  createdAt?: string;
+  title: string;
+  content?: string | null;
+  isLocked: boolean;
+  createdAt: string;
+  media: PostMedia[];
 };
 
-export default function PostsPage() {
-  const { data, error, isLoading } = useSWR("/api/posts/list", fetcher);
+export default function DashboardPostsPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const posts: Post[] = data?.posts || [];
+  async function loadPosts() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/posts", {
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Could not load posts.");
+      }
+
+      setPosts(Array.isArray(data.posts) ? data.posts : []);
+    } catch (err: any) {
+      setError(err?.message || "Could not load posts.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function deletePost(postId: string) {
+    setDeletingId(postId);
+    setError("");
+
+    try {
+      const res = await fetch("/api/posts/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ postId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Could not delete post.");
+      }
+
+      setPosts((current) => current.filter((post) => post.id !== postId));
+    } catch (err: any) {
+      setError(err?.message || "Could not delete post.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
 
   return (
-    <div className="p-6 md:p-10">
-      <div className="max-w-6xl">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <main className="min-h-screen bg-black px-6 py-10 text-white">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-pink-300">Creator content</p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight">Your posts</h1>
-            <p className="mt-3 text-zinc-400">
-              Manage the posts uploaded to your creator page.
+            <p className="text-sm uppercase tracking-[0.35em] text-pink-300">
+              Creator dashboard
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold">Your posts</h1>
+            <p className="mt-2 max-w-2xl text-sm text-zinc-400">
+              SFW uploads are stored as posts with attached media. NSFW uploads
+              stay disabled until the CCBill lane is approved and isolated.
             </p>
           </div>
 
-          <Link
+          <a
             href="/dashboard/upload"
-            className="rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-3 text-center font-black text-white"
+            className="rounded-full bg-pink-500 px-5 py-3 text-sm font-semibold text-white hover:bg-pink-400"
           >
-            Upload post
-          </Link>
+            Upload new post
+          </a>
         </div>
 
-        {isLoading && <p className="mt-8 text-zinc-400">Loading posts...</p>}
-
-        {error && (
-          <p className="mt-8 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-red-200">
-            Error loading posts.
-          </p>
-        )}
-
-        {!isLoading && !posts.length && (
-          <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-8">
-            <h2 className="text-2xl font-black">No posts yet</h2>
-            <p className="mt-3 text-zinc-400">
-              Upload your first creator post to start building your page.
-            </p>
-            <Link
-              href="/dashboard/upload"
-              className="mt-6 inline-block rounded-2xl bg-white px-6 py-3 font-black text-black"
-            >
-              Upload first post
-            </Link>
+        {error ? (
+          <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+            {error}
           </div>
-        )}
+        ) : null}
 
-        {posts.length > 0 && (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <article
-                key={post.id}
-                className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04]"
-              >
-                {post.url ? (
-                  <img
-                    src={post.url}
-                    alt={post.caption || "OnlyAi creator post"}
-                    className="h-72 w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-72 items-center justify-center bg-black/30 text-zinc-500">
-                    No image
+        {loading ? (
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-zinc-300">
+            Loading posts...
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
+            <h2 className="text-xl font-semibold">No posts yet</h2>
+            <p className="mt-2 text-sm text-zinc-400">
+              Upload your first SFW members-only post to test the creator flow.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => {
+              const firstMedia = post.media?.[0];
+
+              return (
+                <article
+                  key={post.id}
+                  className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-950"
+                >
+                  <div className="aspect-[4/5] bg-zinc-900">
+                    {firstMedia?.url ? (
+                      firstMedia.type === "VIDEO" ? (
+                        <video
+                          src={firstMedia.url}
+                          controls
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <img
+                          src={firstMedia.url}
+                          alt={post.title || "OnlyAi creator post"}
+                          className="h-full w-full object-cover"
+                        />
+                      )
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-zinc-500">
+                        No media
+                      </div>
+                    )}
                   </div>
-                )}
 
-                <div className="p-5">
-                  <p className="text-sm leading-6 text-zinc-300">
-                    {post.caption || "No caption"}
-                  </p>
-                </div>
-              </article>
-            ))}
+                  <div className="space-y-3 p-5">
+                    <div>
+                      <h2 className="line-clamp-2 text-base font-semibold">
+                        {post.title || "Members-only post"}
+                      </h2>
+                      {post.content ? (
+                        <p className="mt-2 line-clamp-3 text-sm text-zinc-400">
+                          {post.content}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-zinc-500">
+                      <span>{post.isLocked ? "Locked" : "Public"}</span>
+                      <span>SFW</span>
+                    </div>
+
+                    <button
+                      onClick={() => deletePost(post.id)}
+                      disabled={deletingId === post.id}
+                      className="w-full rounded-full border border-white/10 px-4 py-2 text-sm text-zinc-200 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {deletingId === post.id ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }

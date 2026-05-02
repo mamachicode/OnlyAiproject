@@ -1,42 +1,37 @@
-// @ts-nocheck
-import prisma from "@/src/lib/prisma";
-import Image from "next/image";
 import Link from "next/link";
 
-export default async function Page({ params }) {
-  const creator = await prisma.user.findUnique({
-    where: { username: params.username },
-    include: {
-      posts: true,
-    },
-  });
+type PageProps = {
+  params: Promise<{
+    username: string;
+  }>;
+};
 
-  if (!creator) {
-    return (
-      <div className="p-10">
-        <h1 className="text-2xl font-bold">Creator not found</h1>
-      </div>
-    );
-  }
+export default async function NsfwCreatorPage({ params }: PageProps) {
+  const { username } = await params;
+  const handle = decodeURIComponent(username);
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">{creator.username}</h1>
-      <p className="text-gray-500 mb-6">NSFW Creator Profile</p>
+    <main className="min-h-screen bg-black px-6 py-16 text-white">
+      <div className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8">
+        <p className="text-sm uppercase tracking-[0.35em] text-pink-300">
+          NSFW lane disabled
+        </p>
+        <h1 className="mt-4 text-3xl font-semibold">
+          This creator lane is not available yet.
+        </h1>
+        <p className="mt-4 text-zinc-300">
+          OnlyAi currently supports SFW creator subscriptions through Stripe.
+          NSFW subscriptions will stay disabled until the CCBill lane is
+          approved, isolated, and enforced separately.
+        </p>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {creator.posts.map((post) => (
-          <div key={post.id} className="rounded overflow-hidden shadow bg-black/30">
-            <Image
-              src={post.url}
-              alt="Post Image"
-              width={400}
-              height={400}
-              className="object-cover w-full h-full"
-            />
-          </div>
-        ))}
+        <Link
+          href={`/public/creator/${handle}`}
+          className="mt-8 inline-flex rounded-full bg-pink-500 px-5 py-3 text-sm font-semibold text-white hover:bg-pink-400"
+        >
+          View SFW creator page
+        </Link>
       </div>
-    </div>
+    </main>
   );
 }
