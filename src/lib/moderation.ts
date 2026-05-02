@@ -1,21 +1,45 @@
-const BANNED_KEYWORDS = [
-  "nsfw","xxx","porn","explicit","nude","nudity","sex","sexual",
-  "fetish","onlyfans","blowjob","bj","cum","creampie","hardcore",
-  "pussy","dick","cock","boobs","tits","naked","topless",
-  "milf","anal","gangbang","escort","camgirl"
+const BLOCKED_SFW_TERMS = [
+  "nsfw",
+  "nude",
+  "naked",
+  "explicit",
+  "adult",
+  "porn",
+  "hentai",
+  "boobs",
+  "breasts",
+  "cleavage",
+  "ass",
+  "butt",
+  "thong",
+  "bikini",
+  "lingerie",
+  "sweat",
+  "caked",
+  "sexy",
+  "erotic",
+  "fetish",
 ];
 
-function normalize(input: string) {
-  return (input || "").toLowerCase().replace(/[^a-z0-9\s]/g, " ");
+export function assertSafeText(fields: Array<string | undefined | null>) {
+  const combined = fields
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const hit = BLOCKED_SFW_TERMS.find((term) => combined.includes(term));
+
+  if (hit) {
+    throw new Error(
+      "This upload appears to contain adult or suggestive content. OnlyAi currently allows SFW uploads only while the CCBill/NSFW lane is disabled."
+    );
+  }
 }
 
-export function assertSafeText(fields: Array<string | undefined | null>) {
-  const combined = fields.filter(Boolean).join(" ");
-  const normalized = normalize(combined);
-
-  const found = BANNED_KEYWORDS.filter(w => normalized.includes(w));
-
-  if (found.length > 0) {
-    throw new Error(`Blocked by moderation: ${found.slice(0,5).join(", ")}`);
-  }
+export function assertSafeUploadMetadata(input: {
+  caption?: string | null;
+  filename?: string | null;
+  contentType?: string | null;
+}) {
+  assertSafeText([input.caption, input.filename, input.contentType]);
 }

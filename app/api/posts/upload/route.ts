@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
 import cloudinary from "@/src/lib/cloudinary";
-import { assertSafeText } from "@/src/lib/moderation";
+import { assertSafeUploadMetadata } from "@/src/lib/moderation";
 
 export const runtime = "nodejs";
 
@@ -32,7 +32,12 @@ export async function POST(req: Request) {
 
     // Stripe-safe MVP rule:
     // Dashboard upload is SFW-only until the CCBill/NSFW lane is approved and isolated.
-    assertSafeText([caption]);
+    // Temporary guard checks text + filename until real image moderation is added.
+    assertSafeUploadMetadata({
+      caption,
+      filename: file.name,
+      contentType: file.type,
+    });
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
