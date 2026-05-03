@@ -87,10 +87,6 @@ export default function DashboardPostsPage() {
               Creator dashboard
             </p>
             <h1 className="mt-2 text-3xl font-semibold">Your posts</h1>
-            <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-              SFW uploads are stored as posts with attached media. NSFW uploads
-              stay disabled until the CCBill lane is approved and isolated.
-            </p>
           </div>
 
           <a
