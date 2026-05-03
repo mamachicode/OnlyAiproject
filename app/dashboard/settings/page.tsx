@@ -1,44 +1,63 @@
-// @ts-nocheck
-export const dynamic = "force-dynamic";
-
 import { redirect } from "next/navigation";
-import { auth } from "@/src/auth";
-import prisma from "@/src/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/auth";
+import { prisma } from "@/src/lib/prisma";
 
-function cleanUsername(value: FormDataEntryValue | null) {
+type SettingsPageProps = {
+  searchParams?: Promise<{
+    saved?: string;
+  }>;
+};
+
+function cleanHandle(value: FormDataEntryValue | null) {
   return String(value || "")
     .trim()
+    .replace(/^@+/, "")
     .toLowerCase()
-    .replace(/^@/, "");
+    .replace(/[^a-z0-9_]/g, "")
+    .slice(0, 30);
 }
 
 function cleanPrice(value: FormDataEntryValue | null) {
-  const price = Number(value);
+  const parsed = Number(value);
 
-  if (!Number.isFinite(price)) {
-    return 5;
-  }
+  if (!Number.isFinite(parsed)) return 5;
 
-  return Math.min(99, Math.max(3, Math.round(price)));
+  const rounded = Math.round(parsed);
+
+  if (rounded < 1) return 1;
+  if (rounded > 500) return 500;
+
+  return rounded;
 }
 
-export default async function SettingsPage({ searchParams }) {
-  const session = await auth();
+export default async function CreatorSettingsPage({
+  searchParams,
+}: SettingsPageProps) {
+  const session = await getServerSession(authOptions);
+  const userId = (session?.user as { id?: string } | undefined)?.id;
 
-  if (!session?.user?.id) {
+  if (!userId) {
     redirect("/login");
   }
 
-  const params = await Promise.resolve(searchParams || {});
-  const error = params.error;
-  const saved = params.saved;
+  const resolvedSearchParams = await Promise.resolve(searchParams);
+  const saved = resolvedSearchParams?.saved === "1";
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: {
+      id: userId,
+    },
     select: {
+      id: true,
       username: true,
       sfwPrice: true,
-      isNsfw: true,
+      creator: {
+        select: {
+          handle: true,
+          priceCents: true,
+        },
+      },
     },
   });
 
@@ -46,123 +65,142 @@ export default async function SettingsPage({ searchParams }) {
     redirect("/login");
   }
 
-  async function updateCreatorSettings(formData: FormData) {
+  const currentHandle = user.creator?.handle || user.username || "";
+  const currentMonthlyPrice =
+    user.creator?.priceCents != null
+      ? Math.round(user.creator.priceCents / 100)
+      : user.sfwPrice ?? 5;
+
+  async function saveCreatorSettings(formData: FormData) {
     "use server";
 
-    const serverSession = await auth();
+    const session = await getServerSession(authOptions);
+    const userId = (session?.user as { id?: string } | undefined)?.id;
 
-    if (!serverSession?.user?.id) {
+    if (!userId) {
       redirect("/login");
     }
 
-    const username = cleanUsername(formData.get("username"));
+    const handle = cleanHandle(formData.get("handle"));
     const sfwPrice = cleanPrice(formData.get("sfwPrice"));
+    const priceCents = sfwPrice * 100;
 
-    if (!/^[a-z0-9_]{3,24}$/.test(username)) {
-      redirect("/dashboard/settings?error=username");
+    if (!handle) {
+      redirect("/dashboard/settings?error=handle");
     }
 
-    try {
-      await prisma.user.update({
-        where: { id: serverSession.user.id },
-        data: {
-          username,
-          sfwPrice,
-          isNsfw: false,
+    await prisma.$transaction([
+      prisma.user.update({
+        where: {
+          id: userId,
         },
-      });
-    } catch (err) {
-      redirect("/dashboard/settings?error=taken");
-    }
+        data: {
+          username: handle,
+          sfwPrice,
+        },
+      }),
+
+      prisma.creator.upsert({
+        where: {
+          userId,
+        },
+        update: {
+          handle,
+          displayName: handle,
+          classification: "SFW",
+          priceCents,
+          currency: "USD",
+          billingPeriodDays: 30,
+        },
+        create: {
+          userId,
+          handle,
+          displayName: handle,
+          classification: "SFW",
+          priceCents,
+          currency: "USD",
+          billingPeriodDays: 30,
+        },
+      }),
+    ]);
 
     redirect("/dashboard/settings?saved=1");
   }
 
   return (
-    <div className="p-6 md:p-10">
-      <div className="max-w-3xl">
-        <p className="text-sm font-semibold text-pink-300">Creator onboarding</p>
-
-        <h1 className="mt-3 text-4xl font-black tracking-tight">
-          Creator settings
-        </h1>
-
-        <p className="mt-4 text-zinc-400">
-          Set your creator handle and monthly subscription price. SFW creator pages are enabled first.
+    <main className="min-h-screen bg-black px-6 py-10 text-white">
+      <div className="mx-auto max-w-4xl">
+        <p className="text-sm font-semibold text-pink-300">
+          Creator onboarding
         </p>
 
-        {saved && (
-          <div className="mt-6 rounded-2xl border border-green-400/20 bg-green-400/10 p-4 text-sm font-semibold text-green-200">
+        <h1 className="mt-4 text-4xl font-black">Creator settings</h1>
+
+        <p className="mt-4 text-zinc-400">
+          Set your creator handle and monthly subscription price.
+        </p>
+
+        {saved ? (
+          <div className="mt-8 rounded-2xl border border-green-500/30 bg-green-500/10 p-5 text-sm font-semibold text-green-200">
             Settings saved.
           </div>
-        )}
-
-        {error === "username" && (
-          <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm font-semibold text-red-200">
-            Username must be 3–24 characters and can only use lowercase letters, numbers, and underscores.
-          </div>
-        )}
-
-        {error === "taken" && (
-          <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm font-semibold text-red-200">
-            That username is already taken.
-          </div>
-        )}
+        ) : null}
 
         <form
-          action={updateCreatorSettings}
-          className="mt-8 space-y-6 rounded-3xl border border-white/10 bg-white/[0.04] p-6"
+          action={saveCreatorSettings}
+          className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-8"
         >
-          <div>
-            <label className="block text-sm font-bold text-zinc-300">
+          <label className="block">
+            <span className="text-sm font-bold text-zinc-100">
               Creator handle
-            </label>
-            <div className="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-black/30">
-              <span className="flex items-center px-4 font-black text-zinc-500">@</span>
+            </span>
+
+            <div className="mt-3 flex items-center rounded-2xl border border-white/10 bg-black/30 px-5">
+              <span className="text-zinc-500">@</span>
               <input
-                name="username"
-                defaultValue={user.username}
-                className="w-full bg-transparent px-4 py-4 text-white outline-none"
-                placeholder="yourname"
+                name="handle"
                 required
+                minLength={3}
+                maxLength={30}
+                pattern="[a-zA-Z0-9_]+"
+                defaultValue={currentHandle}
+                className="w-full bg-transparent px-4 py-5 font-semibold text-white outline-none"
               />
             </div>
-            <p className="mt-2 text-sm text-zinc-500">
+
+            <p className="mt-3 text-sm text-zinc-500">
               Your public page will use this handle.
             </p>
-          </div>
+          </label>
 
-          <div>
-            <label className="block text-sm font-bold text-zinc-300">
+          <label className="mt-8 block">
+            <span className="text-sm font-bold text-zinc-100">
               Monthly price
-            </label>
-            <div className="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-black/30">
-              <span className="flex items-center px-4 font-black text-zinc-500">$</span>
-              <input
-                type="number"
-                name="sfwPrice"
-                min="3"
-                max="99"
-                step="1"
-                defaultValue={user.sfwPrice ?? 5}
-                className="w-full bg-transparent px-4 py-4 text-white outline-none"
-                required
-              />
-              <span className="flex items-center px-4 text-sm font-semibold text-zinc-500">
-                /month
-              </span>
-            </div>
-          </div>
+            </span>
 
+            <div className="mt-3 flex items-center rounded-2xl border border-white/10 bg-black/30 px-5">
+              <span className="text-zinc-500">$</span>
+              <input
+                name="sfwPrice"
+                required
+                min={1}
+                max={500}
+                type="number"
+                defaultValue={currentMonthlyPrice}
+                className="w-full bg-transparent px-4 py-5 font-semibold text-white outline-none"
+              />
+              <span className="text-zinc-500">/month</span>
+            </div>
+          </label>
 
           <button
             type="submit"
-            className="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4 text-center font-black text-white shadow-xl shadow-pink-500/20"
+            className="mt-8 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-5 text-lg font-black text-white shadow-2xl shadow-pink-500/20 transition hover:scale-[1.01]"
           >
             Save creator settings
           </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
