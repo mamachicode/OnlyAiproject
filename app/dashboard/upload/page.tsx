@@ -36,7 +36,7 @@ export default function UploadPage() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data.error || `Upload failed with status ${res.status}.`);
+        setError(data?.error || "Upload failed. Please try again.");
         setLoading(false);
         return;
       }
@@ -44,7 +44,7 @@ export default function UploadPage() {
       router.push("/dashboard/posts");
       router.refresh();
     } catch (err) {
-      setError("Upload failed because the request could not complete.");
+      setError("Upload failed. Please try again.");
       setLoading(false);
     }
   }
@@ -59,7 +59,7 @@ export default function UploadPage() {
         </h1>
 
         <p className="mt-4 text-zinc-400">
-          Add a clean image post to your creator page.
+          Add a new post to your creator page.
         </p>
 
         {error && (

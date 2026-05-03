@@ -6,7 +6,7 @@ type PageProps = {
   }>;
 };
 
-export default async function NsfwCreatorPage({ params }: PageProps) {
+export default async function CreatorUnavailablePage({ params }: PageProps) {
   const { username } = await params;
   const handle = decodeURIComponent(username);
 
@@ -14,23 +14,30 @@ export default async function NsfwCreatorPage({ params }: PageProps) {
     <main className="min-h-screen bg-black px-6 py-16 text-white">
       <div className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8">
         <p className="text-sm uppercase tracking-[0.35em] text-pink-300">
-          NSFW lane disabled
+          Creator page
         </p>
         <h1 className="mt-4 text-3xl font-semibold">
-          This creator lane is not available yet.
+          This page is not available yet.
         </h1>
         <p className="mt-4 text-zinc-300">
-          OnlyAi currently supports SFW creator subscriptions through Stripe.
-          NSFW subscriptions will stay disabled until the CCBill lane is
-          approved, isolated, and enforced separately.
+          Please visit the creator’s main page for available subscription options.
         </p>
 
-        <Link
-          href={`/public/creator/${handle}`}
-          className="mt-8 inline-flex rounded-full bg-pink-500 px-5 py-3 text-sm font-semibold text-white hover:bg-pink-400"
-        >
-          View SFW creator page
-        </Link>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href={`/public/creator/${handle}`}
+            className="inline-flex rounded-full bg-pink-500 px-5 py-3 text-sm font-semibold text-white hover:bg-pink-400"
+          >
+            View creator page
+          </Link>
+
+          <Link
+            href="/legal/2257"
+            className="inline-flex rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            Compliance
+          </Link>
+        </div>
       </div>
     </main>
   );

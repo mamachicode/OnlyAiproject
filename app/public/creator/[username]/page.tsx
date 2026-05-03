@@ -96,13 +96,13 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             <div>
               <div className="mb-5 h-24 w-24 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20" />
               <p className="text-sm uppercase tracking-[0.35em] text-pink-300">
-                SFW Creator
+                Creator
               </p>
               <h1 className="mt-3 text-4xl font-semibold">{displayName}</h1>
               <p className="mt-2 text-zinc-400">@{publicHandle}</p>
 
               <p className="mt-5 max-w-2xl text-zinc-300">
-                Subscribe for private SFW creator posts, updates, and
+                Subscribe for private creator posts, updates, and
                 members-only content.
               </p>
             </div>
@@ -120,12 +120,12 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 </Link>
               ) : (
                 <div className="mt-5 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-100">
-                  This creator lane is not available yet.
+                  This creator page is not available yet.
                 </div>
               )}
 
               <p className="mt-4 text-xs text-zinc-500">
-                Stripe is used for SFW subscriptions only.
+                Secure monthly subscription.
               </p>
             </div>
           </div>
@@ -138,14 +138,14 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             <div>
               <h2 className="text-2xl font-semibold">Posts</h2>
               <p className="mt-1 text-sm text-zinc-400">
-                Public preview of SFW-only posts.
+                Preview recent creator posts.
               </p>
             </div>
           </div>
 
           {posts.length === 0 ? (
             <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-zinc-400">
-              No SFW posts yet.
+              No posts yet.
             </div>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

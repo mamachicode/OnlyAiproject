@@ -31,7 +31,7 @@ export function assertSafeText(fields: Array<string | undefined | null>) {
 
   if (hit) {
     throw new Error(
-      "This upload appears to contain adult or suggestive content. OnlyAi currently allows SFW uploads only while the CCBill/NSFW lane is disabled."
+      "This post cannot be uploaded right now. Please use a clean image and neutral caption."
     );
   }
 }

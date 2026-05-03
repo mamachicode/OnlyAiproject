@@ -160,7 +160,7 @@ export default function DashboardPostsPage() {
 
                     <div className="flex items-center justify-between text-xs text-zinc-500">
                       <span>{post.isLocked ? "Locked" : "Public"}</span>
-                      <span>SFW</span>
+                      <span>Post</span>
                     </div>
 
                     <button

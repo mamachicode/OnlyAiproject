@@ -1,48 +1,44 @@
-// @ts-nocheck
-import prisma from "@/src/lib/prisma";
+import Link from "next/link";
 
-export default async function NsfwSubscribePage({ params }) {
-  const { username } = params;
+type PageProps = {
+  params: Promise<{
+    username: string;
+  }>;
+};
 
-  const creator = await prisma.user.findUnique({
-    where: { username },
-    select: {
-      username: true,
-      avatar: true,
-      nsfwPrice: true,
-      bio: true,
-    },
-  });
-
-  if (!creator) {
-    return (
-      <div className="p-6">
-        <h1 className="text-xl font-bold">Creator not found</h1>
-      </div>
-    );
-  }
+export default async function SubscribeUnavailablePage({ params }: PageProps) {
+  const { username } = await params;
+  const handle = decodeURIComponent(username);
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Subscribe to {creator.username}</h1>
-
-      <div className="bg-black/20 p-4 rounded-lg mb-6">
-        <p className="text-gray-300">
-          Unlock NSFW content for <span className="font-bold">${creator.nsfwPrice}/month</span>.
+    <main className="min-h-screen bg-black px-6 py-16 text-white">
+      <div className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-8">
+        <p className="text-sm uppercase tracking-[0.35em] text-pink-300">
+          Subscription
         </p>
+        <h1 className="mt-4 text-3xl font-semibold">
+          This subscription is not available yet.
+        </h1>
+        <p className="mt-4 text-zinc-300">
+          Please visit the creator’s main page for currently available subscription options.
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href={`/public/creator/${handle}`}
+            className="inline-flex rounded-full bg-pink-500 px-5 py-3 text-sm font-semibold text-white hover:bg-pink-400"
+          >
+            View creator page
+          </Link>
+
+          <Link
+            href="/legal/2257"
+            className="inline-flex rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            Compliance
+          </Link>
+        </div>
       </div>
-
-      <form action="/api/ccbill/create-link" method="GET">
-        <input type="hidden" name="creator" value={creator.username} />
-        <input type="hidden" name="section" value="nsfw" />
-
-        <button
-          type="submit"
-          className="bg-pink-600 hover:bg-pink-700 transition text-white px-6 py-3 rounded-lg w-full"
-        >
-          Continue to Payment
-        </button>
-      </form>
-    </div>
+    </main>
   );
 }
