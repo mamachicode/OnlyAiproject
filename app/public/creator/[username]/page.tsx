@@ -158,7 +158,16 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                     className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-950"
                   >
                     <div className="aspect-[4/5] bg-zinc-900">
-                      {firstMedia?.url ? (
+                      {post.isLocked ? (
+                        <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-black p-6 text-center">
+                          <div className="mb-4 rounded-full border border-white/15 bg-black/40 px-5 py-3 text-sm font-semibold backdrop-blur">
+                            🔒 Subscribe to unlock
+                          </div>
+                          <p className="max-w-xs text-sm text-zinc-300">
+                            This post is available to subscribers.
+                          </p>
+                        </div>
+                      ) : firstMedia?.url ? (
                         firstMedia.type === "VIDEO" ? (
                           <video
                             src={firstMedia.url}
@@ -174,14 +183,14 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                         )
                       ) : (
                         <div className="flex h-full items-center justify-center text-sm text-zinc-500">
-                          Members-only post
+                          Creator post
                         </div>
                       )}
                     </div>
 
                     <div className="p-5">
                       <div className="mb-3 inline-flex rounded-full bg-pink-500/10 px-3 py-1 text-xs text-pink-200">
-                        {post.isLocked ? "Members only" : "Preview"}
+                        {post.isLocked ? "Subscribers only" : "Free preview"}
                       </div>
                       <h3 className="line-clamp-2 font-semibold">
                         {post.title || "Members-only post"}
