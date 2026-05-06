@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
 
 export const runtime = "nodejs";
@@ -50,6 +52,21 @@ export async function POST(req: Request) {
       );
     }
 
+    const origin =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      new URL(req.url).origin;
+
+    const sessionUser = await getServerSession(authOptions);
+    const fanUserId = sessionUser?.user?.id;
+    const fanEmail = sessionUser?.user?.email || undefined;
+
+    if (!fanUserId) {
+      const loginUrl = new URL("/login", origin);
+      loginUrl.searchParams.set("callbackUrl", `/subscribe/${encodeURIComponent(username)}`);
+      return NextResponse.redirect(loginUrl.toString(), 303);
+    }
+
     const creator = await prisma.creator.findFirst({
       where: {
         classification: "SFW",
@@ -80,6 +97,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (creator.userId === fanUserId) {
+      return NextResponse.json(
+        { error: "You cannot subscribe to your own creator page." },
+        { status: 400 }
+      );
+    }
+
     const unitAmount = Number(creator.priceCents || 0);
 
     if (!Number.isInteger(unitAmount) || unitAmount < 100 || unitAmount > 50000) {
@@ -89,16 +113,22 @@ export async function POST(req: Request) {
       );
     }
 
-    const origin =
-      process.env.NEXT_PUBLIC_APP_URL ||
-      process.env.NEXTAUTH_URL ||
-      new URL(req.url).origin;
-
     const handle = creator.handle || creator.user.username;
     const currency = String(creator.currency || "USD").toLowerCase();
 
-    const session = await stripe.checkout.sessions.create({
+    const metadata = {
+      fanUserId,
+      creatorId: creator.id,
+      creatorUserId: creator.userId,
+      creatorHandle: handle,
+      processor: "STRIPE",
+      section: "SFW",
+      priceCents: String(unitAmount),
+    };
+
+    const checkoutSession = await stripe.checkout.sessions.create({
       mode: "subscription",
+      customer_email: fanEmail,
       payment_method_types: ["card"],
       line_items: [
         {
@@ -124,34 +154,20 @@ export async function POST(req: Request) {
       ],
       success_url: `${origin}/billing/success?creator=${encodeURIComponent(handle)}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/subscribe/${encodeURIComponent(handle)}?canceled=1`,
-      metadata: {
-        creatorId: creator.id,
-        creatorUserId: creator.userId,
-        creatorHandle: handle,
-        processor: "STRIPE",
-        section: "SFW",
-        priceCents: String(unitAmount),
-      },
+      metadata,
       subscription_data: {
-        metadata: {
-          creatorId: creator.id,
-          creatorUserId: creator.userId,
-          creatorHandle: handle,
-          processor: "STRIPE",
-          section: "SFW",
-          priceCents: String(unitAmount),
-        },
+        metadata,
       },
     });
 
-    if (!session.url) {
+    if (!checkoutSession.url) {
       return NextResponse.json(
         { error: "Checkout is not available right now." },
         { status: 500 }
       );
     }
 
-    return NextResponse.redirect(session.url, 303);
+    return NextResponse.redirect(checkoutSession.url, 303);
   } catch (err) {
     console.error("STRIPE_CHECKOUT_ERROR", err);
 

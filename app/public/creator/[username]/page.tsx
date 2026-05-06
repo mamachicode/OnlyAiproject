@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
 
 type PageProps = {
@@ -11,6 +13,9 @@ type PageProps = {
 export default async function PublicCreatorPage({ params }: PageProps) {
   const { username } = await params;
   const handle = decodeURIComponent(username);
+
+  const session = await getServerSession(authOptions);
+  const fanUserId = (session?.user as { id?: string } | undefined)?.id;
 
   const creator = await prisma.creator.findFirst({
     where: {
@@ -84,6 +89,24 @@ export default async function PublicCreatorPage({ params }: PageProps) {
   const price = (priceCents / 100).toFixed(2);
   const posts = isCreatorSfw ? user.posts : [];
 
+  const activeSubscription =
+    fanUserId && creator
+      ? await prisma.subscription.findFirst({
+          where: {
+            userId: fanUserId,
+            creatorId: creator.id,
+            processor: "STRIPE",
+            status: "ACTIVE",
+            OR: [
+              { currentPeriodEnd: null },
+              { currentPeriodEnd: { gt: new Date() } },
+            ],
+          },
+        })
+      : null;
+
+  const hasActiveSubscription = Boolean(activeSubscription);
+
   return (
     <main className="min-h-screen bg-black text-white">
       <section className="border-b border-white/10 px-6 py-10">
@@ -112,12 +135,18 @@ export default async function PublicCreatorPage({ params }: PageProps) {
               <p className="mt-2 text-3xl font-semibold">${price}</p>
 
               {isCreatorSfw ? (
-                <Link
-                  href={`/subscribe/${publicHandle}`}
-                  className="mt-5 block rounded-full bg-pink-500 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-pink-400"
-                >
-                  Subscribe
-                </Link>
+                hasActiveSubscription ? (
+                  <div className="mt-5 rounded-2xl border border-green-400/20 bg-green-400/10 p-4 text-center text-sm font-semibold text-green-100">
+                    Active subscriber
+                  </div>
+                ) : (
+                  <Link
+                    href={`/subscribe/${publicHandle}`}
+                    className="mt-5 block rounded-full bg-pink-500 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-pink-400"
+                  >
+                    Subscribe
+                  </Link>
+                )
               ) : (
                 <div className="mt-5 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-100">
                   This creator page is not available yet.
@@ -151,6 +180,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post) => {
                 const firstMedia = post.media?.[0];
+                const canViewPost = !post.isLocked || hasActiveSubscription;
 
                 return (
                   <article
@@ -158,7 +188,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                     className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-950"
                   >
                     <div className="aspect-[4/5] bg-zinc-900">
-                      {post.isLocked ? (
+                      {!canViewPost ? (
                         <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-black p-6 text-center">
                           <div className="mb-4 rounded-full border border-white/15 bg-black/40 px-5 py-3 text-sm font-semibold backdrop-blur">
                             🔒 Subscribe to unlock
@@ -190,7 +220,11 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
                     <div className="p-5">
                       <div className="mb-3 inline-flex rounded-full bg-pink-500/10 px-3 py-1 text-xs text-pink-200">
-                        {post.isLocked ? "Subscribers only" : "Free preview"}
+                        {post.isLocked
+                          ? hasActiveSubscription
+                            ? "Unlocked"
+                            : "Subscribers only"
+                          : "Free preview"}
                       </div>
                       <h3 className="line-clamp-2 font-semibold">
                         {post.title || "Members-only post"}
