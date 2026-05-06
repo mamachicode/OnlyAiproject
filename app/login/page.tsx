@@ -1,23 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
+
+function safeCallbackUrl(value: string | null) {
+  if (!value) return "/dashboard";
+  if (!value.startsWith("/")) return "/dashboard";
+  if (value.startsWith("//")) return "/dashboard";
+  return value;
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [signupHref, setSignupHref] = useState("/signup");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const callbackUrl = safeCallbackUrl(params.get("callbackUrl"));
+
+    if (callbackUrl !== "/dashboard") {
+      setSignupHref(`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
+    const params = new URLSearchParams(window.location.search);
+    const callbackUrl = safeCallbackUrl(params.get("callbackUrl"));
+
     const result = await signIn("credentials", {
       email,
       password,
       redirect: true,
-      callbackUrl: "/dashboard",
+      callbackUrl,
     });
 
     if (result?.error) {
@@ -37,7 +57,7 @@ export default function LoginPage() {
             </Link>
 
             <Link
-              href="/signup"
+              href={signupHref}
               className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-sm font-bold hover:bg-white/15"
             >
               Sign up
@@ -50,7 +70,7 @@ export default function LoginPage() {
               className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-pink-950/30 backdrop-blur-xl"
             >
               <p className="text-sm font-semibold text-pink-300">
-                Creator login
+                Account login
               </p>
 
               <h1 className="mt-3 text-4xl font-black tracking-tight">
@@ -58,7 +78,7 @@ export default function LoginPage() {
               </h1>
 
               <p className="mt-3 text-sm leading-6 text-zinc-400">
-                Log in to manage your creator page, posts, and membership settings.
+                Log in to subscribe, unlock creators, or manage your creator dashboard.
               </p>
 
               {error && (
@@ -106,8 +126,8 @@ export default function LoginPage() {
 
               <p className="mt-6 text-center text-sm text-zinc-500">
                 New to OnlyAi?{" "}
-                <Link href="/signup" className="font-bold text-pink-300">
-                  Create a creator account
+                <Link href={signupHref} className="font-bold text-pink-300">
+                  Create an account
                 </Link>
               </p>
             </form>

@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
     if (existingUser?.username === username) {
       return NextResponse.json(
-        { error: "That creator handle is already taken." },
+        { error: "That username is already taken." },
         { status: 409 }
       );
     }

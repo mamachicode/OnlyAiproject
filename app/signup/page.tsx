@@ -2,17 +2,35 @@
 
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+function safeCallbackUrl(value: string | null) {
+  if (!value) return "";
+  if (!value.startsWith("/")) return "";
+  if (value.startsWith("//")) return "";
+  return value;
+}
 
 export default function SignupPage() {
   const router = useRouter();
 
+  const [accountType, setAccountType] = useState<"fan" | "creator">("fan");
+  const [loginHref, setLoginHref] = useState("/login");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const callbackUrl = safeCallbackUrl(params.get("callbackUrl"));
+
+    if (callbackUrl) {
+      setLoginHref(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,11 +66,21 @@ export default function SignupPage() {
       });
 
       if (login?.error) {
-        router.push("/login");
+        router.push(loginHref);
         return;
       }
 
-      router.push("/dashboard/settings");
+      const params = new URLSearchParams(window.location.search);
+      const callbackUrl = safeCallbackUrl(params.get("callbackUrl"));
+
+      if (accountType === "creator") {
+        router.push("/dashboard/settings");
+      } else if (callbackUrl) {
+        router.push(callbackUrl);
+      } else {
+        router.push("/account");
+      }
+
       router.refresh();
     } catch (err) {
       setError("Something went wrong. Try again.");
@@ -72,7 +100,7 @@ export default function SignupPage() {
             </Link>
 
             <Link
-              href="/login"
+              href={loginHref}
               className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-sm font-bold hover:bg-white/15"
             >
               Log in
@@ -82,16 +110,41 @@ export default function SignupPage() {
           <div className="flex flex-1 items-center justify-center py-16">
             <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-pink-950/30 backdrop-blur-xl">
               <p className="text-sm font-semibold text-pink-300">
-                Creator signup
+                Create account
               </p>
 
               <h1 className="mt-3 text-4xl font-black tracking-tight">
-                Create your OnlyAi page.
+                Join OnlyAi.
               </h1>
 
               <p className="mt-3 text-sm leading-6 text-zinc-400">
-                Start your private creator membership. You can upload posts and set pricing from the dashboard.
+                Create a fan account to subscribe and unlock creators, or choose creator mode to start your own page.
               </p>
+
+              <div className="mt-6 grid grid-cols-2 gap-3 rounded-3xl border border-white/10 bg-black/20 p-2">
+                <button
+                  type="button"
+                  onClick={() => setAccountType("fan")}
+                  className={`rounded-2xl px-4 py-3 text-sm font-black transition ${
+                    accountType === "fan"
+                      ? "bg-white text-black"
+                      : "text-zinc-400 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  Fan
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccountType("creator")}
+                  className={`rounded-2xl px-4 py-3 text-sm font-black transition ${
+                    accountType === "creator"
+                      ? "bg-white text-black"
+                      : "text-zinc-400 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  Creator
+                </button>
+              </div>
 
               {error && (
                 <div className="mt-5 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm font-semibold text-red-200">
@@ -116,7 +169,7 @@ export default function SignupPage() {
 
                 <div>
                   <label className="block text-sm font-bold text-zinc-300">
-                    Creator handle
+                    {accountType === "creator" ? "Creator handle" : "Username"}
                   </label>
                   <div className="mt-2 flex overflow-hidden rounded-2xl border border-white/10 bg-black/30">
                     <span className="flex items-center px-4 font-black text-zinc-500">
@@ -124,7 +177,7 @@ export default function SignupPage() {
                     </span>
                     <input
                       className="w-full bg-transparent px-4 py-4 text-white outline-none placeholder:text-zinc-600"
-                      placeholder="yourname"
+                      placeholder={accountType === "creator" ? "yourcreatorname" : "yourusername"}
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
@@ -154,13 +207,17 @@ export default function SignupPage() {
                   disabled={loading}
                   className="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4 text-center font-black text-white shadow-xl shadow-pink-500/20 disabled:opacity-60"
                 >
-                  {loading ? "Creating account..." : "Create creator account"}
+                  {loading
+                    ? "Creating account..."
+                    : accountType === "creator"
+                      ? "Create creator account"
+                      : "Create fan account"}
                 </button>
               </form>
 
               <p className="mt-6 text-center text-sm text-zinc-500">
                 Already have an account?{" "}
-                <Link href="/login" className="font-bold text-pink-300">
+                <Link href={loginHref} className="font-bold text-pink-300">
                   Log in
                 </Link>
               </p>
