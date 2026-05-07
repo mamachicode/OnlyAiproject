@@ -81,22 +81,53 @@ export default async function AccountPage() {
 
         <div className="mt-16">
           <p className="text-sm font-semibold uppercase tracking-[0.35em] text-pink-300">
-            Fan account
+            {user.creator ? "Creator account" : "Fan account"}
           </p>
           <h1 className="mt-4 text-5xl font-black tracking-tight">
             Your OnlyAi account
           </h1>
           <p className="mt-4 max-w-2xl text-zinc-400">
-            Manage creator subscriptions and unlock private posts from the creators you support.
+            {user.creator
+              ? "Manage your creator tools and any creator subscriptions you support."
+              : "Manage creator subscriptions and unlock private posts from the creators you support."}
           </p>
         </div>
 
+        {user.creator ? (
+          <div className="mt-10 rounded-[2rem] border border-pink-400/20 bg-pink-500/[0.06] p-6">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-black">Creator tools</h2>
+                <p className="mt-2 text-sm text-zinc-400">
+                  Your creator profile is active. Manage posts, uploads, settings, and your public creator page.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/dashboard"
+                  className="rounded-full bg-white px-5 py-3 text-center text-sm font-black text-black"
+                >
+                  Open dashboard
+                </Link>
+
+                <Link
+                  href={`/public/creator/${user.creator.handle}`}
+                  className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-center text-sm font-black text-white hover:bg-white/10"
+                >
+                  View public page
+                </Link>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <div className="mt-10 rounded-[2rem] border border-white/10 bg-white/[0.05] p-6">
-          <h2 className="text-2xl font-black">Your subscriptions</h2>
+          <h2 className="text-2xl font-black">Your fan subscriptions</h2>
 
           {activeSubscriptions.length === 0 ? (
             <div className="mt-6 rounded-3xl border border-white/10 bg-black/20 p-6 text-zinc-400">
-              You do not have active subscriptions yet.
+              You do not have active fan subscriptions yet.
               <div className="mt-5">
                 <Link
                   href="/"
