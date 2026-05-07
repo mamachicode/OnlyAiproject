@@ -112,7 +112,10 @@ export default async function PublicCreatorPage({ params }: PageProps) {
     <main className="min-h-screen bg-black text-white">
       <section className="border-b border-white/10 px-6 py-10">
         <div className="mx-auto max-w-5xl">
-          <Link href="/" className="text-sm text-zinc-400 hover:text-white">
+          <Link
+            href={fanUserId ? "/account" : "/"}
+            className="text-sm text-zinc-400 hover:text-white"
+          >
             ← OnlyAi
           </Link>
 
