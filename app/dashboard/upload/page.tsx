@@ -1,6 +1,12 @@
-import Link from "next/link";
+// @ts-nocheck
+export const dynamic = "force-dynamic";
 
-export default function UploadPostPage() {
+import Link from "next/link";
+import { requireCreatorPage } from "@/src/lib/creatorGuard";
+
+export default async function UploadPostPage() {
+  await requireCreatorPage("/dashboard/upload");
+
   return (
     <main className="min-h-screen bg-[#07050d] text-white">
       <section className="mx-auto max-w-3xl px-6 py-12">

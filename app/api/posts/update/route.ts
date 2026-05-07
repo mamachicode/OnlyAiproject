@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
+import { getCreatorForApi } from "@/src/lib/creatorGuard";
 import { v2 as cloudinary } from "cloudinary";
 
 export const runtime = "nodejs";
@@ -83,12 +84,18 @@ async function uploadToCloudinary(file: any, order: number) {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
+    const creatorAccess = await getCreatorForApi();
 
-    if (!userId) {
-      return NextResponse.redirect(new URL("/login?callbackUrl=/dashboard/posts", req.url), 303);
+    if (!creatorAccess.ok) {
+      const target =
+        creatorAccess.status === 401
+          ? "/login?callbackUrl=/dashboard/posts"
+          : "/account";
+
+      return NextResponse.redirect(new URL(target, req.url), 303);
     }
+
+    const userId = creatorAccess.userId;
 
     const formData = await req.formData();
 

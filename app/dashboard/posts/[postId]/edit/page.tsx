@@ -2,9 +2,9 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { auth } from "@/src/auth";
+import { notFound } from "next/navigation";
 import { prisma } from "@/src/lib/prisma";
+import { requireCreatorPage } from "@/src/lib/creatorGuard";
 
 type PageProps = {
   params: Promise<{
@@ -16,11 +16,7 @@ type PageProps = {
 };
 
 export default async function EditPostPage({ params, searchParams }: PageProps) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/login?callbackUrl=/dashboard/posts");
-  }
+  const creatorAccess = await requireCreatorPage("/dashboard/posts");
 
   const { postId } = await params;
   const query = searchParams ? await searchParams : {};
@@ -29,7 +25,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
   const post = await prisma.post.findFirst({
     where: {
       id: postId,
-      authorId: session.user.id,
+      authorId: creatorAccess.userId,
     },
     include: {
       media: {

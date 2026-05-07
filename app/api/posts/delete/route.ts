@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
+import { getCreatorForApi } from "@/src/lib/creatorGuard";
 import cloudinary from "@/src/lib/cloudinary";
 
 export const runtime = "nodejs";
