@@ -5,6 +5,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
+import LogoutButton from "./LogoutButton";
 
 export default async function AccountPage() {
   const session = await auth();
@@ -45,26 +46,37 @@ export default async function AccountPage() {
   return (
     <main className="min-h-screen bg-[#07050d] text-white">
       <section className="mx-auto max-w-5xl px-6 py-10">
-        <nav className="flex items-center justify-between">
+        <nav className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <Link href="/" className="text-4xl font-black tracking-tight">
             Only<span className="text-pink-400">Ai</span>
           </Link>
 
-          {user.creator ? (
+          <div className="flex flex-wrap items-center gap-3">
             <Link
-              href="/dashboard"
-              className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-sm font-bold hover:bg-white/15"
+              href="/"
+              className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-bold text-zinc-200 hover:bg-white/10 hover:text-white"
             >
-              Creator dashboard
+              Browse creators
             </Link>
-          ) : (
-            <Link
-              href="/dashboard/settings"
-              className="rounded-full border border-pink-400/30 bg-pink-500/15 px-5 py-2 text-sm font-bold text-pink-100 hover:bg-pink-500/25"
-            >
-              Become a creator
-            </Link>
-          )}
+
+            {user.creator ? (
+              <Link
+                href="/dashboard"
+                className="rounded-full border border-white/10 bg-white/10 px-5 py-2 text-sm font-bold hover:bg-white/15"
+              >
+                Creator dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/dashboard/settings"
+                className="rounded-full border border-pink-400/30 bg-pink-500/15 px-5 py-2 text-sm font-bold text-pink-100 hover:bg-pink-500/25"
+              >
+                Become a creator
+              </Link>
+            )}
+
+            <LogoutButton />
+          </div>
         </nav>
 
         <div className="mt-16">
@@ -90,7 +102,7 @@ export default async function AccountPage() {
                   href="/"
                   className="inline-flex rounded-full bg-pink-500 px-5 py-3 text-sm font-bold text-white hover:bg-pink-400"
                 >
-                  Find creators
+                  Browse creators
                 </Link>
               </div>
             </div>
@@ -119,7 +131,7 @@ export default async function AccountPage() {
                           href={`/public/creator/${creatorHandle}`}
                           className="rounded-full bg-white px-5 py-3 text-center text-sm font-black text-black"
                         >
-                          View unlocked posts
+                          Open creator page
                         </Link>
                       ) : null}
                     </div>
