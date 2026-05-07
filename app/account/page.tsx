@@ -52,13 +52,6 @@ export default async function AccountPage() {
           </Link>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href="/"
-              className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-bold text-zinc-200 hover:bg-white/10 hover:text-white"
-            >
-              Browse creators
-            </Link>
-
             {user.creator ? (
               <Link
                 href="/dashboard"
