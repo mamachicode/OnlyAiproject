@@ -200,9 +200,12 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                         </div>
                       ) : firstMedia?.url ? (
                         <MediaLightbox
-                          src={firstMedia.url}
-                          type={firstMedia.type}
-                          alt={post.title || "OnlyAi creator post"}
+                          media={post.media.map((item: any) => ({
+                            src: item.url,
+                            type: item.type,
+                            alt: post.title || "OnlyAi creator post",
+                          }))}
+                          initialIndex={0}
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center text-sm text-zinc-500">
