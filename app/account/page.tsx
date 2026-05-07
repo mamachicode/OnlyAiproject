@@ -121,14 +121,7 @@ export default async function AccountPage() {
           {activeSubscriptions.length === 0 ? (
             <div className="mt-6 rounded-3xl border border-white/10 bg-black/20 p-6 text-zinc-400">
               You do not have active fan subscriptions yet.
-              <div className="mt-5">
-                <Link
-                  href="/"
-                  className="inline-flex rounded-full bg-pink-500 px-5 py-3 text-sm font-bold text-white hover:bg-pink-400"
-                >
-                  Browse creators
-                </Link>
-              </div>
+
             </div>
           ) : (
             <div className="mt-6 grid gap-4">
