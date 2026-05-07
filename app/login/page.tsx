@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 
 function safeCallbackUrl(value: string | null) {
-  if (!value) return "/dashboard";
-  if (!value.startsWith("/")) return "/dashboard";
-  if (value.startsWith("//")) return "/dashboard";
+  if (!value) return "/account";
+  if (!value.startsWith("/")) return "/account";
+  if (value.startsWith("//")) return "/account";
   return value;
 }
 
@@ -21,7 +21,7 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const callbackUrl = safeCallbackUrl(params.get("callbackUrl"));
 
-    if (callbackUrl !== "/dashboard") {
+    if (callbackUrl !== "/account") {
       setSignupHref(`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`);
     }
   }, []);
