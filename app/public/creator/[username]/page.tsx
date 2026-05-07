@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
+import MediaLightbox from "./MediaLightbox";
 
 type PageProps = {
   params: Promise<{
@@ -198,19 +199,11 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                           </p>
                         </div>
                       ) : firstMedia?.url ? (
-                        firstMedia.type === "VIDEO" ? (
-                          <video
-                            src={firstMedia.url}
-                            controls
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <img
-                            src={firstMedia.url}
-                            alt={post.title || "OnlyAi creator post"}
-                            className="h-full w-full object-cover"
-                          />
-                        )
+                        <MediaLightbox
+                          src={firstMedia.url}
+                          type={firstMedia.type}
+                          alt={post.title || "OnlyAi creator post"}
+                        />
                       ) : (
                         <div className="flex h-full items-center justify-center text-sm text-zinc-500">
                           Creator post
