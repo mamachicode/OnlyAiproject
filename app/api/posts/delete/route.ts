@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
 import { getCreatorForApi } from "@/src/lib/creatorGuard";
 import cloudinary from "@/src/lib/cloudinary";
@@ -9,15 +7,16 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = (session?.user as { id?: string } | undefined)?.id;
+    const creatorAccess = await getCreatorForApi();
 
-    if (!userId) {
+    if (!creatorAccess.ok) {
       return NextResponse.json(
-        { error: "You must be logged in." },
-        { status: 401 }
+        { error: creatorAccess.error },
+        { status: creatorAccess.status }
       );
     }
+
+    const userId = creatorAccess.userId;
 
     const body = await req.json();
     const postId = String(body.id || body.postId || "").trim();
@@ -65,6 +64,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     console.error("POST_DELETE_ERROR", err);
+
     return NextResponse.json(
       { error: err?.message || "Could not delete post." },
       { status: 500 }
