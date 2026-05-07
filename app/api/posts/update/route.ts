@@ -87,60 +87,79 @@ export async function POST(req: Request) {
     const userId = session?.user?.id;
 
     if (!userId) {
-      return NextResponse.redirect(new URL("/login?callbackUrl=/dashboard/upload", req.url), 303);
+      return NextResponse.redirect(new URL("/login?callbackUrl=/dashboard/posts", req.url), 303);
     }
 
     const formData = await req.formData();
 
-    const title = String(
-      formData.get("title") ||
-      formData.get("caption") ||
-      "Members-only post"
-    ).trim();
+    const postId = String(formData.get("postId") || "");
+    const title = String(formData.get("title") || "Members-only post").trim();
+    const content = String(formData.get("content") || "").trim();
+    const isLocked = formData.get("isLocked") === "on";
 
-    const content = String(
-      formData.get("content") ||
-      formData.get("caption") ||
-      ""
-    ).trim();
+    if (!postId) {
+      return NextResponse.json({ error: "Missing post ID." }, { status: 400 });
+    }
 
     assertSafeText([title, content]);
 
-    const files = getFiles(formData);
-
-    if (!files.length) {
-      return NextResponse.json(
-        { error: "Upload at least one image or video." },
-        { status: 400 }
-      );
-    }
-
-    const uploadedMedia = [];
-
-    for (let i = 0; i < files.length; i++) {
-      uploadedMedia.push(await uploadToCloudinary(files[i], i));
-    }
-
-    await prisma.post.create({
-      data: {
-        title: title || "Members-only post",
-        content: content || null,
-        isNsfw: false,
+    const post = await prisma.post.findFirst({
+      where: {
+        id: postId,
         authorId: userId,
-        isLocked: true,
-        priceCents: null,
+      },
+      include: {
         media: {
-          create: uploadedMedia,
+          orderBy: { order: "asc" },
         },
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/posts?uploaded=1", req.url), 303);
+    if (!post) {
+      return NextResponse.json(
+        { error: "Post not found or unauthorized." },
+        { status: 404 }
+      );
+    }
+
+    const files = getFiles(formData);
+    const nextOrder =
+      post.media.length > 0
+        ? Math.max(...post.media.map((media) => media.order || 0)) + 1
+        : 0;
+
+    const newMedia = [];
+
+    for (let i = 0; i < files.length; i++) {
+      newMedia.push(await uploadToCloudinary(files[i], nextOrder + i));
+    }
+
+    await prisma.post.update({
+      where: { id: post.id },
+      data: {
+        title: title || "Members-only post",
+        content: content || null,
+        isLocked,
+        isNsfw: false,
+        ...(newMedia.length
+          ? {
+              media: {
+                create: newMedia,
+              },
+            }
+          : {}),
+      },
+    });
+
+    return NextResponse.redirect(
+      new URL(`/dashboard/posts/${post.id}/edit?saved=1`, req.url),
+      303
+    );
   } catch (error) {
-    console.error("POST_UPLOAD_ERROR", error);
+    console.error("POST_UPDATE_ERROR", error);
 
     return NextResponse.json(
-      { error: error?.message || "Could not upload post." },
+      { error: error?.message || "Could not update post." },
       { status: 500 }
     );
   }
