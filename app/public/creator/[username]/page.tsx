@@ -112,6 +112,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
       : null;
 
   const hasActiveSubscription = Boolean(activeSubscription);
+  const isOwner = Boolean(fanUserId && creator?.userId === fanUserId);
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -172,7 +173,27 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 <p className="text-sm text-zinc-400">Monthly access</p>
                 <p className="mt-2 text-3xl font-semibold">${price}</p>
 
-                {isCreatorSfw ? (
+                {isOwner ? (
+                  <div className="mt-5 space-y-3">
+                    <div className="rounded-2xl border border-pink-400/20 bg-pink-500/10 p-4 text-center text-sm font-semibold text-pink-100">
+                      Viewing your creator page
+                    </div>
+
+                    <Link
+                      href="/dashboard/settings"
+                      className="block rounded-full bg-white px-6 py-3 text-center text-sm font-black text-black hover:bg-zinc-200"
+                    >
+                      Edit profile
+                    </Link>
+
+                    <Link
+                      href="/dashboard"
+                      className="block rounded-full border border-white/10 bg-white/5 px-6 py-3 text-center text-sm font-black text-white hover:bg-white/10"
+                    >
+                      Open dashboard
+                    </Link>
+                  </div>
+                ) : isCreatorSfw ? (
                   hasActiveSubscription ? (
                     <div className="mt-5 rounded-2xl border border-green-400/20 bg-green-400/10 p-4 text-center text-sm font-semibold text-green-100">
                       Active subscriber
@@ -192,7 +213,9 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 )}
 
                 <p className="mt-4 text-xs text-zinc-500">
-                  Secure monthly subscription.
+                  {isOwner
+                    ? "Owner preview mode. Fans will see subscribe or subscriber status here."
+                    : "Secure monthly subscription."}
                 </p>
               </div>
             </div>
@@ -206,7 +229,9 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             <div>
               <h2 className="text-2xl font-semibold">Posts</h2>
               <p className="mt-1 text-sm text-zinc-400">
-                Preview recent creator posts.
+                {isOwner
+                  ? "Owner preview: your subscribers can unlock these posts."
+                  : "Preview recent creator posts."}
               </p>
             </div>
           </div>
@@ -219,7 +244,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post) => {
                 const firstMedia = post.media?.[0];
-                const canViewPost = !post.isLocked || hasActiveSubscription;
+                const canViewPost = isOwner || !post.isLocked || hasActiveSubscription;
 
                 return (
                   <article
