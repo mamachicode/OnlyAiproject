@@ -191,7 +191,8 @@ async function moderateImageWithSightengine({
   const result = evaluateSightengineResult(data);
 
   if (!result.allowed) {
-    console.warn("SFW_IMAGE_BLOCKED", result.reason);
+    console.error("SFW_IMAGE_BLOCKED_REASON", result.reason);
+
     throw new Error(
       "This image is not allowed in the Stripe SFW lane. Please upload clearly SFW content."
     );
