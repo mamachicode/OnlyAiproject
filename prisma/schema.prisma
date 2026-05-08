@@ -58,8 +58,9 @@ model Creator {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  user          User           @relation(fields: [userId], references: [id])
+  user          User             @relation(fields: [userId], references: [id])
   subscriptions Subscription[]
+  messages      CreatorMessage[]
 }
 
 model Post {
@@ -131,4 +132,18 @@ model WebhookEvent {
 
   @@unique([processor, eventId])
   @@index([processor, receivedAt])
+}
+
+
+model CreatorMessage {
+  id        String   @id @default(cuid())
+  creatorId String
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, createdAt])
 }

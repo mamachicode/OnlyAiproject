@@ -55,6 +55,9 @@ export default async function DashboardLayout({
               <Link className="block rounded-xl px-4 py-3 text-zinc-300 hover:bg-white/10 hover:text-white" href="/dashboard/posts">
                 Your posts
               </Link>
+              <Link className="block rounded-xl px-4 py-3 text-zinc-300 hover:bg-white/10 hover:text-white" href="/dashboard/messages">
+                Messages
+              </Link>
               <Link className="block rounded-xl px-4 py-3 text-zinc-300 hover:bg-white/10 hover:text-white" href="/dashboard/settings">
                 Creator settings
               </Link>
@@ -69,6 +72,9 @@ export default async function DashboardLayout({
               </Link>
               <Link className="block rounded-xl px-4 py-3 text-zinc-300 hover:bg-white/10 hover:text-white" href="/account">
                 My subscriptions
+              </Link>
+              <Link className="block rounded-xl px-4 py-3 text-zinc-300 hover:bg-white/10 hover:text-white" href="/account/messages">
+                Messages
               </Link>
               <Link className="block rounded-xl px-4 py-3 text-zinc-300 hover:bg-white/10 hover:text-white" href="/public/creator/demolitionbaby">
                 View creator
