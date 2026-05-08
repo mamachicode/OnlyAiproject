@@ -17,7 +17,7 @@ export default async function UploadPostPage() {
         <h1 className="mt-4 text-4xl font-black">Upload a post</h1>
 
         <p className="mt-3 max-w-2xl text-zinc-400">
-          Create one members-only post with one or more images/videos. Use this for comics, stories, photo sets, or private updates.
+          Create one members-only post with one or more SFW images. Use this for comics, stories, photo sets, or private updates.
         </p>
 
         <form
@@ -56,13 +56,13 @@ export default async function UploadPostPage() {
             <input
               name="files"
               type="file"
-              accept="image/*,video/*"
+              accept="image/*"
               multiple
               required
               className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
             />
             <p className="mt-2 text-xs text-zinc-500">
-              Select multiple files to create a gallery/comic-style post. Stripe lane must stay SFW.
+              Select multiple SFW images to create a gallery/comic-style post. Unsafe images are blocked before upload.
             </p>
           </div>
 

@@ -106,12 +106,12 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
               <input
                 name="files"
                 type="file"
-                accept="image/*,video/*"
+                accept="image/*"
                 multiple
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
               />
               <p className="mt-2 text-xs text-zinc-500">
-                New files are appended to this post. Paid fans can browse them with arrows in the lightbox.
+                New SFW images are moderated before upload, then appended to this post.
               </p>
             </div>
 

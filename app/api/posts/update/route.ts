@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { getCreatorForApi } from "@/src/lib/creatorGuard";
+import { assertSafeText, prepareSafeUploadFile } from "@/src/lib/moderation";
 import { v2 as cloudinary } from "cloudinary";
 
 export const runtime = "nodejs";
@@ -16,29 +17,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const BLOCKED_SFW_TERMS = [
-  "porn",
-  "xxx",
-  "nude",
-  "nudity",
-  "explicit",
-  "fetish",
-  "hardcore",
-  "onlyfans",
-  "nsfw",
-  "18+",
-];
-
-function assertSafeText(values: string[]) {
-  const combined = values.join(" ").toLowerCase();
-
-  for (const term of BLOCKED_SFW_TERMS) {
-    if (combined.includes(term)) {
-      throw new Error("This post text is not allowed in the Stripe SFW lane.");
-    }
-  }
-}
-
 function getFiles(formData: FormData) {
   const files = [
     ...formData.getAll("files"),
@@ -51,30 +29,17 @@ function getFiles(formData: FormData) {
 }
 
 async function uploadToCloudinary(file: any, order: number) {
-  const mime = String(file.type || "application/octet-stream");
-
-  if (!mime.startsWith("image/") && !mime.startsWith("video/")) {
-    throw new Error("Only image and video uploads are supported.");
-  }
-
-  const maxSizeMb = mime.startsWith("video/") ? 100 : 20;
-  const maxBytes = maxSizeMb * 1024 * 1024;
-
-  if (file.size > maxBytes) {
-    throw new Error(`File is too large. Max ${maxSizeMb}MB.`);
-  }
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const dataUri = `data:${mime};base64,${buffer.toString("base64")}`;
+  const safeFile = await prepareSafeUploadFile(file);
+  const dataUri = `data:${safeFile.mime};base64,${safeFile.buffer.toString("base64")}`;
 
   const result = await cloudinary.uploader.upload(dataUri, {
     folder: "onlyai/posts",
-    resource_type: mime.startsWith("video/") ? "video" : "image",
+    resource_type: "image",
   });
 
   return {
     url: result.secure_url,
-    type: mime.startsWith("video/") ? "VIDEO" : "IMAGE",
+    type: "IMAGE",
     order,
     publicId: result.public_id,
   };
@@ -94,7 +59,6 @@ export async function POST(req: Request) {
     }
 
     const userId = creatorAccess.userId;
-
     const formData = await req.formData();
 
     const postId = String(formData.get("postId") || "");
