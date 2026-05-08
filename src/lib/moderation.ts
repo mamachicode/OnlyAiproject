@@ -85,6 +85,8 @@ function evaluateSightengineResult(data: any) {
   const safePath = (path: string) =>
     path.includes(".none") ||
     path.endsWith(".none") ||
+    path.includes(".context.") ||
+    path.startsWith("context.") ||
     path.includes("safe") ||
     path.includes("not_") ||
     path.includes("no_");
