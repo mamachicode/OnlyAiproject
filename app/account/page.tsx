@@ -87,29 +87,58 @@ export default async function AccountPage() {
         </div>
 
         {user.creator ? (
-          <div className="mt-10 rounded-[2rem] border border-pink-400/20 bg-pink-500/[0.06] p-6">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-2xl font-black">Creator tools</h2>
-                <p className="mt-2 text-sm text-zinc-400">
-                  Your creator profile is active. Manage posts, uploads, settings, and your public creator page.
-                </p>
-              </div>
+          <div className="mt-10 overflow-hidden rounded-[2rem] border border-pink-400/20 bg-pink-500/[0.06]">
+            <div className="h-28 bg-gradient-to-br from-pink-500/30 via-purple-500/20 to-black">
+              {user.creator.bannerUrl ? (
+                <img
+                  src={user.creator.bannerUrl}
+                  alt="Creator banner"
+                  className="h-full w-full object-cover"
+                />
+              ) : null}
+            </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/dashboard"
-                  className="rounded-full bg-white px-5 py-3 text-center text-sm font-black text-black"
-                >
-                  Open dashboard
-                </Link>
+            <div className="p-6">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex gap-4">
+                  <div className="-mt-12 h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-[#120611] bg-gradient-to-br from-pink-500 to-purple-600">
+                    {user.creator.avatarUrl ? (
+                      <img
+                        src={user.creator.avatarUrl}
+                        alt="Creator avatar"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : null}
+                  </div>
 
-                <Link
-                  href={`/public/creator/${user.creator.handle}`}
-                  className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-center text-sm font-black text-white hover:bg-white/10"
-                >
-                  View public page
-                </Link>
+                  <div>
+                    <h2 className="text-2xl font-black">
+                      {user.creator.displayName || user.creator.handle}
+                    </h2>
+                    <p className="mt-1 text-sm text-zinc-500">
+                      @{user.creator.handle}
+                    </p>
+                    <p className="mt-2 max-w-xl text-sm text-zinc-400">
+                      {user.creator.bio || "Manage posts, uploads, settings, and your public creator page."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/dashboard"
+                    className="rounded-full bg-white px-5 py-3 text-center text-sm font-black text-black"
+                  >
+                    Open dashboard
+                  </Link>
+
+                  <Link
+                    href={`/public/creator/${user.creator.handle}`}
+                    className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-center text-sm font-black text-white hover:bg-white/10"
+                  >
+                    View public page
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

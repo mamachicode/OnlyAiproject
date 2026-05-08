@@ -86,6 +86,11 @@ export default async function PublicCreatorPage({ params }: PageProps) {
   const isCreatorSfw = !creator || creator.classification === "SFW";
   const displayName = creator?.displayName || user.username;
   const publicHandle = creator?.handle || user.username;
+  const bio =
+    creator?.bio ||
+    "Subscribe for private creator posts, updates, and members-only content.";
+  const avatarUrl = creator?.avatarUrl || "";
+  const bannerUrl = creator?.bannerUrl || "";
   const priceCents = creator?.priceCents ?? (user.sfwPrice || 5) * 100;
   const price = (priceCents / 100).toFixed(2);
   const posts = isCreatorSfw ? user.posts : [];
@@ -110,8 +115,8 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <section className="border-b border-white/10 px-6 py-10">
-        <div className="mx-auto max-w-5xl">
+      <section className="border-b border-white/10 px-6 py-8">
+        <div className="mx-auto max-w-6xl">
           <Link
             href={fanUserId ? "/account" : "/"}
             className="text-sm text-zinc-400 hover:text-white"
@@ -119,54 +124,84 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             ← OnlyAi
           </Link>
 
-          <div className="mt-10 grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-            <div>
-              <div className="mb-5 h-24 w-24 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20" />
-              <p className="text-sm uppercase tracking-[0.35em] text-pink-300">
-                Creator
-              </p>
-              <h1 className="mt-3 text-4xl font-semibold">{displayName}</h1>
-              <p className="mt-2 text-zinc-400">@{publicHandle}</p>
-
-              <p className="mt-5 max-w-2xl text-zinc-300">
-                Subscribe for private creator posts, updates, and
-                members-only content.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-              <p className="text-sm text-zinc-400">Monthly access</p>
-              <p className="mt-2 text-3xl font-semibold">${price}</p>
-
-              {isCreatorSfw ? (
-                hasActiveSubscription ? (
-                  <div className="mt-5 rounded-2xl border border-green-400/20 bg-green-400/10 p-4 text-center text-sm font-semibold text-green-100">
-                    Active subscriber
-                  </div>
-                ) : (
-                  <Link
-                    href={`/subscribe/${publicHandle}`}
-                    className="mt-5 block rounded-full bg-pink-500 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-pink-400"
-                  >
-                    Subscribe
-                  </Link>
-                )
+          <div className="mt-8 overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950">
+            <div className="h-56 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black md:h-72">
+              {bannerUrl ? (
+                <img
+                  src={bannerUrl}
+                  alt={`${displayName} banner`}
+                  className="h-full w-full object-cover"
+                />
               ) : (
-                <div className="mt-5 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-100">
-                  This creator page is not available yet.
+                <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(236,72,153,0.35),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(147,51,234,0.25),transparent_35%)]">
+                  <span className="text-sm font-semibold uppercase tracking-[0.35em] text-pink-200/70">
+                    Creator profile
+                  </span>
                 </div>
               )}
+            </div>
 
-              <p className="mt-4 text-xs text-zinc-500">
-                Secure monthly subscription.
-              </p>
+            <div className="grid gap-8 p-6 md:grid-cols-[1fr_280px] md:p-8">
+              <div>
+                <div className="-mt-20 h-32 w-32 overflow-hidden rounded-full border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={`${displayName} avatar`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : null}
+                </div>
+
+                <p className="mt-6 text-sm uppercase tracking-[0.35em] text-pink-300">
+                  Creator
+                </p>
+
+                <h1 className="mt-3 text-4xl font-black tracking-tight md:text-5xl">
+                  {displayName}
+                </h1>
+
+                <p className="mt-2 text-zinc-400">@{publicHandle}</p>
+
+                <p className="mt-5 max-w-2xl text-zinc-300">
+                  {bio}
+                </p>
+              </div>
+
+              <div className="self-start rounded-3xl border border-white/10 bg-white/5 p-6">
+                <p className="text-sm text-zinc-400">Monthly access</p>
+                <p className="mt-2 text-3xl font-semibold">${price}</p>
+
+                {isCreatorSfw ? (
+                  hasActiveSubscription ? (
+                    <div className="mt-5 rounded-2xl border border-green-400/20 bg-green-400/10 p-4 text-center text-sm font-semibold text-green-100">
+                      Active subscriber
+                    </div>
+                  ) : (
+                    <Link
+                      href={`/subscribe/${publicHandle}`}
+                      className="mt-5 block rounded-full bg-pink-500 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-pink-400"
+                    >
+                      Subscribe
+                    </Link>
+                  )
+                ) : (
+                  <div className="mt-5 rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-100">
+                    This creator page is not available yet.
+                  </div>
+                )}
+
+                <p className="mt-4 text-xs text-zinc-500">
+                  Secure monthly subscription.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <section className="px-6 py-10">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-6xl">
           <div className="mb-6 flex items-end justify-between">
             <div>
               <h2 className="text-2xl font-semibold">Posts</h2>

@@ -47,6 +47,9 @@ model Creator {
   userId            String   @unique
   handle            String   @unique
   displayName       String?
+  bio               String?
+  avatarUrl         String?
+  bannerUrl         String?
   classification    String   @default("SFW")
   platformFeeBps    Int      @default(2000)
   priceCents        Int      @default(1000)
