@@ -91,10 +91,20 @@ function evaluateSightengineResult(data: any) {
 
   const rules = [
     {
-      label: "sexual or nudity content",
+      // Hard Stripe-SFW block: explicit sexual/nude content.
+      // Keep this strict.
+      label: "explicit sexual or nudity content",
       threshold: 0.35,
       pattern:
-        /(nudity|sexual|erotica|explicit|suggestive|nude|breast|genital|butt|underwear|lingerie|bikini|porn)/,
+        /(nudity|nude|explicit|erotica|porn|genital|sexual_activity|sexual_display|sexual_act|exposed|bare_breast|bare_chest)/,
+    },
+    {
+      // Soft-risk visual signals.
+      // These can appear on normal clothed anime/creator portraits, so only block when confidence is very high.
+      label: "high-confidence suggestive content",
+      threshold: 0.88,
+      pattern:
+        /(suggestive|breast|cleavage|butt|underwear|lingerie|bikini|swimsuit|revealing)/,
     },
     {
       label: "gore or graphic violence",
