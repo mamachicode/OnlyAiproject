@@ -88,12 +88,14 @@ export default async function PublicCreatorPage({ params }: PageProps) {
   const publicHandle = creator?.handle || user.username;
   const bio =
     creator?.bio ||
-    "Subscribe for private creator posts, updates, and members-only content.";
+    "Subscribe for private creator posts, fan-only updates, and members-only drops.";
   const avatarUrl = creator?.avatarUrl || "";
   const bannerUrl = creator?.bannerUrl || "";
   const priceCents = creator?.priceCents ?? (user.sfwPrice || 5) * 100;
   const price = (priceCents / 100).toFixed(2);
   const posts = isCreatorSfw ? user.posts : [];
+  const lockedCount = posts.filter((post) => post.isLocked).length;
+  const freeCount = posts.length - lockedCount;
 
   const activeSubscription =
     fanUserId && creator
@@ -115,18 +117,18 @@ export default async function PublicCreatorPage({ params }: PageProps) {
   const isOwner = Boolean(fanUserId && creator?.userId === fanUserId);
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-[#07050d] text-white">
       <section className="border-b border-white/10 px-6 py-8">
         <div className="mx-auto max-w-6xl">
           <Link
             href={fanUserId ? "/account" : "/"}
-            className="text-sm text-zinc-400 hover:text-white"
+            className="text-sm font-semibold text-zinc-400 hover:text-white"
           >
             ← OnlyAi
           </Link>
 
-          <div className="mt-8 overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950">
-            <div className="h-56 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black md:h-72">
+          <div className="mt-8 overflow-hidden rounded-[2.25rem] border border-white/10 bg-zinc-950 shadow-2xl shadow-pink-950/20">
+            <div className="relative h-60 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black md:h-80">
               {bannerUrl ? (
                 <img
                   src={bannerUrl}
@@ -140,11 +142,13 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </span>
                 </div>
               )}
+
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-zinc-950 to-transparent" />
             </div>
 
-            <div className="grid gap-8 p-6 md:grid-cols-[1fr_280px] md:p-8">
+            <div className="grid gap-8 p-6 md:grid-cols-[1fr_320px] md:p-8">
               <div>
-                <div className="-mt-20 h-32 w-32 overflow-hidden rounded-full border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20">
+                <div className="-mt-24 h-36 w-36 overflow-hidden rounded-full border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20">
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
@@ -154,24 +158,68 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   ) : null}
                 </div>
 
-                <p className="mt-6 text-sm uppercase tracking-[0.35em] text-pink-300">
-                  Creator
+                <p className="mt-6 text-sm font-black uppercase tracking-[0.35em] text-pink-300">
+                  Creator feed
                 </p>
 
-                <h1 className="mt-3 text-4xl font-black tracking-tight md:text-5xl">
+                <h1 className="mt-3 text-4xl font-black tracking-tight md:text-6xl">
                   {displayName}
                 </h1>
 
-                <p className="mt-2 text-zinc-400">@{publicHandle}</p>
+                <p className="mt-2 text-base font-semibold text-zinc-400">
+                  @{publicHandle}
+                </p>
 
-                <p className="mt-5 max-w-2xl text-zinc-300">
+                <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-300">
                   {bio}
                 </p>
+
+                <div className="mt-7 grid max-w-2xl gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                    <p className="text-2xl font-black">{posts.length}</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                      Posts
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                    <p className="text-2xl font-black">{lockedCount}</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                      Locked
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                    <p className="text-2xl font-black">{freeCount}</p>
+                    <p className="mt-1 text-xs font-bold uppercase tracking-[0.18em] text-zinc-500">
+                      Previews
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="self-start rounded-3xl border border-white/10 bg-white/5 p-6">
-                <p className="text-sm text-zinc-400">Monthly access</p>
-                <p className="mt-2 text-3xl font-semibold">${price}</p>
+              <aside className="self-start rounded-[2rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.11] via-white/[0.05] to-purple-500/[0.08] p-6 shadow-xl shadow-pink-950/20">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-pink-200">
+                  Monthly access
+                </p>
+
+                <p className="mt-3 text-5xl font-black">${price}</p>
+
+                <p className="mt-3 text-sm leading-6 text-zinc-300">
+                  Unlock private posts and creator updates from @{publicHandle}.
+                </p>
+
+                <div className="mt-5 space-y-3 text-sm text-zinc-300">
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                    🔒 Members-only posts
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                    💌 Private creator updates
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                    ✨ New drops and previews
+                  </div>
+                </div>
 
                 {isOwner ? (
                   <div className="mt-5 space-y-3">
@@ -195,15 +243,15 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 ) : isCreatorSfw ? (
                   hasActiveSubscription ? (
-                    <div className="mt-5 rounded-2xl border border-green-400/20 bg-green-400/10 p-4 text-center text-sm font-semibold text-green-100">
+                    <div className="mt-5 rounded-2xl border border-green-400/20 bg-green-400/10 p-4 text-center text-sm font-black text-green-100">
                       Active subscriber
                     </div>
                   ) : (
                     <Link
                       href={`/subscribe/${publicHandle}`}
-                      className="mt-5 block rounded-full bg-pink-500 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-pink-400"
+                      className="mt-5 block rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4 text-center text-base font-black text-white shadow-lg shadow-pink-950/30 hover:from-pink-400 hover:to-purple-500"
                     >
-                      Subscribe
+                      Subscribe for ${price}/month
                     </Link>
                   )
                 ) : (
@@ -212,12 +260,12 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 )}
 
-                <p className="mt-4 text-xs text-zinc-500">
+                <p className="mt-4 text-xs leading-5 text-zinc-500">
                   {isOwner
                     ? "Owner preview mode. Fans will see subscribe or subscriber status here."
-                    : "Secure monthly subscription."}
+                    : "Secure monthly subscription. Cancel anytime from your account."}
                 </p>
-              </div>
+              </aside>
             </div>
           </div>
         </div>
@@ -225,20 +273,37 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
       <section className="px-6 py-10">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-6 flex items-end justify-between">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-2xl font-semibold">Posts</h2>
-              <p className="mt-1 text-sm text-zinc-400">
+              <p className="text-sm font-black uppercase tracking-[0.3em] text-pink-300">
+                Creator feed
+              </p>
+              <h2 className="mt-2 text-3xl font-black">Posts</h2>
+              <p className="mt-2 text-sm text-zinc-400">
                 {isOwner
-                  ? "Owner preview: your subscribers can unlock these posts."
-                  : "Preview recent creator posts."}
+                  ? "Owner preview: subscribers can unlock your private posts."
+                  : hasActiveSubscription
+                    ? "You have active access to this creator feed."
+                    : "Preview the feed and subscribe to unlock members-only posts."}
               </p>
             </div>
+
+            {!isOwner && isCreatorSfw && !hasActiveSubscription ? (
+              <Link
+                href={`/subscribe/${publicHandle}`}
+                className="rounded-full bg-white px-5 py-3 text-center text-sm font-black text-black hover:bg-zinc-200"
+              >
+                Unlock full feed
+              </Link>
+            ) : null}
           </div>
 
           {posts.length === 0 ? (
             <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-zinc-400">
-              No posts yet.
+              <p className="text-lg font-black text-white">No posts yet.</p>
+              <p className="mt-2 text-sm">
+                This creator has not published public preview posts yet.
+              </p>
             </div>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -249,16 +314,16 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 return (
                   <article
                     key={post.id}
-                    className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-950"
+                    className="overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-xl shadow-black/20 transition hover:border-pink-400/25"
                   >
                     <div className="aspect-[4/5] bg-zinc-900">
                       {!canViewPost ? (
                         <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-pink-500/20 via-purple-500/10 to-black p-6 text-center">
-                          <div className="mb-4 rounded-full border border-white/15 bg-black/40 px-5 py-3 text-sm font-semibold backdrop-blur">
+                          <div className="mb-4 rounded-full border border-white/15 bg-black/40 px-5 py-3 text-sm font-black backdrop-blur">
                             🔒 Subscribe to unlock
                           </div>
-                          <p className="max-w-xs text-sm text-zinc-300">
-                            This post is available to subscribers.
+                          <p className="max-w-xs text-sm leading-6 text-zinc-300">
+                            This post is available to monthly subscribers.
                           </p>
                         </div>
                       ) : firstMedia?.url ? (
@@ -278,18 +343,18 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                     </div>
 
                     <div className="p-5">
-                      <div className="mb-3 inline-flex rounded-full bg-pink-500/10 px-3 py-1 text-xs text-pink-200">
+                      <div className="mb-3 inline-flex rounded-full bg-pink-500/10 px-3 py-1 text-xs font-bold text-pink-200">
                         {post.isLocked
-                          ? hasActiveSubscription
+                          ? canViewPost
                             ? "Unlocked"
                             : "Subscribers only"
                           : "Free preview"}
                       </div>
-                      <h3 className="line-clamp-2 font-semibold">
+                      <h3 className="line-clamp-2 text-lg font-black">
                         {post.title || "Members-only post"}
                       </h3>
                       {post.content ? (
-                        <p className="mt-2 line-clamp-3 text-sm text-zinc-400">
+                        <p className="mt-2 line-clamp-3 text-sm leading-6 text-zinc-400">
                           {post.content}
                         </p>
                       ) : null}
