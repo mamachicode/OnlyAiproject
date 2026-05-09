@@ -54,12 +54,7 @@ export async function POST(req: Request) {
     console.error("CREATOR_MESSAGE_SEND_ERROR", error);
 
     return NextResponse.redirect(
-      new URL(
-        `/dashboard/messages?error=${encodeURIComponent(
-          error?.message || "Could not send message."
-        )}`,
-        req.url
-      ),
+      new URL("/dashboard/messages?error=sendfailed", req.url),
       303
     );
   }
