@@ -25,7 +25,7 @@ function formatDate(value: Date) {
 function getErrorMessage(error: string) {
   if (error === "missing") return "Add a title and message before sending.";
   if (error === "sendfailed") {
-    return "Could not send that message. Keep it clean, subscriber-safe, and try again.";
+    return "Could not send that message. Please adjust the wording and try again.";
   }
 
   return "Could not send that message. Please try again.";
@@ -111,12 +111,12 @@ export default async function CreatorMessagesPage({
           </div>
 
           <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.045] p-6">
-            <p className="text-4xl font-black">SFW</p>
+            <p className="text-4xl font-black">Send</p>
             <p className="mt-2 text-xs font-bold uppercase tracking-[0.22em] text-zinc-500">
-              Current lane
+              Subscriber updates
             </p>
             <p className="mt-3 text-sm leading-6 text-zinc-400">
-              Keep creator messages clean and subscriber-safe for launch.
+              Share drops, previews, announcements, and personal updates.
             </p>
           </div>
         </div>
