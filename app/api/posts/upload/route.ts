@@ -17,6 +17,63 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+function redirectToUpload(req: Request, errorCode: string) {
+  return NextResponse.redirect(
+    new URL(`/dashboard/upload?error=${encodeURIComponent(errorCode)}`, req.url),
+    303
+  );
+}
+
+function classifyUploadError(error: any) {
+  const message = String(error?.message || "").toLowerCase();
+
+  if (
+    message.includes("video") ||
+    message.includes("unsupported media") ||
+    message.includes("resource_type")
+  ) {
+    return "video";
+  }
+
+  if (
+    message.includes("text") ||
+    message.includes("caption") ||
+    message.includes("title") ||
+    message.includes("word") ||
+    message.includes("language")
+  ) {
+    return "text";
+  }
+
+  if (
+    message.includes("moderation") ||
+    message.includes("sightengine") ||
+    message.includes("unsafe") ||
+    message.includes("sfw") ||
+    message.includes("nsfw") ||
+    message.includes("explicit") ||
+    message.includes("nudity") ||
+    message.includes("adult") ||
+    message.includes("blocked")
+  ) {
+    return "moderation";
+  }
+
+  if (
+    message.includes("cloudinary") ||
+    message.includes("upload") ||
+    message.includes("api key") ||
+    message.includes("api_secret") ||
+    message.includes("configuration") ||
+    message.includes("configured") ||
+    message.includes("storage")
+  ) {
+    return "storage";
+  }
+
+  return "failed";
+}
+
 function getFiles(formData: FormData) {
   const files = [
     ...formData.getAll("files"),
@@ -24,7 +81,12 @@ function getFiles(formData: FormData) {
   ];
 
   return files.filter((file: any) => {
-    return file && typeof file === "object" && file.size > 0 && typeof file.arrayBuffer === "function";
+    return (
+      file &&
+      typeof file === "object" &&
+      file.size > 0 &&
+      typeof file.arrayBuffer === "function"
+    );
   });
 }
 
@@ -78,10 +140,7 @@ export async function POST(req: Request) {
     const files = getFiles(formData);
 
     if (!files.length) {
-      return NextResponse.json(
-        { error: "Upload at least one SFW image." },
-        { status: 400 }
-      );
+      return redirectToUpload(req, "nofile");
     }
 
     const uploadedMedia = [];
@@ -104,13 +163,13 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.redirect(new URL("/dashboard/posts?uploaded=1", req.url), 303);
+    return NextResponse.redirect(
+      new URL("/dashboard/posts?uploaded=1", req.url),
+      303
+    );
   } catch (error) {
     console.error("POST_UPLOAD_ERROR", error);
 
-    return NextResponse.json(
-      { error: error?.message || "Could not upload post." },
-      { status: 500 }
-    );
+    return redirectToUpload(req, classifyUploadError(error));
   }
 }
