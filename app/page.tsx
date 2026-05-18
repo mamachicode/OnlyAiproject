@@ -38,15 +38,7 @@ export default function HomePage() {
                 AI creator memberships
               </p>
 
-              <h1 className="text-6xl font-black leading-[0.95] tracking-tight md:text-6xl">
-                Ai lovers,
-                <br />
-                creators, and fans.
-                <br />
-                <span className="bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-400 bg-clip-text text-transparent">
-                   
-                </span>
-              </h1>
+              <h1 className="text-6xl font-black leading-[0.95] tracking-tight md:text-6xl">Private memberships<br />for AI creators.</h1>
 
               <p className="mt-8 max-w-3xl text-xl leading-9 text-zinc-300 md:text-2xl">
                 OnlyAi helps creators launch private subscription pages where
