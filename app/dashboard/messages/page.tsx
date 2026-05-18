@@ -142,8 +142,7 @@ export default async function CreatorMessagesPage({
             <div className="mb-6 rounded-3xl border border-pink-400/15 bg-pink-500/[0.07] p-5">
               <p className="text-lg font-black">Broadcast update</p>
               <p className="mt-2 text-sm leading-6 text-zinc-400">
-                This sends one private update to all currently active
-                subscribers. Full one-to-one DMs can come later.
+                This sends one private update to your currently active subscribers.
               </p>
             </div>
 
@@ -175,8 +174,7 @@ export default async function CreatorMessagesPage({
             </label>
 
             <p className="mt-3 text-xs leading-5 text-zinc-500">
-              Launch rule: keep messages clean, premium, and subscriber-safe.
-              Use this for updates, previews, announcements, and creator notes.
+              Tip: keep it short, valuable, and personal. Use this for updates, previews, announcements, and creator notes.
             </p>
 
             <button
