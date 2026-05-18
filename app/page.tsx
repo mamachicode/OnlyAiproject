@@ -35,7 +35,7 @@ export default function HomePage() {
           <div className="grid flex-1 items-center gap-14 py-20 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="max-w-5xl">
               <p className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
-                AI creator platform
+                AI creator memberships
               </p>
 
               <h1 className="text-6xl font-black leading-[0.95] tracking-tight md:text-6xl">
