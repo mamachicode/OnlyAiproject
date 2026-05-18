@@ -41,8 +41,7 @@ export default function HomePage() {
               <h1 className="text-6xl font-black leading-[0.95] tracking-tight md:text-6xl">Private memberships<br />for AI creators.</h1>
 
               <p className="mt-8 max-w-3xl text-xl leading-9 text-zinc-300 md:text-2xl">
-                OnlyAi helps creators launch private subscription pages where
-                fans unlock exclusive posts, drops, and creator updates.
+                Create your page. Share exclusive posts. Get paid monthly.
               </p>
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
