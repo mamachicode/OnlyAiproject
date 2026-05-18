@@ -8,33 +8,23 @@ type OnlyAiLogoProps = {
 };
 
 const sizeMap = {
-  sm: {
-    icon: "h-8 w-8",
-    text: "text-2xl",
-    gap: "gap-2",
-  },
-  md: {
-    icon: "h-10 w-10",
-    text: "text-4xl",
-    gap: "gap-3",
-  },
-  lg: {
-    icon: "h-12 w-12",
-    text: "text-5xl",
-    gap: "gap-3",
-  },
+  sm: "text-2xl",
+  md: "text-4xl",
+  lg: "text-5xl",
 };
 
-function LogoMark({ className = "" }: { className?: string }) {
+function NeonAi({ className = "" }: { className?: string }) {
   return (
     <span
-      className={`relative inline-flex items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-pink-400 via-fuchsia-500 to-purple-600 shadow-lg shadow-pink-950/25 ${className}`}
-      aria-hidden="true"
+      className={`relative inline-block text-pink-300 ${className}`}
+      style={{
+        color: "#ff5fc8",
+        WebkitTextStroke: "1px rgba(255, 210, 244, 0.9)",
+        textShadow:
+          "0 0 6px rgba(255, 95, 200, 0.95), 0 0 18px rgba(255, 95, 200, 0.75), 0 0 36px rgba(217, 70, 239, 0.55)",
+      }}
     >
-      <span className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.55),transparent_26%),radial-gradient(circle_at_75%_80%,rgba(255,255,255,0.18),transparent_32%)]" />
-      <span className="relative text-lg font-black tracking-tight text-white">
-        Ai
-      </span>
+      Ai
     </span>
   );
 }
@@ -42,21 +32,18 @@ function LogoMark({ className = "" }: { className?: string }) {
 export default function OnlyAiLogo({
   href = "/",
   size = "md",
-  showIcon = true,
+  showIcon = false,
   className = "",
 }: OnlyAiLogoProps) {
-  const sizes = sizeMap[size];
-
   const content = (
-    <span className={`inline-flex items-center ${sizes.gap} ${className}`}>
-      {showIcon ? <LogoMark className={sizes.icon} /> : null}
-
-      <span
-        className={`${sizes.text} font-black tracking-[-0.06em] text-white`}
-        aria-label="OnlyAi"
-      >
-        Only<span className="bg-gradient-to-r from-pink-400 to-fuchsia-300 bg-clip-text text-transparent">Ai</span>
+    <span
+      className={`inline-flex items-center font-black tracking-[-0.07em] ${sizeMap[size]} ${className}`}
+      aria-label="OnlyAi"
+    >
+      <span className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.18)]">
+        Only
       </span>
+      <NeonAi />
     </span>
   );
 
@@ -68,3 +55,5 @@ export default function OnlyAiLogo({
     </Link>
   );
 }
+
+export { NeonAi };

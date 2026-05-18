@@ -1,5 +1,5 @@
 import Link from "next/link";
-import OnlyAiLogo from "@/components/OnlyAiLogo";
+import OnlyAiLogo, { NeonAi } from "@/components/OnlyAiLogo";
 
 export default function HomePage() {
   const highlights = [
@@ -35,16 +35,16 @@ export default function HomePage() {
           <div className="grid flex-1 items-center gap-14 py-20 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="max-w-5xl">
               <p className="mb-6 inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
-                Private AI creator memberships
+                AI creator platform
               </p>
 
-              <h1 className="text-6xl font-black leading-[0.95] tracking-tight md:text-8xl">
-                Your private
+              <h1 className="text-6xl font-black leading-[0.95] tracking-tight md:text-6xl">
+                Ai lovers,
                 <br />
-                creator feed.
+                creators, and fans.
                 <br />
                 <span className="bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-400 bg-clip-text text-transparent">
-                  On your terms.
+                   
                 </span>
               </h1>
 
