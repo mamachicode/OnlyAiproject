@@ -1,4 +1,5 @@
 import Link from "next/link";
+import OnlyAiLogo from "@/components/OnlyAiLogo";
 
 export default function HomePage() {
   const highlights = [
@@ -15,9 +16,7 @@ export default function HomePage() {
 
         <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8">
           <nav className="flex items-center justify-between">
-            <Link href="/" className="text-4xl font-black tracking-tight md:text-5xl">
-              Only<span className="text-pink-400">Ai</span>
-            </Link>
+            <OnlyAiLogo size="md" showIcon={false} />
 
             <div className="flex items-center gap-5 text-sm font-semibold text-zinc-200 md:text-base">
               <Link href="/login" className="hover:text-pink-300">

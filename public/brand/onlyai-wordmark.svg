@@ -1,0 +1,15 @@
+<svg width="900" height="220" viewBox="0 0 900 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="8" y="34" width="152" height="152" rx="42" fill="url(#mark)"/>
+  <circle cx="56" cy="72" r="28" fill="white" fill-opacity="0.22"/>
+  <path d="M43 139L78 57H111L146 139H116L111 124H78L73 139H43ZM86 103H104L95 77L86 103Z" fill="white"/>
+  <path d="M176 152C176 107 209 73 254 73C299 73 332 107 332 152C332 197 299 231 254 231C209 231 176 197 176 152ZM226 152C226 172 237 186 254 186C271 186 282 172 282 152C282 132 271 118 254 118C237 118 226 132 226 152Z" fill="white"/>
+  <text x="180" y="154" font-family="Inter, Arial, sans-serif" font-size="112" font-weight="900" letter-spacing="-8" fill="white">Only</text>
+  <text x="415" y="154" font-family="Inter, Arial, sans-serif" font-size="112" font-weight="900" letter-spacing="-8" fill="#F472B6">Ai</text>
+  <defs>
+    <linearGradient id="mark" x1="10" y1="32" x2="162" y2="188" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F472B6"/>
+      <stop offset="0.5" stop-color="#D946EF"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+</svg>
