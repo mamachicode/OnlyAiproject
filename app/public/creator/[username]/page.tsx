@@ -166,7 +166,10 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
               <div>
                 <div className="-mt-10 flex min-w-0 flex-col gap-4 sm:-mt-12 sm:flex-row sm:items-end">
-                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 ring-1 ring-white/10 sm:h-24 sm:w-24">
+                  <div
+                    className="relative h-[96px] w-[96px] min-h-[96px] min-w-[96px] max-h-[96px] max-w-[96px] shrink-0 overflow-hidden rounded-[9999px] border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 ring-1 ring-white/10"
+                    style={{ clipPath: "circle(50% at 50% 50%)" }}
+                  >
                     {avatarUrl ? (
                       <img
                         src={avatarUrl}
