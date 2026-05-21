@@ -214,24 +214,26 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 </div>
 
                 {isOwner ? (
-                  <div className="mt-7 rounded-[1.5rem] border border-pink-400/20 bg-pink-500/10 p-5">
-                    <p className="text-sm font-black text-white">
-                      Viewing your creator page
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-pink-100/80">
-                      This is the sales page fans see before subscribing. Keep your
-                      banner, avatar, bio, and first posts polished.
-                    </p>
-                    <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-pink-400/20 bg-pink-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-black text-white">
+                        Creator preview
+                      </p>
+                      <p className="mt-1 text-sm text-pink-100/75">
+                        This is what fans see before subscribing.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <Link
                         href="/dashboard/settings"
-                        className="rounded-full bg-white px-5 py-3 text-center text-sm font-black text-black hover:bg-zinc-200"
+                        className="rounded-full bg-white px-4 py-2 text-center text-sm font-black text-black hover:bg-zinc-200"
                       >
                         Edit profile
                       </Link>
                       <Link
                         href="/dashboard/upload"
-                        className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-center text-sm font-black text-white hover:bg-white/10"
+                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-black text-white hover:bg-white/10"
                       >
                         Add post
                       </Link>
