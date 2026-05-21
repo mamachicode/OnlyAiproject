@@ -122,10 +122,10 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[#07050d] text-white">
-      <section className="relative overflow-hidden border-b border-white/10 px-6 py-6">
+      <section className="relative overflow-hidden border-b border-white/10 px-4 py-4 sm:px-6 sm:py-6">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(236,72,153,0.18),transparent_34%),radial-gradient(circle_at_top_right,rgba(147,51,234,0.14),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent_28%)]" />
 
-        <div className="relative mx-auto max-w-6xl">
+        <div className="relative mx-auto max-w-5xl">
           <div className="flex items-center justify-between gap-4">
             <Link
               href={fanUserId ? "/account" : "/"}
@@ -144,8 +144,8 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             ) : null}
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950/90 shadow-2xl shadow-pink-950/20">
-            <div className="relative h-56 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black md:h-80">
+          <div className="mt-5 overflow-hidden rounded-[1.75rem] border border-white/10 bg-zinc-950/90 shadow-2xl shadow-pink-950/20 sm:rounded-[2rem]">
+            <div className="relative h-40 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black sm:h-52 md:h-64">
               {bannerUrl ? (
                 <img
                   src={bannerUrl}
@@ -161,15 +161,12 @@ export default async function PublicCreatorPage({ params }: PageProps) {
               )}
 
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
-              <div className="absolute left-6 top-6 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-pink-100 backdrop-blur">
-                SFW creator
-              </div>
             </div>
 
-            <div className="grid gap-8 p-6 md:grid-cols-[1fr_350px] md:p-8">
+            <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
               <div>
-                <div className="-mt-24 flex flex-col gap-5 sm:flex-row sm:items-end">
-                  <div className="h-36 w-36 shrink-0 overflow-hidden rounded-full border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20">
+                <div className="-mt-14 flex min-w-0 flex-col gap-4 sm:-mt-16 sm:flex-row sm:items-end">
+                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 sm:h-28 sm:w-28">
                     {avatarUrl ? (
                       <img
                         src={avatarUrl}
@@ -183,12 +180,12 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                     )}
                   </div>
 
-                  <div className="pb-2">
+                  <div className="min-w-0 pb-1">
                     <div className="inline-flex rounded-full border border-pink-400/20 bg-pink-500/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-pink-200">
-                      Creator feed
+                      Creator
                     </div>
 
-                    <h1 className="mt-4 text-4xl font-black tracking-tight md:text-6xl">
+                    <h1 className="mt-3 break-words text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
                       {displayName}
                     </h1>
 
@@ -198,11 +195,11 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-300">
+                <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300 sm:text-lg">
                   {bio}
                 </p>
 
-                <div className="mt-7 flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-wrap gap-2 sm:gap-3">
                   <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
                     🔒 {lockedCount} members-only
                   </div>
@@ -243,21 +240,20 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 ) : null}
               </div>
 
-              <aside className="self-start rounded-[2rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.14] via-white/[0.06] to-purple-500/[0.1] p-6 shadow-xl shadow-pink-950/20 md:sticky md:top-6">
+              <aside className="self-start rounded-[1.5rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.14] via-white/[0.06] to-purple-500/[0.1] p-5 shadow-xl shadow-pink-950/20 sm:p-6 lg:sticky lg:top-6">
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-pink-200">
-                  Monthly access
+                  Monthly membership
                 </p>
 
                 <div className="mt-3 flex items-end gap-2">
-                  <p className="text-5xl font-black">${price}</p>
+                  <p className="text-4xl font-black sm:text-5xl">${price}</p>
                   <p className="pb-2 text-sm font-bold text-zinc-400">
                     /month
                   </p>
                 </div>
 
                 <p className="mt-4 text-sm leading-6 text-zinc-300">
-                  Join @{publicHandle} for members-only posts, private creator
-                  updates, and new drops in one clean feed.
+                  Unlock members-only posts, previews, and creator updates from @{publicHandle}.
                 </p>
 
                 <div className="mt-5 space-y-3 text-sm text-zinc-300">

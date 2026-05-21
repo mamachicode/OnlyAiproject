@@ -51,13 +51,6 @@ export default function HomePage() {
                 >
                   Start as a Creator
                 </Link>
-
-                <Link
-                  href="/public/creator/demolitionbaby"
-                  className="rounded-2xl border border-white/10 bg-white/5 px-8 py-4 text-center text-lg font-black text-white transition hover:bg-white/10"
-                >
-                  View Demo Creator
-                </Link>
               </div>
 
               <div className="mt-12 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -110,13 +103,6 @@ export default function HomePage() {
                     Fans subscribe monthly to unlock private creator content.
                   </p>
                 </div>
-
-                <Link
-                  href="/public/creator/demolitionbaby"
-                  className="mt-4 block rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-5 py-4 text-center text-base font-black shadow-xl shadow-pink-500/20 hover:from-pink-400 hover:to-purple-500"
-                >
-                  Preview creator page
-                </Link>
               </div>
             </div>
           </div>
