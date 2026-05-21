@@ -150,7 +150,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 <img
                   src={bannerUrl}
                   alt={`${displayName} banner`}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-center"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(236,72,153,0.35),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(147,51,234,0.25),transparent_35%)]">
@@ -165,8 +165,8 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
             <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
               <div>
-                <div className="-mt-14 flex min-w-0 flex-col gap-4 sm:-mt-16 sm:flex-row sm:items-end">
-                  <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 sm:h-28 sm:w-28">
+                <div className="-mt-10 flex min-w-0 flex-col gap-4 sm:-mt-12 sm:flex-row sm:items-end">
+                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 ring-1 ring-white/10 sm:h-24 sm:w-24">
                     {avatarUrl ? (
                       <img
                         src={avatarUrl}
