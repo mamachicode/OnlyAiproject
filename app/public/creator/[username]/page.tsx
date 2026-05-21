@@ -181,9 +181,6 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
 
                   <div className="min-w-0 pb-1">
-                    <div className="inline-flex rounded-full border border-pink-400/20 bg-pink-500/10 px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-pink-200">
-                      Creator
-                    </div>
 
                     <h1 className="mt-3 break-words text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
                       {displayName}
@@ -266,10 +263,6 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
                 {isOwner ? (
                   <div className="mt-5 space-y-3">
-                    <div className="rounded-2xl border border-pink-400/20 bg-pink-500/10 p-4 text-center text-sm font-semibold text-pink-100">
-                      Owner preview mode
-                    </div>
-
                     <Link
                       href="/dashboard/settings"
                       className="block rounded-full bg-white px-6 py-3 text-center text-sm font-black text-black hover:bg-zinc-200"
