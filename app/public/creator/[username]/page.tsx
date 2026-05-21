@@ -204,9 +204,15 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                     🔒 {lockedCount} members-only
                   </div>
 
-                  <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
-                    ✨ {freeCount} previews
-                  </div>
+                  {freeCount > 0 ? (
+                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
+                      ✨ {freeCount} previews
+                    </div>
+                  ) : (
+                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
+                      ✨ Private feed
+                    </div>
+                  )}
 
                   <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
                     💌 Creator updates
@@ -258,29 +264,6 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   Unlock members-only posts, previews, and creator updates from @{publicHandle}.
                 </p>
 
-                <div className="mt-5 space-y-3 text-sm text-zinc-300">
-                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                    <p className="font-black text-white">🔒 Unlock the feed</p>
-                    <p className="mt-1 text-xs leading-5 text-zinc-500">
-                      Access locked posts once your subscription is active.
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                    <p className="font-black text-white">💌 Creator updates</p>
-                    <p className="mt-1 text-xs leading-5 text-zinc-500">
-                      Receive private broadcast messages from the creator.
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                    <p className="font-black text-white">🛡️ Secure checkout</p>
-                    <p className="mt-1 text-xs leading-5 text-zinc-500">
-                      Stripe-powered monthly access. Cancel anytime.
-                    </p>
-                  </div>
-                </div>
-
                 {isOwner ? (
                   <div className="mt-5 space-y-3">
                     <div className="rounded-2xl border border-pink-400/20 bg-pink-500/10 p-4 text-center text-sm font-semibold text-pink-100">
@@ -311,7 +294,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                       href={`/subscribe/${publicHandle}`}
                       className="mt-5 block rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4 text-center text-base font-black text-white shadow-lg shadow-pink-950/30 transition hover:scale-[1.01] hover:from-pink-400 hover:to-purple-500"
                     >
-                      Subscribe for ${price}/month
+                      Subscribe now — ${price}/month
                     </Link>
                   )
                 ) : (
@@ -320,10 +303,35 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 )}
 
+                <div className="mt-5 space-y-3 text-sm text-zinc-300">
+                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                    <p className="font-black text-white">🔒 Unlock the feed</p>
+                    <p className="mt-1 text-xs leading-5 text-zinc-500">
+                      Access locked posts once your subscription is active.
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                    <p className="font-black text-white">💌 Creator updates</p>
+                    <p className="mt-1 text-xs leading-5 text-zinc-500">
+                      Receive private broadcast messages from the creator.
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                    <p className="font-black text-white">🛡️ Secure checkout</p>
+                    <p className="mt-1 text-xs leading-5 text-zinc-500">
+                      Stripe-powered monthly access. Cancel anytime.
+                    </p>
+                  </div>
+                </div>
+
+
+
                 <p className="mt-4 text-xs leading-5 text-zinc-500">
                   {isOwner
                     ? "Fans will see subscribe or subscriber status here."
-                    : "Payment-safe creator subscription. Public content remains SFW."}
+                    : "Secure monthly access. Cancel anytime."}
                 </p>
               </aside>
             </div>
