@@ -53,6 +53,13 @@ export default async function AccountPage() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Link
+              href="/public/creator/demolitionbaby"
+              className="rounded-full bg-white px-5 py-2 text-sm font-black text-black hover:bg-zinc-200"
+            >
+              Find a creator
+            </Link>
+
+            <Link
               href="/account/messages"
               className="rounded-full border border-white/10 bg-white/5 px-5 py-2 text-sm font-bold text-zinc-200 hover:bg-white/10 hover:text-white"
             >
@@ -156,8 +163,14 @@ export default async function AccountPage() {
 
           {activeSubscriptions.length === 0 ? (
             <div className="mt-6 rounded-3xl border border-white/10 bg-black/20 p-6 text-zinc-400">
-              You do not have active fan subscriptions yet.
+              <p>You do not have active fan subscriptions yet.</p>
 
+              <Link
+                href="/public/creator/demolitionbaby"
+                className="mt-5 inline-flex rounded-full bg-white px-5 py-3 text-sm font-black text-black hover:bg-zinc-200"
+              >
+                Browse creator pages
+              </Link>
             </div>
           ) : (
             <div className="mt-6 grid gap-4">
