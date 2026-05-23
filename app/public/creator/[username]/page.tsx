@@ -243,6 +243,12 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                       >
                         Add post
                       </Link>
+                      <Link
+                        href="/dashboard/messages"
+                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-black text-white hover:bg-white/10"
+                      >
+                        Message fans
+                      </Link>
                     </div>
                   </div>
                 ) : null}
@@ -265,20 +271,11 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 </p>
 
                 {isOwner ? (
-                  <div className="mt-5 space-y-3">
-                    <Link
-                      href="/dashboard/settings"
-                      className="block rounded-full bg-white px-6 py-3 text-center text-sm font-black text-black hover:bg-zinc-200"
-                    >
-                      Edit profile
-                    </Link>
-
-                    <Link
-                      href="/dashboard/messages"
-                      className="block rounded-full border border-white/10 bg-white/5 px-6 py-3 text-center text-sm font-black text-white hover:bg-white/10"
-                    >
-                      Message fans
-                    </Link>
+                  <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm leading-6 text-zinc-300">
+                    <p className="font-black text-white">Fan subscription preview</p>
+                    <p className="mt-1">
+                      Fans will see the subscribe button here. Manage your page from the creator preview tools.
+                    </p>
                   </div>
                 ) : isCreatorSfw ? (
                   hasActiveSubscription ? (
