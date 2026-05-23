@@ -58,45 +58,22 @@ export default async function DashboardPage() {
             Welcome back, @{user.username}. Manage your subscriptions and unlock private creator posts.
           </p>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <Link
-              href="/account"
-              className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 transition hover:bg-white/[0.07]"
-            >
-              <p className="text-2xl font-black">My subscriptions</p>
-              <p className="mt-3 text-sm leading-6 text-zinc-400">
-                View creators you support.
-              </p>
-            </Link>
-
-            <Link
-              href="/public/creator/demolitionbaby"
-              className="rounded-3xl border border-white/10 bg-white/[0.04] p-6 transition hover:bg-white/[0.07]"
-            >
-              <p className="text-2xl font-black">Unlocked creator</p>
-              <p className="mt-3 text-sm leading-6 text-zinc-400">
-                Open your active creator subscription.
-              </p>
-            </Link>
-
-            <Link
-              href="/dashboard/settings"
-              className="rounded-3xl border border-pink-400/20 bg-pink-500/10 p-6 transition hover:bg-pink-500/15"
-            >
-              <p className="text-2xl font-black">Become a creator</p>
-              <p className="mt-3 text-sm leading-6 text-zinc-400">
-                Start your own creator page when ready.
-              </p>
-            </Link>
-          </div>
-
           <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-            <h2 className="text-2xl font-black">Active subscriptions</h2>
+            <h2 className="text-2xl font-black">Your subscriptions</h2>
 
             {activeSubscriptions.length === 0 ? (
-              <p className="mt-4 text-zinc-400">
-                You do not have active subscriptions yet.
-              </p>
+              <div className="mt-4 rounded-3xl border border-white/10 bg-black/20 p-6">
+                <p className="text-zinc-400">
+                  You do not have active subscriptions yet.
+                </p>
+
+                <Link
+                  href="/creators"
+                  className="mt-5 inline-flex rounded-full bg-white px-5 py-3 text-sm font-black text-black hover:bg-zinc-200"
+                >
+                  Find creators
+                </Link>
+              </div>
             ) : (
               <div className="mt-6 grid gap-4">
                 {activeSubscriptions.map((sub) => {
