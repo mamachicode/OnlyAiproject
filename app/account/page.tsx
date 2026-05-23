@@ -53,7 +53,7 @@ export default async function AccountPage() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              href="/public/creator/demolitionbaby"
+              href="/creators"
               className="rounded-full bg-white px-5 py-2 text-sm font-black text-black hover:bg-zinc-200"
             >
               Find a creator
@@ -166,7 +166,7 @@ export default async function AccountPage() {
               <p>You do not have active fan subscriptions yet.</p>
 
               <Link
-                href="/public/creator/demolitionbaby"
+                href="/creators"
                 className="mt-5 inline-flex rounded-full bg-white px-5 py-3 text-sm font-black text-black hover:bg-zinc-200"
               >
                 Browse creator pages
