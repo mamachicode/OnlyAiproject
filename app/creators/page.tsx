@@ -11,6 +11,13 @@ export default async function CreatorsPage() {
   const creators = await prisma.creator.findMany({
     where: {
       classification: "SFW",
+      user: {
+        posts: {
+          some: {
+            isNsfw: false,
+          },
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
