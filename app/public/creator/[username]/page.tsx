@@ -201,7 +201,9 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
                 <div className="mt-5 flex flex-wrap gap-2 sm:gap-3">
                   <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
-                    🔒 {lockedCount} members-only
+                    {isOwner
+                      ? `🔒 ${lockedCount} locked posts`
+                      : `🔒 ${lockedCount} member posts`}
                   </div>
 
                   {freeCount > 0 ? (
@@ -230,7 +232,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-2 sm:flex-row">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                       <Link
                         href="/dashboard/settings"
                         className="rounded-full bg-white px-4 py-2 text-center text-sm font-black text-black hover:bg-zinc-200"
@@ -243,6 +245,13 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                       >
                         Add post
                       </Link>
+                      <Link
+                        href="/dashboard/subscribers"
+                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-black text-white hover:bg-white/10"
+                      >
+                        View subscribers
+                      </Link>
+
                       <Link
                         href="/dashboard/messages"
                         className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-black text-white hover:bg-white/10"
