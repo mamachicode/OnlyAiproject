@@ -15,6 +15,14 @@ function stripePeriodEndToDate(value: unknown) {
   return new Date(seconds * 1000);
 }
 
+function getStripeCurrentPeriodEnd(stripeSub: any) {
+  const itemPeriodEnd = stripeSub.items?.data?.find(
+    (item: any) => Number(item?.current_period_end || 0) > 0
+  )?.current_period_end;
+
+  return stripePeriodEndToDate(stripeSub.current_period_end || itemPeriodEnd);
+}
+
 function mapStripeStatus(status: string) {
   if (status === "active" || status === "trialing") return "ACTIVE";
   if (status === "canceled" || status === "unpaid" || status === "incomplete_expired") return "CANCELED";
@@ -70,7 +78,7 @@ async function upsertSubscriptionFromStripeSubscription(stripeSub: any) {
   }
 
   const status = mapStripeStatus(stripeSub.status);
-  const currentPeriodEnd = stripePeriodEndToDate(stripeSub.current_period_end);
+  const currentPeriodEnd = getStripeCurrentPeriodEnd(stripeSub);
 
   await prisma.subscription.upsert({
     where: {
