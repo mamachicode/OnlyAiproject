@@ -131,7 +131,7 @@ export default async function CreatorsPage() {
 
                     <p className="mt-5 line-clamp-3 text-sm leading-6 text-zinc-400">
                       {creator.bio ||
-                        "Private creator posts, members-only updates, and exclusive drops."}
+                        "Private creator posts, member updates, and exclusive drops."}
                     </p>
 
                     <div className="mt-5 flex flex-wrap gap-2">
@@ -139,7 +139,7 @@ export default async function CreatorsPage() {
                         {totalPosts} posts
                       </span>
                       <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-zinc-300">
-                        {lockedCount} members-only
+                        {lockedCount} member posts
                       </span>
                       <span className="rounded-full border border-pink-300/20 bg-pink-500/10 px-3 py-1 text-xs font-black text-pink-100">
                         ${price}/month
