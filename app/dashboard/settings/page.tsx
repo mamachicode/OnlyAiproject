@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
+import CreatorProfileForm from "./CreatorProfileForm";
 
 type SettingsPageProps = {
   searchParams?: Promise<{
@@ -120,129 +121,12 @@ export default async function CreatorSettingsPage({
           </div>
         </div>
 
-        <form
-          action="/api/creator/profile"
-          method="POST"
-          encType="multipart/form-data"
-          className="mt-8 rounded-3xl border border-white/10 bg-white/[0.04] p-8"
-        >
-          <div className="grid gap-8 md:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-bold text-zinc-100">
-                Display name
-              </span>
-
-              <input
-                name="displayName"
-                maxLength={50}
-                defaultValue={currentDisplayName}
-                placeholder="Your creator name"
-                className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-5 font-semibold text-white outline-none placeholder:text-zinc-600"
-              />
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-bold text-zinc-100">
-                Creator handle
-              </span>
-
-              <div className="mt-3 flex items-center rounded-2xl border border-white/10 bg-black/30 px-5">
-                <span className="text-zinc-500">@</span>
-                <input
-                  name="handle"
-                  required
-                  minLength={3}
-                  maxLength={30}
-                  pattern="[a-zA-Z0-9_]+"
-                  defaultValue={currentHandle}
-                  className="w-full bg-transparent px-4 py-5 font-semibold text-white outline-none"
-                />
-              </div>
-            </label>
-          </div>
-
-          <label className="mt-8 block">
-            <span className="text-sm font-bold text-zinc-100">
-              Bio
-            </span>
-
-            <textarea
-              name="bio"
-              rows={4}
-              maxLength={280}
-              defaultValue={currentBio}
-              placeholder="Tell fans what you post and why they should subscribe..."
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-5 font-semibold text-white outline-none placeholder:text-zinc-600"
-            />
-
-            <p className="mt-2 text-xs text-zinc-500">
-              Keep it SFW for the Stripe lane. Max 280 characters.
-            </p>
-          </label>
-
-          <div className="mt-8 grid gap-8 md:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-bold text-zinc-100">
-                Avatar image
-              </span>
-
-              <input
-                name="avatar"
-                type="file"
-                accept="image/*"
-                className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
-              />
-
-              <p className="mt-2 text-xs text-zinc-500">
-                Optional. SFW images only. Leave empty to keep current avatar.
-              </p>
-            </label>
-
-            <label className="block">
-              <span className="text-sm font-bold text-zinc-100">
-                Banner image
-              </span>
-
-              <input
-                name="banner"
-                type="file"
-                accept="image/*"
-                className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
-              />
-
-              <p className="mt-2 text-xs text-zinc-500">
-                Optional wide cover image. SFW images only. Leave empty to keep current banner.
-              </p>
-            </label>
-          </div>
-
-          <label className="mt-8 block">
-            <span className="text-sm font-bold text-zinc-100">
-              Monthly price
-            </span>
-
-            <div className="mt-3 flex items-center rounded-2xl border border-white/10 bg-black/30 px-5">
-              <span className="text-zinc-500">$</span>
-              <input
-                name="sfwPrice"
-                required
-                min={1}
-                max={500}
-                type="number"
-                defaultValue={currentMonthlyPrice}
-                className="w-full bg-transparent px-4 py-5 font-semibold text-white outline-none"
-              />
-              <span className="text-zinc-500">/month</span>
-            </div>
-          </label>
-
-          <button
-            type="submit"
-            className="mt-8 w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-5 text-lg font-black text-white shadow-2xl shadow-pink-500/20 transition hover:scale-[1.01]"
-          >
-            Save creator profile
-          </button>
-        </form>
+        <CreatorProfileForm
+          currentDisplayName={currentDisplayName}
+          currentHandle={currentHandle}
+          currentBio={currentBio}
+          currentMonthlyPrice={currentMonthlyPrice}
+        />
       </div>
     </main>
   );
