@@ -1,6 +1,7 @@
 // @ts-nocheck
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/auth";
@@ -65,7 +66,7 @@ export default async function CreatorSettingsPage({
       : user.sfwPrice ?? 5;
 
   return (
-    <main className="min-h-screen bg-black px-6 py-10 text-white">
+    <main className="min-h-screen bg-black px-6 pb-32 pt-10 text-white">
       <div className="mx-auto max-w-5xl">
         <p className="text-sm font-semibold uppercase tracking-[0.35em] text-pink-300">
           Creator profile
@@ -77,9 +78,41 @@ export default async function CreatorSettingsPage({
           Set your public creator identity, profile banner, avatar, bio, and monthly subscription price.
         </p>
 
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/dashboard"
+            className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-center text-sm font-black text-white hover:bg-white/10"
+          >
+            ← Dashboard
+          </Link>
+
+          <Link
+            href={`/public/creator/${currentHandle}`}
+            className="rounded-full bg-white px-5 py-3 text-center text-sm font-black text-black hover:bg-zinc-200"
+          >
+            View creator page
+          </Link>
+        </div>
+
         {saved ? (
           <div className="mt-8 rounded-2xl border border-green-500/30 bg-green-500/10 p-5 text-sm font-semibold text-green-200">
-            Settings saved.
+            <p className="text-base font-black">Settings saved.</p>
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href={`/public/creator/${currentHandle}`}
+                className="rounded-full bg-green-200 px-5 py-3 text-center text-sm font-black text-green-950 hover:bg-green-100"
+              >
+                View creator page
+              </Link>
+
+              <Link
+                href="/dashboard"
+                className="rounded-full border border-green-300/20 bg-black/20 px-5 py-3 text-center text-sm font-black text-green-100 hover:bg-black/30"
+              >
+                Back to dashboard
+              </Link>
+            </div>
           </div>
         ) : null}
 
