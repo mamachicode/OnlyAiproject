@@ -9,14 +9,12 @@ type CreatorProfileFormProps = {
   currentMonthlyPrice: number;
 };
 
-type ImageFocus = "top" | "center" | "bottom";
-
 type CropOptions = {
   outputWidth: number;
   outputHeight: number;
   maxBytes: number;
   label: string;
-  focus: ImageFocus;
+  focusY: number;
 };
 
 function loadImage(file: File): Promise<HTMLImageElement> {
@@ -59,10 +57,11 @@ function canvasToBlob(
   });
 }
 
-function focusOffset(extraSpace: number, focus: ImageFocus) {
-  if (focus === "top") return 0;
-  if (focus === "bottom") return extraSpace;
-  return extraSpace / 2;
+function clampPercent(value: number) {
+  if (!Number.isFinite(value)) return 50;
+  if (value < 0) return 0;
+  if (value > 100) return 100;
+  return value;
 }
 
 async function cropAndCompressImage(
@@ -84,6 +83,7 @@ async function cropAndCompressImage(
 
   const targetRatio = options.outputWidth / options.outputHeight;
   const imageRatio = imageWidth / imageHeight;
+  const focusY = clampPercent(options.focusY) / 100;
 
   let sourceX = 0;
   let sourceY = 0;
@@ -99,7 +99,7 @@ async function cropAndCompressImage(
     sourceWidth = imageWidth;
     sourceHeight = imageWidth / targetRatio;
     sourceX = 0;
-    sourceY = focusOffset(imageHeight - sourceHeight, options.focus);
+    sourceY = (imageHeight - sourceHeight) * focusY;
   }
 
   let quality = 0.88;
@@ -157,6 +157,12 @@ async function cropAndCompressImage(
   throw new Error(`${options.label} could not be compressed.`);
 }
 
+function cropLabel(value: number) {
+  if (value <= 15) return "Top";
+  if (value >= 85) return "Bottom";
+  return `${value}%`;
+}
+
 export default function CreatorProfileForm({
   currentDisplayName,
   currentHandle,
@@ -165,8 +171,8 @@ export default function CreatorProfileForm({
 }: CreatorProfileFormProps) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
-  const [avatarFocus, setAvatarFocus] = useState<ImageFocus>("center");
-  const [bannerFocus, setBannerFocus] = useState<ImageFocus>("top");
+  const [avatarFocusY, setAvatarFocusY] = useState(50);
+  const [bannerFocusY, setBannerFocusY] = useState(22);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -193,7 +199,7 @@ export default function CreatorProfileForm({
           outputHeight: 1200,
           maxBytes: 1_500_000,
           label: "Avatar",
-          focus: avatarFocus,
+          focusY: avatarFocusY,
         });
 
         next.set("avatar", croppedAvatar);
@@ -205,7 +211,7 @@ export default function CreatorProfileForm({
           outputHeight: 800,
           maxBytes: 2_500_000,
           label: "Banner",
-          focus: bannerFocus,
+          focusY: bannerFocusY,
         });
 
         next.set("banner", croppedBanner);
@@ -311,23 +317,28 @@ export default function CreatorProfileForm({
 
           <label className="mt-4 block">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
-              Avatar crop
+              Avatar vertical position: {cropLabel(avatarFocusY)}
             </span>
 
-            <select
-              value={avatarFocus}
-              onChange={(event) =>
-                setAvatarFocus(event.target.value as ImageFocus)
-              }
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 font-bold text-white outline-none"
-            >
-              <option value="center">Center</option>
-              <option value="top">Top / face</option>
-            </select>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={avatarFocusY}
+              onChange={(event) => setAvatarFocusY(Number(event.target.value))}
+              className="mt-3 w-full accent-pink-500"
+            />
           </label>
 
+          <div className="mt-2 flex justify-between text-xs font-bold text-zinc-600">
+            <span>Top</span>
+            <span>Center</span>
+            <span>Bottom</span>
+          </div>
+
           <p className="mt-2 text-xs text-zinc-500">
-            Pick Top if the face is too low. Pick Center for normal portraits.
+            Re-upload the original image, adjust the slider, then save.
           </p>
         </div>
 
@@ -347,24 +358,28 @@ export default function CreatorProfileForm({
 
           <label className="mt-4 block">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
-              Banner crop
+              Banner vertical position: {cropLabel(bannerFocusY)}
             </span>
 
-            <select
-              value={bannerFocus}
-              onChange={(event) =>
-                setBannerFocus(event.target.value as ImageFocus)
-              }
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 font-bold text-white outline-none"
-            >
-              <option value="top">Top / face</option>
-              <option value="center">Center</option>
-              <option value="bottom">Bottom</option>
-            </select>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={bannerFocusY}
+              onChange={(event) => setBannerFocusY(Number(event.target.value))}
+              className="mt-3 w-full accent-pink-500"
+            />
           </label>
 
+          <div className="mt-2 flex justify-between text-xs font-bold text-zinc-600">
+            <span>Top</span>
+            <span>Center</span>
+            <span>Bottom</span>
+          </div>
+
           <p className="mt-2 text-xs text-zinc-500">
-            Pick Top for portrait images. Wide images work best for banners.
+            Use the slider to place the face/subject inside the wide banner crop.
           </p>
         </div>
       </div>
