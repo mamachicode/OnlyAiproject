@@ -98,7 +98,7 @@ function evaluateSightengineResult(data: any) {
       label: "explicit sexual or nudity content",
       threshold: 0.35,
       pattern:
-        /(nudity|nude|explicit|erotica|porn|genital|sexual_activity|sexual_display|sexual_act|exposed|bare_breast|bare_chest)/,
+        /(explicit|erotica|porn|genital|sexual_activity|sexual_display|sexual_act|exposed|bare_breast|bare_chest)/,
     },
     {
       label: "gore or graphic violence",
