@@ -150,7 +150,8 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 <img
                   src={bannerUrl}
                   alt={`${displayName} banner`}
-                  className="h-full w-full object-cover object-center"
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: "center 18%" }}
                 />
               ) : (
                 <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(236,72,153,0.35),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(147,51,234,0.25),transparent_35%)]">
