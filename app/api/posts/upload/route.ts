@@ -90,18 +90,35 @@ function getFiles(formData: FormData) {
   });
 }
 
+function assertVideoBetaRules(files: any[]) {
+  const videoFiles = files.filter((file: any) =>
+    String(file?.type || "").toLowerCase().startsWith("video/")
+  );
+
+  if (videoFiles.length > 1) {
+    throw new Error("Only one video can be added per post right now.");
+  }
+
+  if (videoFiles.length === 1 && files.length > 1) {
+    throw new Error("Upload either multiple images or one short video for now.");
+  }
+}
+
 async function uploadToCloudinary(file: any, order: number) {
   const safeFile = await prepareSafeUploadFile(file);
   const dataUri = `data:${safeFile.mime};base64,${safeFile.buffer.toString("base64")}`;
 
+  const mediaType = safeFile.type || (safeFile.mime.startsWith("video/") ? "VIDEO" : "IMAGE");
+  const resourceType = safeFile.resourceType || (mediaType === "VIDEO" ? "video" : "image");
+
   const result = await cloudinary.uploader.upload(dataUri, {
     folder: "onlyai/posts",
-    resource_type: "image",
+    resource_type: resourceType,
   });
 
   return {
     url: result.secure_url,
-    type: "IMAGE",
+    type: mediaType,
     order,
     publicId: result.public_id,
   };

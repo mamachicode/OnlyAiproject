@@ -296,7 +296,7 @@ export default function CreatorProfileForm({
         />
 
         <p className="mt-2 text-xs text-zinc-500">
-          Keep it payment-safe. Max 280 characters.
+          Max 280 characters. Keep it clear for new members.
         </p>
       </label>
 

@@ -29,7 +29,14 @@ const ALLOWED_IMAGE_MIMES = new Set([
   "image/gif",
 ]);
 
+const ALLOWED_VIDEO_MIMES = new Set([
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+]);
+
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 25 * 1024 * 1024;
 
 function normalizeText(value: any) {
   return String(value || "")
@@ -48,7 +55,7 @@ export function assertSafeText(values: any[]) {
 
   if (hit) {
     throw new Error(
-      "This post cannot be uploaded in the Stripe SFW lane. Please use neutral text and SFW content."
+      "This post cannot be uploaded. Please use clean creator-safe text."
     );
   }
 }
@@ -188,7 +195,7 @@ async function moderateImageWithSightengine({
     console.error("SFW_IMAGE_BLOCKED_REASON", result.reason);
 
     throw new Error(
-      "This image is not allowed in the Stripe SFW lane. Please upload clearly SFW content."
+      "This image could not be added. Please upload a clean creator-safe image."
     );
   }
 
@@ -205,35 +212,40 @@ export async function prepareSafeUploadFile(file: any) {
 
   assertSafeText([filename, mime]);
 
-  if (mime.startsWith("video/")) {
-    throw new Error(
-      "Video uploads are disabled in the Stripe SFW lane until video moderation is connected."
-    );
-  }
+  const isImage = ALLOWED_IMAGE_MIMES.has(mime);
+  const isVideo = ALLOWED_VIDEO_MIMES.has(mime);
 
-  if (!ALLOWED_IMAGE_MIMES.has(mime)) {
-    throw new Error("Only JPG, PNG, WebP, and GIF images are allowed in the SFW lane.");
+  if (!isImage && !isVideo) {
+    throw new Error("Only JPG, PNG, WebP, GIF, MP4, MOV, and WebM files are allowed.");
   }
 
   if (Number(file.size || 0) <= 0) {
     throw new Error("Upload file is empty.");
   }
 
-  if (Number(file.size || 0) > MAX_IMAGE_BYTES) {
+  if (isImage && Number(file.size || 0) > MAX_IMAGE_BYTES) {
     throw new Error("Image is too large. Max 20MB.");
+  }
+
+  if (isVideo && Number(file.size || 0) > MAX_VIDEO_BYTES) {
+    throw new Error("Video is too large for the current beta. Max 25MB.");
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  await moderateImageWithSightengine({
-    buffer,
-    mime,
-    filename,
-  });
+  if (isImage) {
+    await moderateImageWithSightengine({
+      buffer,
+      mime,
+      filename,
+    });
+  }
 
   return {
     buffer,
     mime,
     filename,
+    type: isVideo ? "VIDEO" : "IMAGE",
+    resourceType: isVideo ? "video" : "image",
   };
 }

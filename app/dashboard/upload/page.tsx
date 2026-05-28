@@ -14,11 +14,11 @@ function getUploadErrorMessage(error?: string) {
   if (!error) return "";
 
   if (error === "nofile") {
-    return "Add at least one SFW image before uploading your post.";
+    return "Add at least one image or short video before uploading your post.";
   }
 
   if (error === "moderation") {
-    return "That upload was blocked by the SFW safety check. Use a clean, fully clothed, Stripe-safe image and try again.";
+    return "That image could not be added. Use a clean, polished image and try again.";
   }
 
   if (error === "text") {
@@ -26,14 +26,14 @@ function getUploadErrorMessage(error?: string) {
   }
 
   if (error === "video") {
-    return "Video uploads are temporarily disabled until full video moderation is ready.";
+    return "That video could not be added. Use MP4, MOV, or WebM under 25MB.";
   }
 
   if (error === "storage") {
     return "The upload service could not process the image right now. Try again with a smaller image or upload one image first.";
   }
 
-  return "Could not upload that post. Check the image, keep it SFW, and try again.";
+  return "Could not upload that post. Check the image and try again.";
 }
 
 export default async function UploadPostPage({
@@ -58,7 +58,7 @@ export default async function UploadPostPage({
             </h1>
 
             <p className="mt-3 max-w-2xl text-zinc-400">
-              Create one members-only post with one or more SFW images. Use this
+              Create one members-only post with images or a short video. Use this
               for comics, stories, photo sets, or private creator updates.
             </p>
           </div>
@@ -121,15 +121,14 @@ export default async function UploadPostPage({
             <input
               name="files"
               type="file"
-              accept="image/*"
+              accept="image/*,video/mp4,video/quicktime,video/webm"
               multiple
               required
               className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
             />
             <p className="mt-2 text-xs leading-5 text-zinc-500">
-              Select one or more clean SFW images. Unsafe images are blocked
-              before upload. Video uploads stay disabled until real video
-              moderation is ready.
+              Select images or one short video for this post. You can choose several at once,
+              or add more later from the edit page.
             </p>
           </div>
 
@@ -144,14 +143,14 @@ export default async function UploadPostPage({
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-300">
               <p className="font-black text-white">Gallery ready</p>
               <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Multiple images become one post set.
+                Multiple media files become one post set.
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-300">
-              <p className="font-black text-white">Stripe-safe</p>
+              <p className="font-black text-white">Creator-ready</p>
               <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Keep launch content clean and payment-safe.
+                Keep your post clean, polished, and subscription-ready.
               </p>
             </div>
           </div>

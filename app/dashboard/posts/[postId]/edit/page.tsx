@@ -59,6 +59,7 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
           <form
+            id="edit-post-form"
             action="/api/posts/update"
             method="POST"
             encType="multipart/form-data"
@@ -106,12 +107,12 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
               <input
                 name="files"
                 type="file"
-                accept="image/*"
+                accept="image/*,video/mp4,video/quicktime,video/webm"
                 multiple
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
               />
               <p className="mt-2 text-xs text-zinc-500">
-                New SFW images are moderated before upload, then appended to this post.
+                New images or short videos are reviewed before upload, then appended to this post.
               </p>
             </div>
 
@@ -144,8 +145,19 @@ export default async function EditPostPage({ params, searchParams }: PageProps) 
                         <img src={item.url} alt={post.title || "Post media"} className="h-full w-full object-cover" />
                       )}
                     </div>
-                    <div className="p-3 text-xs text-zinc-400">
-                      Item {index + 1} · {item.type}
+                    <div className="space-y-3 p-3 text-xs text-zinc-400">
+                      <div>Item {index + 1} · {item.type}</div>
+
+                      <label className="flex items-center gap-2 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 font-bold text-red-100">
+                        <input
+                          form="edit-post-form"
+                          type="checkbox"
+                          name="removeMediaIds"
+                          value={item.id}
+                          className="h-4 w-4"
+                        />
+                        Remove this media when saving
+                      </label>
                     </div>
                   </div>
                 ))
