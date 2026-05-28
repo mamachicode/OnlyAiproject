@@ -127,32 +127,8 @@ export default async function UploadPostPage({
               className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
             />
             <p className="mt-2 text-xs leading-5 text-zinc-500">
-              Select images or one short video for this post. You can choose several at once,
-              or add more later from the edit page.
+              Upload images or one short video.
             </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-pink-400/20 bg-pink-500/10 p-4 text-sm text-pink-100">
-              <p className="font-black text-white">Members-only</p>
-              <p className="mt-1 text-xs leading-5 text-pink-100/80">
-                New posts are locked for subscribers by default.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-300">
-              <p className="font-black text-white">Gallery ready</p>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Multiple media files become one post set.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-zinc-300">
-              <p className="font-black text-white">Creator-ready</p>
-              <p className="mt-1 text-xs leading-5 text-zinc-500">
-                Keep your post clean, polished, and subscription-ready.
-              </p>
-            </div>
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
