@@ -35,7 +35,7 @@ export default async function SubscribeUnavailablePage({ params }: PageProps) {
             href="/legal/2257"
             className="inline-flex rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
           >
-            Compliance
+            Not open yet
           </Link>
         </div>
       </div>

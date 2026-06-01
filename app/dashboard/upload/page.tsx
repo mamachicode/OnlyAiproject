@@ -22,7 +22,7 @@ function getUploadErrorMessage(error?: string) {
   }
 
   if (error === "text") {
-    return "Your title or caption triggered the safety filter. Keep it clean, creator-safe, and try again.";
+    return "Your title or caption could not be saved. Keep it clean and try again.";
   }
 
   if (error === "video") {
@@ -30,7 +30,7 @@ function getUploadErrorMessage(error?: string) {
   }
 
   if (error === "storage") {
-    return "The upload service could not process the image right now. Try again with a smaller image or upload one image first.";
+    return "We could not process that image right now. Try a smaller image or upload one image first.";
   }
 
   return "Could not upload that post. Check the image and try again.";
@@ -58,7 +58,7 @@ export default async function UploadPostPage({
             </h1>
 
             <p className="mt-3 max-w-2xl text-zinc-400">
-              Create one members-only post with images or a short video. Use this
+              Create a new post with images or a short video. Use this
               for comics, stories, photo sets, or private creator updates.
             </p>
           </div>
@@ -76,7 +76,7 @@ export default async function UploadPostPage({
             <div className="flex gap-3">
               <span className="mt-0.5">⚠️</span>
               <div>
-                <p className="font-black text-white">Upload blocked</p>
+                <p className="font-black text-white">Upload not added</p>
                 <p className="mt-1 text-red-100">{uploadError}</p>
               </div>
             </div>
@@ -95,7 +95,7 @@ export default async function UploadPostPage({
             </label>
             <input
               name="title"
-              placeholder="Members-only post"
+              placeholder="Exclusive post"
               maxLength={90}
               className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
             />
@@ -116,7 +116,7 @@ export default async function UploadPostPage({
 
           <div>
             <label className="block text-sm font-bold text-zinc-300">
-              Media files
+              Images or video
             </label>
             <input
               name="files"

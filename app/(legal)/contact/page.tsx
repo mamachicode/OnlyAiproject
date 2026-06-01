@@ -8,7 +8,7 @@ export default function ContactPage() {
       <p>support@onlyai.com</p>
 
       <h2 className="text-2xl font-semibold mt-4">Billing Issues</h2>
-      <p>Billing issues must be handled through CCBill’s support portal.</p>
+      <p>For billing help, contact OnlyAi support and include the email used for your subscription.</p>
     </div>
   );
 }

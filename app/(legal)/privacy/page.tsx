@@ -5,16 +5,16 @@ export default function PrivacyPage() {
       <p>OnlyAi (“we”) respects your privacy and is committed to protecting your personal information.</p>
 
       <h2 className="text-2xl font-semibold mt-4">1. Information We Collect</h2>
-      <p>We collect email, login data, creator uploads, and subscription metadata. Payment information is handled exclusively by CCBill.</p>
+      <p>We collect email, login data, creator uploads, and subscription metadata. Payment information is handled securely by our payment processors.</p>
 
       <h2 className="text-2xl font-semibold mt-4">2. Cookies</h2>
       <p>We use cookies to maintain sessions and personalize your experience.</p>
 
       <h2 className="text-2xl font-semibold mt-4">3. Payments</h2>
-      <p>All payments are processed securely by CCBill. We do not store credit card information.</p>
+      <p>Payments are processed securely by our payment processors. We do not store credit card information.</p>
 
       <h2 className="text-2xl font-semibold mt-4">4. Sharing</h2>
-      <p>We do not sell personal information. Limited data may be shared with CCBill for billing purposes.</p>
+      <p>We do not sell personal information. Limited data may be shared with payment processors for billing purposes.</p>
     </div>
   );
 }

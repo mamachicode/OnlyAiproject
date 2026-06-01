@@ -11,10 +11,10 @@ export default function TermsPage() {
       <p>Creators are responsible for all uploaded content. Illegal or harmful uploads are prohibited.</p>
 
       <h2 className="text-2xl font-semibold mt-4">3. Subscriptions</h2>
-      <p>Subscriptions are handled via CCBill. Access remains active as long as a subscription is valid.</p>
+      <p>Subscriptions are handled through our payment processors. Access remains active as long as a subscription is valid.</p>
 
       <h2 className="text-2xl font-semibold mt-4">4. Refunds</h2>
-      <p>Billing and refund disputes are handled by CCBill, our payment processor.</p>
+      <p>Billing and refund requests are handled through the payment processor used for the subscription.</p>
 
       <h2 className="text-2xl font-semibold mt-4">5. Account Termination</h2>
       <p>We may suspend accounts that violate policies or upload illegal material.</p>

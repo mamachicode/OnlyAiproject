@@ -23,9 +23,6 @@ export default function Footer() {
           <Link href="/refund" className="hover:text-pink-300">
             Refunds
           </Link>
-          <Link href="/2257" className="hover:text-pink-300">
-            2257 Compliance
-          </Link>
           <Link href="/contact" className="hover:text-pink-300">
             Contact
           </Link>

@@ -6,7 +6,6 @@ export default function Footer() {
         <a href="/terms" className="hover:underline">Terms of Service</a>
         <a href="/privacy" className="hover:underline">Privacy Policy</a>
         <a href="/refund" className="hover:underline">Refund Policy</a>
-        <a href="/2257" className="hover:underline">2257 Compliance</a>
         <a href="/contact" className="hover:underline">Contact</a>
       </div>
     </footer>

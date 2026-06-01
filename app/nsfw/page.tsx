@@ -9,7 +9,7 @@ export default function NsfwPage() {
         </Link>
 
         <p className="mb-5 inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-300">
-          Advanced creator lane
+          Creator area
         </p>
 
         <h1 className="text-5xl font-black tracking-tight md:text-7xl">
@@ -17,9 +17,8 @@ export default function NsfwPage() {
         </h1>
 
         <p className="mt-6 max-w-2xl text-xl leading-9 text-zinc-300">
-          OnlyAi is launching first with clean creator memberships. Advanced
-          content lanes will open only after dedicated billing and compliance
-          systems are ready.
+          OnlyAi is launching first with clean creator memberships. More
+          creator options will open when they are ready.
         </p>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
