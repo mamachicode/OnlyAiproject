@@ -108,10 +108,12 @@ function evaluateSightengineResult(data: any) {
         /(explicit|erotica|porn|genital|sexual_activity|sexual_display|sexual_act|exposed|bare_breast|bare_chest|sexual)/,
     },
     {
-      // Allow normal gothic/fantasy poster art. Block only strong gore signals.
-      label: "graphic gore",
+      // Allow gothic/fantasy poster art with skulls, candles, dark rooms, and horror styling.
+      // Do not block generic gore.prob because it false-positives on SFW goth artwork.
+      // Block only clear graphic injury/body-harm signals.
+      label: "graphic injury",
       threshold: 0.70,
-      pattern: /(gore|graphic_gore|severe_blood|open_wound|corpse|dismember)/,
+      pattern: /(graphic_gore|severe_blood|open_wound|fresh_wound|dismember|dismemberment|body_part|body_parts)/,
     },
     {
       // Weapons can false-positive in fantasy/anime art, so require a high score.
