@@ -55,7 +55,7 @@ export function assertSafeText(values: any[]) {
 
   if (hit) {
     throw new Error(
-      "This post cannot be uploaded. Please use clean creator-safe text."
+      "Your text could not be saved. Keep it clean and try again."
     );
   }
 }
@@ -100,22 +100,29 @@ function evaluateSightengineResult(data: any) {
 
   const rules = [
     {
-      // Hard Stripe-SFW block: explicit sexual/nude content.
-      // Keep this strict.
+      // Hard SFW block: actual explicit sexual/nude content.
+      // Keep this strict for the public Stripe lane.
       label: "explicit sexual or nudity content",
       threshold: 0.35,
       pattern:
-        /(explicit|erotica|porn|genital|sexual_activity|sexual_display|sexual_act|exposed|bare_breast|bare_chest)/,
+        /(explicit|erotica|porn|genital|sexual_activity|sexual_display|sexual_act|exposed|bare_breast|bare_chest|sexual)/,
     },
     {
-      label: "gore or graphic violence",
-      threshold: 0.45,
-      pattern: /(gore|graphic|blood|wound|corpse|weapon|violence)/,
+      // Allow normal gothic/fantasy poster art. Block only strong gore signals.
+      label: "graphic gore",
+      threshold: 0.70,
+      pattern: /(gore|graphic_gore|severe_blood|open_wound|corpse|dismember)/,
+    },
+    {
+      // Weapons can false-positive in fantasy/anime art, so require a high score.
+      label: "weapon content",
+      threshold: 0.90,
+      pattern: /(weapon|firearm|gun|knife)/,
     },
     {
       label: "offensive or restricted content",
-      threshold: 0.65,
-      pattern: /(offensive|hate|drug|weapon|recreational_drug)/,
+      threshold: 0.80,
+      pattern: /(hate|recreational_drug|hard_drug|drug_use)/,
     },
   ];
 
@@ -186,7 +193,7 @@ async function moderateImageWithSightengine({
 
   if (!res.ok || !data || data.status === "failure") {
     console.error("SIGHTENGINE_MODERATION_FAILURE", data);
-    throw new Error("Image moderation failed. Upload blocked for safety.");
+    throw new Error("That image could not be checked. Try again with a different image.");
   }
 
   const result = evaluateSightengineResult(data);
@@ -195,7 +202,7 @@ async function moderateImageWithSightengine({
     console.error("SFW_IMAGE_BLOCKED_REASON", result.reason);
 
     throw new Error(
-      "This image could not be added. Please upload a clean creator-safe image."
+      "That image could not be added. Try a different image or a simpler crop."
     );
   }
 
