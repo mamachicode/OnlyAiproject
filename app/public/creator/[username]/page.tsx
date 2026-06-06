@@ -122,7 +122,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[#07050d] text-white">
-      <section className="relative overflow-hidden border-b border-white/10 px-4 py-4 sm:px-6 sm:py-6">
+      <section className="relative overflow-hidden border-b border-white/10 px-3 py-3 sm:px-6 sm:py-6">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(236,72,153,0.18),transparent_34%),radial-gradient(circle_at_top_right,rgba(147,51,234,0.14),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent_28%)]" />
 
         <div className="relative mx-auto max-w-5xl">
@@ -144,8 +144,8 @@ export default async function PublicCreatorPage({ params }: PageProps) {
             ) : null}
           </div>
 
-          <div className="mt-5 overflow-hidden rounded-[1.75rem] border border-white/10 bg-zinc-950/90 shadow-2xl shadow-pink-950/20 sm:rounded-[2rem]">
-            <div className="relative h-40 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black sm:h-52 md:h-64">
+          <div className="mt-4 overflow-hidden rounded-[1.4rem] border border-white/10 bg-zinc-950/90 shadow-2xl shadow-pink-950/20 sm:mt-5 sm:rounded-[2rem]">
+            <div className="relative h-32 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black sm:h-52 md:h-64">
               {bannerUrl ? (
                 <img
                   src={bannerUrl}
@@ -164,11 +164,11 @@ export default async function PublicCreatorPage({ params }: PageProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
             </div>
 
-            <div className="grid gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
+            <div className="grid gap-5 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
               <div>
-                <div className="-mt-10 flex min-w-0 flex-col gap-4 sm:-mt-12 sm:flex-row sm:items-end">
+                <div className="-mt-8 flex min-w-0 flex-col gap-3 sm:-mt-12 sm:flex-row sm:items-end sm:gap-4">
                   <div
-                    className="relative h-[96px] w-[96px] min-h-[96px] min-w-[96px] max-h-[96px] max-w-[96px] shrink-0 overflow-hidden rounded-[9999px] border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 ring-1 ring-white/10"
+                    className="relative h-20 w-20 min-h-20 min-w-20 max-h-20 max-w-20 shrink-0 overflow-hidden rounded-[9999px] border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 ring-1 ring-white/10 sm:h-[96px] sm:w-[96px] sm:min-h-[96px] sm:min-w-[96px] sm:max-h-[96px] sm:max-w-[96px]"
                     style={{ clipPath: "circle(50% at 50% 50%)" }}
                   >
                     {avatarUrl ? (
@@ -186,7 +186,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
                   <div className="min-w-0 pb-1">
 
-                    <h1 className="mt-3 break-words text-3xl font-black tracking-tight sm:text-4xl md:text-5xl">
+                    <h1 className="mt-2 break-words text-3xl font-black tracking-tight sm:mt-3 sm:text-4xl md:text-5xl">
                       {displayName}
                     </h1>
 
@@ -196,66 +196,66 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300 sm:text-lg">
+                <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-300 sm:mt-5 sm:text-lg">
                   {bio}
                 </p>
 
-                <div className="mt-5 flex flex-wrap gap-2 sm:gap-3">
-                  <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
+                <div className="mt-4 flex flex-wrap gap-2 sm:mt-5 sm:gap-3">
+                  <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-zinc-200 sm:px-4 sm:text-sm">
                     {isOwner
                       ? `🔒 ${lockedCount} locked posts`
                       : `🔒 ${lockedCount} member posts`}
                   </div>
 
                   {freeCount > 0 ? (
-                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
+                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-zinc-200 sm:px-4 sm:text-sm">
                       ✨ {freeCount} previews
                     </div>
                   ) : (
-                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
+                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-zinc-200 sm:px-4 sm:text-sm">
                       ✨ Private feed
                     </div>
                   )}
 
-                  <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-bold text-zinc-200">
+                  <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-zinc-200 sm:px-4 sm:text-sm">
                     💌 Creator updates
                   </div>
                 </div>
 
                 {isOwner ? (
-                  <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-pink-400/20 bg-pink-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="mt-5 rounded-2xl border border-pink-400/20 bg-pink-500/10 p-3 sm:mt-6 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
                     <div>
                       <p className="text-sm font-black text-white">
-                        Creator preview
+                        Creator tools
                       </p>
-                      <p className="mt-1 text-sm text-pink-100/75">
+                      <p className="mt-1 hidden text-sm text-pink-100/75 sm:block">
                         This is what fans see before subscribing.
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                    <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-0 sm:flex sm:flex-row sm:flex-wrap sm:justify-end">
                       <Link
                         href="/dashboard/settings"
-                        className="rounded-full bg-white px-4 py-2 text-center text-sm font-black text-black hover:bg-zinc-200"
+                        className="rounded-full bg-white px-3 py-2 text-center text-xs font-black text-black hover:bg-zinc-200 sm:px-4 sm:text-sm"
                       >
                         Edit profile
                       </Link>
                       <Link
                         href="/dashboard/upload"
-                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-black text-white hover:bg-white/10"
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-center text-xs font-black text-white hover:bg-white/10 sm:px-4 sm:text-sm"
                       >
                         Add post
                       </Link>
                       <Link
                         href="/dashboard/subscribers"
-                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-black text-white hover:bg-white/10"
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-center text-xs font-black text-white hover:bg-white/10 sm:px-4 sm:text-sm"
                       >
                         View subscribers
                       </Link>
 
                       <Link
                         href="/dashboard/messages"
-                        className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-center text-sm font-black text-white hover:bg-white/10"
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-center text-xs font-black text-white hover:bg-white/10 sm:px-4 sm:text-sm"
                       >
                         Message fans
                       </Link>
@@ -264,7 +264,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 ) : null}
               </div>
 
-              <aside className="self-start rounded-[1.5rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.14] via-white/[0.06] to-purple-500/[0.1] p-5 shadow-xl shadow-pink-950/20 sm:p-6 lg:sticky lg:top-6">
+              <aside className="self-start rounded-[1.25rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.14] via-white/[0.06] to-purple-500/[0.1] p-4 shadow-xl shadow-pink-950/20 sm:rounded-[1.5rem] sm:p-6 lg:sticky lg:top-6">
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-pink-200">
                   Monthly membership
                 </p>
@@ -281,10 +281,10 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 </p>
 
                 {isOwner ? (
-                  <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm leading-6 text-zinc-300">
-                    <p className="font-black text-white">Fan subscription preview</p>
+                  <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-xs leading-5 text-zinc-300 sm:mt-5 sm:p-4 sm:text-sm sm:leading-6">
+                    <p className="font-black text-white">Fan preview</p>
                     <p className="mt-1">
-                      Fans will see the subscribe button here. Manage your page from the creator preview tools.
+                      Fans will see subscription options here.
                     </p>
                   </div>
                 ) : isCreatorSfw ? (
