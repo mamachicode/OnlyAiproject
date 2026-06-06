@@ -229,7 +229,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                         Creator tools
                       </p>
                       <p className="mt-1 hidden text-sm text-pink-100/75 sm:block">
-                        This is what fans see before subscribing.
+                        Manage your profile, posts, subscribers, and fan messages.
                       </p>
                     </div>
 
@@ -270,7 +270,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                         Membership
                       </p>
                       <p className="mt-1 text-xs text-zinc-500">
-                        Fan price preview
+                        Subscription price
                       </p>
                     </div>
 
@@ -283,7 +283,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
               <aside className={`self-start rounded-[1.25rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.14] via-white/[0.06] to-purple-500/[0.1] p-4 shadow-xl shadow-pink-950/20 sm:rounded-[1.5rem] sm:p-6 lg:sticky lg:top-6 ${isOwner ? "hidden sm:block" : ""}`}>
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-pink-200 sm:text-sm">
-                  {isOwner ? "Membership preview" : "Monthly membership"}
+                  {isOwner ? "Membership" : "Monthly membership"}
                 </p>
 
                 <div className="mt-2 flex items-end gap-2 sm:mt-3">
@@ -295,18 +295,11 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
                 <p className="mt-3 text-xs leading-5 text-zinc-300 sm:mt-4 sm:text-sm sm:leading-6">
                   {isOwner
-                    ? "Fans will see your monthly price and subscription options here."
+                    ? "Your monthly subscription price."
                     : `Unlock private posts and creator updates from @${publicHandle}.`}
                 </p>
 
-                {isOwner ? (
-                  <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-xs leading-5 text-zinc-300 sm:mt-5 sm:p-4 sm:text-sm sm:leading-6">
-                    <p className="font-black text-white">Fan preview</p>
-                    <p className="mt-1">
-                      Fans will see subscription options here.
-                    </p>
-                  </div>
-                ) : isCreatorSfw ? (
+                {isOwner ? null : isCreatorSfw ? (
                   hasActiveSubscription ? (
                     <p className="mt-5 text-center text-sm font-semibold text-zinc-100">
                       Active subscriber — access unlocked
