@@ -14,6 +14,7 @@ type CropOptions = {
   outputHeight: number;
   maxBytes: number;
   label: string;
+  focusX: number;
   focusY: number;
 };
 
@@ -83,6 +84,7 @@ async function cropAndCompressImage(
 
   const targetRatio = options.outputWidth / options.outputHeight;
   const imageRatio = imageWidth / imageHeight;
+  const focusX = clampPercent(options.focusX) / 100;
   const focusY = clampPercent(options.focusY) / 100;
 
   let sourceX = 0;
@@ -93,7 +95,7 @@ async function cropAndCompressImage(
   if (imageRatio > targetRatio) {
     sourceHeight = imageHeight;
     sourceWidth = imageHeight * targetRatio;
-    sourceX = (imageWidth - sourceWidth) / 2;
+    sourceX = (imageWidth - sourceWidth) * focusX;
     sourceY = 0;
   } else {
     sourceWidth = imageWidth;
@@ -163,6 +165,12 @@ function cropLabel(value: number) {
   return `${value}%`;
 }
 
+function horizontalCropLabel(value: number) {
+  if (value <= 15) return "Left";
+  if (value >= 85) return "Right";
+  return `${value}%`;
+}
+
 export default function CreatorProfileForm({
   currentDisplayName,
   currentHandle,
@@ -171,7 +179,9 @@ export default function CreatorProfileForm({
 }: CreatorProfileFormProps) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [avatarFocusX, setAvatarFocusX] = useState(50);
   const [avatarFocusY, setAvatarFocusY] = useState(50);
+  const [bannerFocusX, setBannerFocusX] = useState(50);
   const [bannerFocusY, setBannerFocusY] = useState(22);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState("");
@@ -237,6 +247,7 @@ export default function CreatorProfileForm({
           outputHeight: 1200,
           maxBytes: 1_500_000,
           label: "Avatar",
+          focusX: avatarFocusX,
           focusY: avatarFocusY,
         });
 
@@ -249,6 +260,7 @@ export default function CreatorProfileForm({
           outputHeight: 800,
           maxBytes: 2_500_000,
           label: "Banner",
+          focusX: bannerFocusX,
           focusY: bannerFocusY,
         });
 
@@ -365,7 +377,7 @@ export default function CreatorProfileForm({
                   src={avatarPreviewUrl}
                   alt="Avatar crop preview"
                   className="h-full w-full object-cover"
-                  style={{ objectPosition: `center ${avatarFocusY}%` }}
+                  style={{ objectPosition: `${avatarFocusX}% ${avatarFocusY}%` }}
                 />
               </div>
             </div>
@@ -374,6 +386,28 @@ export default function CreatorProfileForm({
               Choose an avatar to preview the crop before saving.
             </p>
           )}
+
+          <label className="mt-4 block">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
+              Avatar horizontal position: {horizontalCropLabel(avatarFocusX)}
+            </span>
+
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={avatarFocusX}
+              onChange={(event) => setAvatarFocusX(Number(event.target.value))}
+              className="mt-3 w-full accent-pink-500"
+            />
+          </label>
+
+          <div className="mt-2 flex justify-between text-xs font-bold text-zinc-600">
+            <span>Left</span>
+            <span>Center</span>
+            <span>Right</span>
+          </div>
 
           <label className="mt-4 block">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
@@ -428,7 +462,7 @@ export default function CreatorProfileForm({
                   src={bannerPreviewUrl}
                   alt="Banner crop preview"
                   className="h-full w-full object-cover"
-                  style={{ objectPosition: `center ${bannerFocusY}%` }}
+                  style={{ objectPosition: `${bannerFocusX}% ${bannerFocusY}%` }}
                 />
               </div>
             </div>
@@ -437,6 +471,28 @@ export default function CreatorProfileForm({
               Choose a banner to preview the crop before saving.
             </p>
           )}
+
+          <label className="mt-4 block">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
+              Banner horizontal position: {horizontalCropLabel(bannerFocusX)}
+            </span>
+
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={bannerFocusX}
+              onChange={(event) => setBannerFocusX(Number(event.target.value))}
+              className="mt-3 w-full accent-pink-500"
+            />
+          </label>
+
+          <div className="mt-2 flex justify-between text-xs font-bold text-zinc-600">
+            <span>Left</span>
+            <span>Center</span>
+            <span>Right</span>
+          </div>
 
           <label className="mt-4 block">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
