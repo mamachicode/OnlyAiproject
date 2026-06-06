@@ -308,9 +308,9 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 ) : isCreatorSfw ? (
                   hasActiveSubscription ? (
-                    <div className="mt-5 rounded-2xl border border-green-400/20 bg-green-400/10 p-4 text-center text-sm font-black text-green-100">
+                    <p className="mt-5 text-center text-sm font-semibold text-zinc-100">
                       Active subscriber — access unlocked
-                    </div>
+                    </p>
                   ) : (
                     <Link
                       href={`/subscribe/${publicHandle}`}
