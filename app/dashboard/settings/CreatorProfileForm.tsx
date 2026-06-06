@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type PointerEvent,
+} from "react";
 
 type CreatorProfileFormProps = {
   currentDisplayName: string;
@@ -16,6 +23,16 @@ type CropOptions = {
   label: string;
   focusX: number;
   focusY: number;
+};
+
+type CropFrameProps = {
+  title: string;
+  previewUrl: string;
+  shape: "avatar" | "banner";
+  focusX: number;
+  focusY: number;
+  setFocusX: (value: number) => void;
+  setFocusY: (value: number) => void;
 };
 
 function loadImage(file: File): Promise<HTMLImageElement> {
@@ -159,16 +176,116 @@ async function cropAndCompressImage(
   throw new Error(`${options.label} could not be compressed.`);
 }
 
-function cropLabel(value: number) {
-  if (value <= 15) return "Top";
-  if (value >= 85) return "Bottom";
-  return `${value}%`;
-}
+function CropFrame({
+  title,
+  previewUrl,
+  shape,
+  focusX,
+  focusY,
+  setFocusX,
+  setFocusY,
+}: CropFrameProps) {
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    startFocusX: number;
+    startFocusY: number;
+  } | null>(null);
 
-function horizontalCropLabel(value: number) {
-  if (value <= 15) return "Left";
-  if (value >= 85) return "Right";
-  return `${value}%`;
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (!previewUrl) return;
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startFocusX: focusX,
+      startFocusY: focusY,
+    };
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    const drag = dragRef.current;
+    if (!drag) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const sensitivity = shape === "banner" ? 85 : 100;
+
+    const deltaX = ((event.clientX - drag.startX) / Math.max(1, rect.width)) * sensitivity;
+    const deltaY = ((event.clientY - drag.startY) / Math.max(1, rect.height)) * sensitivity;
+
+    setFocusX(clampPercent(drag.startFocusX - deltaX));
+    setFocusY(clampPercent(drag.startFocusY - deltaY));
+  }
+
+  function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
+    if (dragRef.current?.pointerId === event.pointerId) {
+      dragRef.current = null;
+    }
+  }
+
+  const isAvatar = shape === "avatar";
+
+  return (
+    <div className="mt-5 rounded-3xl border border-pink-400/20 bg-black/30 p-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <p className="text-xs font-black uppercase tracking-[0.25em] text-pink-300">
+          {title}
+        </p>
+        <p className="text-xs font-semibold text-zinc-500">
+          Drag image to frame it
+        </p>
+      </div>
+
+      <div
+        role="button"
+        tabIndex={0}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className={
+          isAvatar
+            ? "relative mx-auto aspect-square w-full max-w-[320px] cursor-grab touch-none overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 active:cursor-grabbing"
+            : "relative aspect-[3/1] w-full cursor-grab touch-none overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 active:cursor-grabbing"
+        }
+      >
+        <img
+          src={previewUrl}
+          alt={`${title} crop preview`}
+          className="h-full w-full select-none object-cover"
+          draggable={false}
+          style={{ objectPosition: `${focusX}% ${focusY}%` }}
+        />
+
+        <div className="pointer-events-none absolute inset-0 bg-black/5" />
+
+        {isAvatar ? (
+          <>
+            <div className="pointer-events-none absolute inset-6 rounded-full border-2 border-white/80 shadow-[0_0_0_999px_rgba(0,0,0,0.28)]" />
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <span className="rounded-full bg-black/50 px-3 py-1 text-xs font-black text-white opacity-80">
+                Avatar crop
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <span className="rounded-full bg-black/50 px-3 py-1 text-xs font-black text-white opacity-80">
+              Banner crop
+            </span>
+          </div>
+        )}
+      </div>
+
+      <p className="mt-3 text-xs leading-5 text-zinc-500">
+        Drag the image inside the frame. The saved image will match this crop.
+      </p>
+    </div>
+  );
 }
 
 export default function CreatorProfileForm({
@@ -207,6 +324,8 @@ export default function CreatorProfileForm({
     }
 
     setError("");
+    setAvatarFocusX(50);
+    setAvatarFocusY(50);
     setAvatarPreviewUrl(URL.createObjectURL(file));
   }
 
@@ -219,6 +338,8 @@ export default function CreatorProfileForm({
     }
 
     setError("");
+    setBannerFocusX(50);
+    setBannerFocusY(22);
     setBannerPreviewUrl(URL.createObjectURL(file));
   }
 
@@ -367,73 +488,20 @@ export default function CreatorProfileForm({
           </label>
 
           {avatarPreviewUrl ? (
-            <div className="mt-5 rounded-3xl border border-pink-400/20 bg-black/30 p-5">
-              <p className="mb-4 text-xs font-black uppercase tracking-[0.25em] text-pink-300">
-                Avatar preview
-              </p>
-
-              <div className="mx-auto h-40 w-40 overflow-hidden rounded-full border-4 border-black bg-zinc-900 shadow-2xl shadow-pink-950/20">
-                <img
-                  src={avatarPreviewUrl}
-                  alt="Avatar crop preview"
-                  className="h-full w-full object-cover"
-                  style={{ objectPosition: `${avatarFocusX}% ${avatarFocusY}%` }}
-                />
-              </div>
-            </div>
+            <CropFrame
+              title="Avatar preview"
+              previewUrl={avatarPreviewUrl}
+              shape="avatar"
+              focusX={avatarFocusX}
+              focusY={avatarFocusY}
+              setFocusX={setAvatarFocusX}
+              setFocusY={setAvatarFocusY}
+            />
           ) : (
             <p className="mt-3 text-xs text-zinc-500">
               Choose an avatar to preview the crop before saving.
             </p>
           )}
-
-          <label className="mt-4 block">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
-              Avatar horizontal position: {horizontalCropLabel(avatarFocusX)}
-            </span>
-
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="1"
-              value={avatarFocusX}
-              onChange={(event) => setAvatarFocusX(Number(event.target.value))}
-              className="mt-3 w-full accent-pink-500"
-            />
-          </label>
-
-          <div className="mt-2 flex justify-between text-xs font-bold text-zinc-600">
-            <span>Left</span>
-            <span>Center</span>
-            <span>Right</span>
-          </div>
-
-          <label className="mt-4 block">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
-              Avatar vertical position: {cropLabel(avatarFocusY)}
-            </span>
-
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="1"
-              value={avatarFocusY}
-              onChange={(event) => setAvatarFocusY(Number(event.target.value))}
-              className="mt-3 w-full accent-pink-500"
-            />
-          </label>
-
-          <div className="mt-2 flex justify-between text-xs font-bold text-zinc-600">
-            <span>Top</span>
-            <span>Center</span>
-            <span>Bottom</span>
-          </div>
-
-          <p className="mt-2 text-xs text-zinc-500">
-            Move the slider until the preview looks right, then save.
-          </p>
         </div>
 
         <div>
@@ -452,73 +520,20 @@ export default function CreatorProfileForm({
           </label>
 
           {bannerPreviewUrl ? (
-            <div className="mt-5 rounded-3xl border border-pink-400/20 bg-black/30 p-4">
-              <p className="mb-4 text-xs font-black uppercase tracking-[0.25em] text-pink-300">
-                Banner preview
-              </p>
-
-              <div className="aspect-[3/1] w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-900">
-                <img
-                  src={bannerPreviewUrl}
-                  alt="Banner crop preview"
-                  className="h-full w-full object-cover"
-                  style={{ objectPosition: `${bannerFocusX}% ${bannerFocusY}%` }}
-                />
-              </div>
-            </div>
+            <CropFrame
+              title="Banner preview"
+              previewUrl={bannerPreviewUrl}
+              shape="banner"
+              focusX={bannerFocusX}
+              focusY={bannerFocusY}
+              setFocusX={setBannerFocusX}
+              setFocusY={setBannerFocusY}
+            />
           ) : (
             <p className="mt-3 text-xs text-zinc-500">
               Choose a banner to preview the crop before saving.
             </p>
           )}
-
-          <label className="mt-4 block">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
-              Banner horizontal position: {horizontalCropLabel(bannerFocusX)}
-            </span>
-
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="1"
-              value={bannerFocusX}
-              onChange={(event) => setBannerFocusX(Number(event.target.value))}
-              className="mt-3 w-full accent-pink-500"
-            />
-          </label>
-
-          <div className="mt-2 flex justify-between text-xs font-bold text-zinc-600">
-            <span>Left</span>
-            <span>Center</span>
-            <span>Right</span>
-          </div>
-
-          <label className="mt-4 block">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
-              Banner vertical position: {cropLabel(bannerFocusY)}
-            </span>
-
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="1"
-              value={bannerFocusY}
-              onChange={(event) => setBannerFocusY(Number(event.target.value))}
-              className="mt-3 w-full accent-pink-500"
-            />
-          </label>
-
-          <div className="mt-2 flex justify-between text-xs font-bold text-zinc-600">
-            <span>Top</span>
-            <span>Center</span>
-            <span>Bottom</span>
-          </div>
-
-          <p className="mt-2 text-xs text-zinc-500">
-            Move the slider to place the face or subject inside the wide banner.
-          </p>
         </div>
       </div>
 
