@@ -223,7 +223,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 </div>
 
                 {isOwner ? (
-                  <div className="mt-5 rounded-2xl border border-pink-400/20 bg-pink-500/10 p-3 sm:mt-6 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
+                  <div className="mt-4 rounded-2xl border border-pink-400/20 bg-pink-500/10 p-3 sm:mt-6 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
                     <div>
                       <p className="text-sm font-black text-white">
                         Creator tools
@@ -262,9 +262,26 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                     </div>
                   </div>
                 ) : null}
+
+                {isOwner ? (
+                  <div className="mt-4 flex items-center justify-between rounded-2xl border border-pink-400/20 bg-white/[0.04] px-4 py-3 sm:hidden">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.22em] text-pink-200">
+                        Membership
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Fan price preview
+                      </p>
+                    </div>
+
+                    <p className="text-lg font-black text-white">
+                      ${price}<span className="text-xs text-zinc-500">/mo</span>
+                    </p>
+                  </div>
+                ) : null}
               </div>
 
-              <aside className="self-start rounded-[1.25rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.14] via-white/[0.06] to-purple-500/[0.1] p-4 shadow-xl shadow-pink-950/20 sm:rounded-[1.5rem] sm:p-6 lg:sticky lg:top-6">
+              <aside className={`self-start rounded-[1.25rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.14] via-white/[0.06] to-purple-500/[0.1] p-4 shadow-xl shadow-pink-950/20 sm:rounded-[1.5rem] sm:p-6 lg:sticky lg:top-6 ${isOwner ? "hidden sm:block" : ""}`}>
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-pink-200 sm:text-sm">
                   {isOwner ? "Membership preview" : "Monthly membership"}
                 </p>
