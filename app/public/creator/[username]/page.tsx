@@ -125,7 +125,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
       <section className="relative overflow-hidden border-b border-white/10 px-3 py-3 sm:px-6 sm:py-6">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(236,72,153,0.18),transparent_34%),radial-gradient(circle_at_top_right,rgba(147,51,234,0.14),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent_28%)]" />
 
-        <div className="relative mx-auto max-w-5xl">
+        <div className="relative mx-auto max-w-6xl">
           <div className="flex items-center justify-between gap-4">
             <Link
               href={fanUserId ? "/account" : "/"}
@@ -145,7 +145,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
           </div>
 
           <div className="mt-4 overflow-hidden rounded-[1.4rem] border border-white/10 bg-zinc-950/90 shadow-2xl shadow-pink-950/20 sm:mt-5 sm:rounded-[2rem]">
-            <div className="relative h-28 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black sm:h-52 md:h-64">
+            <div className="relative h-36 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black sm:h-60 md:h-80 lg:h-96">
               {bannerUrl ? (
                 <img
                   src={bannerUrl}
@@ -164,11 +164,11 @@ export default async function PublicCreatorPage({ params }: PageProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
             </div>
 
-            <div className="grid gap-4 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
+            <div className="grid gap-5 p-4 sm:gap-6 sm:p-7 lg:grid-cols-[minmax(0,1fr)_340px] lg:p-8">
               <div>
-                <div className="-mt-8 flex min-w-0 flex-col gap-3 sm:-mt-12 sm:flex-row sm:items-end sm:gap-4">
+                <div className="-mt-10 flex min-w-0 flex-col gap-3 sm:-mt-14 sm:flex-row sm:items-end sm:gap-4">
                   <div
-                    className="relative h-20 w-20 min-h-20 min-w-20 max-h-20 max-w-20 shrink-0 overflow-hidden rounded-[9999px] border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 ring-1 ring-white/10 sm:h-[96px] sm:w-[96px] sm:min-h-[96px] sm:min-w-[96px] sm:max-h-[96px] sm:max-w-[96px]"
+                    className="relative h-24 w-24 min-h-24 min-w-24 max-h-24 max-w-24 shrink-0 overflow-hidden rounded-[9999px] border-4 border-zinc-950 bg-gradient-to-br from-pink-500 to-purple-600 shadow-2xl shadow-pink-500/20 ring-1 ring-white/10 sm:h-[112px] sm:w-[112px] sm:min-h-[112px] sm:min-w-[112px] sm:max-h-[112px] sm:max-w-[112px]"
                     style={{ clipPath: "circle(50% at 50% 50%)" }}
                   >
                     {avatarUrl ? (
@@ -186,7 +186,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
 
                   <div className="min-w-0 pb-1">
 
-                    <h1 className="mt-2 break-words text-3xl font-black tracking-tight sm:mt-3 sm:text-4xl md:text-5xl">
+                    <h1 className="mt-2 break-words text-4xl font-black tracking-tight sm:mt-3 sm:text-5xl md:text-6xl">
                       {displayName}
                     </h1>
 
