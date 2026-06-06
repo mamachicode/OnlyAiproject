@@ -325,35 +325,10 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 )}
 
-                {!isOwner ? (
-                  <>
-                    <div className="mt-5 space-y-3 text-sm text-zinc-300">
-                      <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                        <p className="font-black text-white">🔒 Unlock the feed</p>
-                        <p className="mt-1 text-xs leading-5 text-zinc-500">
-                          Access locked posts once your subscription is active.
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                        <p className="font-black text-white">💌 Creator updates</p>
-                        <p className="mt-1 text-xs leading-5 text-zinc-500">
-                          Receive private broadcast messages from the creator.
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                        <p className="font-black text-white">🛡️ Secure checkout</p>
-                        <p className="mt-1 text-xs leading-5 text-zinc-500">
-                          Stripe-powered monthly access. Cancel anytime.
-                        </p>
-                      </div>
-                    </div>
-
-                    <p className="mt-4 text-xs leading-5 text-zinc-500">
-                      Secure monthly access. Cancel anytime.
-                    </p>
-                  </>
+                {!isOwner && isCreatorSfw ? (
+                  <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
+                    Cancel anytime.
+                  </p>
                 ) : null}
               </aside>
             </div>
