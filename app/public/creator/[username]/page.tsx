@@ -145,7 +145,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
           </div>
 
           <div className="mt-4 overflow-hidden rounded-[1.4rem] border border-white/10 bg-zinc-950/90 shadow-2xl shadow-pink-950/20 sm:mt-5 sm:rounded-[2rem]">
-            <div className="relative h-32 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black sm:h-52 md:h-64">
+            <div className="relative h-28 bg-gradient-to-br from-pink-500/40 via-purple-600/20 to-black sm:h-52 md:h-64">
               {bannerUrl ? (
                 <img
                   src={bannerUrl}
@@ -164,7 +164,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
             </div>
 
-            <div className="grid gap-5 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
+            <div className="grid gap-4 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-7">
               <div>
                 <div className="-mt-8 flex min-w-0 flex-col gap-3 sm:-mt-12 sm:flex-row sm:items-end sm:gap-4">
                   <div
@@ -265,19 +265,21 @@ export default async function PublicCreatorPage({ params }: PageProps) {
               </div>
 
               <aside className="self-start rounded-[1.25rem] border border-pink-400/20 bg-gradient-to-br from-pink-500/[0.14] via-white/[0.06] to-purple-500/[0.1] p-4 shadow-xl shadow-pink-950/20 sm:rounded-[1.5rem] sm:p-6 lg:sticky lg:top-6">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-pink-200">
-                  Monthly membership
+                <p className="text-xs font-bold uppercase tracking-[0.25em] text-pink-200 sm:text-sm">
+                  {isOwner ? "Membership preview" : "Monthly membership"}
                 </p>
 
-                <div className="mt-3 flex items-end gap-2">
-                  <p className="text-4xl font-black sm:text-5xl">${price}</p>
-                  <p className="pb-2 text-sm font-bold text-zinc-400">
+                <div className="mt-2 flex items-end gap-2 sm:mt-3">
+                  <p className="text-3xl font-black sm:text-5xl">${price}</p>
+                  <p className="pb-1 text-sm font-bold text-zinc-400 sm:pb-2">
                     /month
                   </p>
                 </div>
 
-                <p className="mt-4 text-sm leading-6 text-zinc-300">
-                  Unlock members-only posts, previews, and creator updates from @{publicHandle}.
+                <p className="mt-3 text-xs leading-5 text-zinc-300 sm:mt-4 sm:text-sm sm:leading-6">
+                  {isOwner
+                    ? "Fans will see your monthly price and subscription options here."
+                    : `Unlock members-only posts, previews, and creator updates from @${publicHandle}.`}
                 </p>
 
                 {isOwner ? (
@@ -306,36 +308,36 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 )}
 
-                <div className="mt-5 space-y-3 text-sm text-zinc-300">
-                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                    <p className="font-black text-white">🔒 Unlock the feed</p>
-                    <p className="mt-1 text-xs leading-5 text-zinc-500">
-                      Access locked posts once your subscription is active.
+                {!isOwner ? (
+                  <>
+                    <div className="mt-5 space-y-3 text-sm text-zinc-300">
+                      <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                        <p className="font-black text-white">🔒 Unlock the feed</p>
+                        <p className="mt-1 text-xs leading-5 text-zinc-500">
+                          Access locked posts once your subscription is active.
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                        <p className="font-black text-white">💌 Creator updates</p>
+                        <p className="mt-1 text-xs leading-5 text-zinc-500">
+                          Receive private broadcast messages from the creator.
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                        <p className="font-black text-white">🛡️ Secure checkout</p>
+                        <p className="mt-1 text-xs leading-5 text-zinc-500">
+                          Stripe-powered monthly access. Cancel anytime.
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="mt-4 text-xs leading-5 text-zinc-500">
+                      Secure monthly access. Cancel anytime.
                     </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                    <p className="font-black text-white">💌 Creator updates</p>
-                    <p className="mt-1 text-xs leading-5 text-zinc-500">
-                      Receive private broadcast messages from the creator.
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                    <p className="font-black text-white">🛡️ Secure checkout</p>
-                    <p className="mt-1 text-xs leading-5 text-zinc-500">
-                      Stripe-powered monthly access. Cancel anytime.
-                    </p>
-                  </div>
-                </div>
-
-
-
-                <p className="mt-4 text-xs leading-5 text-zinc-500">
-                  {isOwner
-                    ? "Fans will see subscribe or subscriber status here."
-                    : "Secure monthly access. Cancel anytime."}
-                </p>
+                  </>
+                ) : null}
               </aside>
             </div>
           </div>
