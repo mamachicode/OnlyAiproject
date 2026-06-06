@@ -296,7 +296,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 <p className="mt-3 text-xs leading-5 text-zinc-300 sm:mt-4 sm:text-sm sm:leading-6">
                   {isOwner
                     ? "Fans will see your monthly price and subscription options here."
-                    : `Unlock members-only posts, previews, and creator updates from @${publicHandle}.`}
+                    : `Unlock private posts and creator updates from @${publicHandle}.`}
                 </p>
 
                 {isOwner ? (
