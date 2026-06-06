@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 
 type CreatorProfileFormProps = {
   currentDisplayName: string;
@@ -173,6 +173,44 @@ export default function CreatorProfileForm({
   const [error, setError] = useState("");
   const [avatarFocusY, setAvatarFocusY] = useState(50);
   const [bannerFocusY, setBannerFocusY] = useState(22);
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState("");
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+    };
+  }, [avatarPreviewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
+    };
+  }, [bannerPreviewUrl]);
+
+  function handleAvatarFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file || !file.type.startsWith("image/")) {
+      setAvatarPreviewUrl("");
+      return;
+    }
+
+    setError("");
+    setAvatarPreviewUrl(URL.createObjectURL(file));
+  }
+
+  function handleBannerFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file || !file.type.startsWith("image/")) {
+      setBannerPreviewUrl("");
+      return;
+    }
+
+    setError("");
+    setBannerPreviewUrl(URL.createObjectURL(file));
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -311,9 +349,31 @@ export default function CreatorProfileForm({
               name="avatar"
               type="file"
               accept="image/*"
+              onChange={handleAvatarFileChange}
               className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
             />
           </label>
+
+          {avatarPreviewUrl ? (
+            <div className="mt-5 rounded-3xl border border-pink-400/20 bg-black/30 p-5">
+              <p className="mb-4 text-xs font-black uppercase tracking-[0.25em] text-pink-300">
+                Avatar preview
+              </p>
+
+              <div className="mx-auto h-40 w-40 overflow-hidden rounded-full border-4 border-black bg-zinc-900 shadow-2xl shadow-pink-950/20">
+                <img
+                  src={avatarPreviewUrl}
+                  alt="Avatar crop preview"
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: `center ${avatarFocusY}%` }}
+                />
+              </div>
+            </div>
+          ) : (
+            <p className="mt-3 text-xs text-zinc-500">
+              Choose an avatar to preview the crop before saving.
+            </p>
+          )}
 
           <label className="mt-4 block">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
@@ -338,7 +398,7 @@ export default function CreatorProfileForm({
           </div>
 
           <p className="mt-2 text-xs text-zinc-500">
-            Re-upload the original image, adjust the slider, then save.
+            Move the slider until the preview looks right, then save.
           </p>
         </div>
 
@@ -352,9 +412,31 @@ export default function CreatorProfileForm({
               name="banner"
               type="file"
               accept="image/*"
+              onChange={handleBannerFileChange}
               className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
             />
           </label>
+
+          {bannerPreviewUrl ? (
+            <div className="mt-5 rounded-3xl border border-pink-400/20 bg-black/30 p-4">
+              <p className="mb-4 text-xs font-black uppercase tracking-[0.25em] text-pink-300">
+                Banner preview
+              </p>
+
+              <div className="aspect-[3/1] w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-900">
+                <img
+                  src={bannerPreviewUrl}
+                  alt="Banner crop preview"
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: `center ${bannerFocusY}%` }}
+                />
+              </div>
+            </div>
+          ) : (
+            <p className="mt-3 text-xs text-zinc-500">
+              Choose a banner to preview the crop before saving.
+            </p>
+          )}
 
           <label className="mt-4 block">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
@@ -379,7 +461,7 @@ export default function CreatorProfileForm({
           </div>
 
           <p className="mt-2 text-xs text-zinc-500">
-            Use the slider to place the face/subject inside the wide banner crop.
+            Move the slider to place the face or subject inside the wide banner.
           </p>
         </div>
       </div>
