@@ -196,7 +196,7 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   </div>
                 </div>
 
-                <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-300 sm:mt-5 sm:text-lg">
+                <p className="mt-4 max-w-2xl whitespace-pre-line text-[1.05rem] font-medium leading-7 tracking-[0.01em] text-zinc-200/90 sm:mt-5 sm:text-xl sm:leading-8">
                   {bio}
                 </p>
 
