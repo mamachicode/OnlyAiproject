@@ -28,7 +28,7 @@ function getFiles(formData: FormData) {
   });
 }
 
-function assertVideoBetaRules(files: any[]) {
+function assertVideoUploadRules(files: any[]) {
   const videoFiles = files.filter((file: any) =>
     String(file?.type || "").toLowerCase().startsWith("video/")
   );
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
     const ownedRemoveIds = ownedMediaToRemove.map((media) => media.id);
 
     const files = getFiles(formData);
-    assertVideoBetaRules(files);
+    assertVideoUploadRules(files);
 
     const nextOrder =
       post.media.length > 0

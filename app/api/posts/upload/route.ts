@@ -90,7 +90,7 @@ function getFiles(formData: FormData) {
   });
 }
 
-function assertVideoBetaRules(files: any[]) {
+function assertVideoUploadRules(files: any[]) {
   const videoFiles = files.filter((file: any) =>
     String(file?.type || "").toLowerCase().startsWith("video/")
   );

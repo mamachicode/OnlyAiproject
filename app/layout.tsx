@@ -5,7 +5,7 @@ import AgeBanner from "@/components/AgeBanner";
 
 export const metadata: Metadata = {
   title: "OnlyAi – AI Creator Platform",
-  description: "AI-powered SFW & NSFW creator platform",
+  description: "Private AI creator memberships, subscriptions, and fan-only posts.",
 };
 
 export const viewport: Viewport = {
@@ -21,7 +21,7 @@ export default function RootLayout({
     <html lang="en" className="bg-[#07050d]">
       <body className="min-h-dvh bg-[#07050d] text-white flex flex-col">
 
-        {/* 18+ banner only for NSFW */}
+        {/* Optional route banner */}
         <AgeBanner />
 
         {/* Page content */}
