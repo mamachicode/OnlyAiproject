@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
-import prisma from "@/src/lib/prisma";
 
-export async function GET(req: Request) {
-  return NextResponse.json({ status: "ok" });
+export async function GET() {
+  return NextResponse.json(
+    { error: "This checkout lane is not available." },
+    { status: 404 }
+  );
+}
+
+export async function POST() {
+  return NextResponse.json(
+    { error: "This checkout lane is not available." },
+    { status: 404 }
+  );
 }
