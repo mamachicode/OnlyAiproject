@@ -28,6 +28,8 @@ model User {
   email     String   @unique
   username  String   @unique
   password  String
+  resetPasswordTokenHash String?
+  resetPasswordExpiresAt DateTime?
 
   sfwPrice  Int      @default(5)
   nsfwPrice Int      @default(10)
@@ -40,6 +42,8 @@ model User {
   posts         Post[]         @relation("UserPosts")
   subscriptions Subscription[]
   webhookEvents WebhookEvent[]
+
+  @@index([resetPasswordTokenHash])
 }
 
 model Creator {
