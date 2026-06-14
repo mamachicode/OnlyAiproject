@@ -79,35 +79,72 @@ async function upsertSubscriptionFromStripeSubscription(stripeSub: any) {
 
   const status = mapStripeStatus(stripeSub.status);
   const currentPeriodEnd = getStripeCurrentPeriodEnd(stripeSub);
+  const endedAt = status === "ACTIVE" ? null : new Date();
 
-  await prisma.subscription.upsert({
+  const existingByExternalId = await prisma.subscription.findUnique({
     where: {
       processor_externalId: {
         processor: "STRIPE",
         externalId: stripeSub.id,
       },
     },
-    update: {
-      userId: fanUserId,
-      creatorId,
-      status,
-      currentPeriodEnd,
-      endedAt: status === "ACTIVE" ? null : new Date(),
+    select: { id: true },
+  });
+
+  if (existingByExternalId) {
+    await prisma.subscription.update({
+      where: { id: existingByExternalId.id },
+      data: {
+        userId: fanUserId,
+        creatorId,
+        status,
+        currentPeriodEnd,
+        endedAt,
+      },
+    });
+    return;
+  }
+
+  const existingByFanCreator = await prisma.subscription.findUnique({
+    where: {
+      userId_creatorId_processor: {
+        userId: fanUserId,
+        creatorId,
+        processor: "STRIPE",
+      },
     },
-    create: {
+    select: { id: true, externalId: true, status: true },
+  });
+
+  if (existingByFanCreator) {
+    await prisma.subscription.update({
+      where: { id: existingByFanCreator.id },
+      data: {
+        externalId: stripeSub.id,
+        status,
+        currentPeriodEnd,
+        endedAt,
+      },
+    });
+    return;
+  }
+
+  await prisma.subscription.create({
+    data: {
       userId: fanUserId,
       creatorId,
       processor: "STRIPE",
       externalId: stripeSub.id,
       status,
       currentPeriodEnd,
-      endedAt: status === "ACTIVE" ? null : new Date(),
+      endedAt,
     },
   });
 }
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
+  let event: Stripe.Event | null = null;
 
   try {
     const sig = req.headers.get("stripe-signature");
@@ -121,7 +158,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
     }
 
-    const event = stripe.webhooks.constructEvent(
+    event = stripe.webhooks.constructEvent(
       rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
@@ -154,6 +191,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ received: true });
   } catch (err) {
     console.error("STRIPE_WEBHOOK_ERROR", err);
+
+    const message = err instanceof Error ? err.message : String(err);
+
+    if (event) {
+      await recordWebhookEvent(event, rawBody, "FAILED", message);
+    }
 
     return NextResponse.json({ error: "Webhook error" }, { status: 400 });
   }
