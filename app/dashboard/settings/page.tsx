@@ -75,15 +75,15 @@ export default async function CreatorSettingsPage({
         <h1 className="mt-4 text-4xl font-black">Creator settings</h1>
 
         <p className="mt-4 max-w-2xl text-zinc-400">
-          Set your public creator identity, profile banner, avatar, bio, and monthly subscription price.
+          Set your public creator identity, profile banner, avatar, bio, and monthly subscription price. After saving, you’ll go to your creator dashboard where you can upload posts.
         </p>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/dashboard"
+            href={user.creator ? "/dashboard" : "/account"}
             className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-center text-sm font-black text-white hover:bg-white/10"
           >
-            ← Dashboard
+            {user.creator ? "← Creator dashboard" : "← Back to account"}
           </Link>
 
           <Link

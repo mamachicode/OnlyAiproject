@@ -404,7 +404,7 @@ export default function CreatorProfileForm({
         throw new Error("Could not save creator profile.");
       }
 
-      window.location.href = "/dashboard/settings?saved=1";
+      window.location.href = "/dashboard?creatorSaved=1";
     } catch (err: any) {
       setStatus("");
       setError(err?.message || "Could not save creator profile.");

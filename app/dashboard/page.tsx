@@ -6,7 +6,15 @@ import { redirect } from "next/navigation";
 import { auth } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams?: Promise<{
+    creatorSaved?: string;
+  }>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await Promise.resolve(searchParams);
+  const creatorSaved = params?.creatorSaved === "1";
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -149,6 +157,21 @@ export default async function DashboardPage() {
         <p className="mt-4 max-w-2xl text-zinc-400">
           Welcome back, @{creatorHandle}. Upload posts, manage your page, and prepare your membership for subscribers.
         </p>
+
+        {creatorSaved ? (
+          <div className="mt-8 rounded-3xl border border-green-400/30 bg-green-500/10 p-5 text-sm font-semibold text-green-100">
+            <p className="text-base font-black text-white">Creator profile saved.</p>
+            <p className="mt-2 text-green-100">
+              You’re now in your creator dashboard. Start by uploading your first locked SFW post.
+            </p>
+            <Link
+              href="/dashboard/upload"
+              className="mt-4 inline-flex rounded-full bg-green-200 px-5 py-3 text-sm font-black text-green-950 hover:bg-green-100"
+            >
+              Upload your first post
+            </Link>
+          </div>
+        ) : null}
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {cards.map((item) => (
