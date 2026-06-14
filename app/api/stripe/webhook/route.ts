@@ -178,10 +178,16 @@ export async function POST(req: Request) {
       }
     }
 
-    if (
-      event.type === "customer.subscription.updated" ||
-      event.type === "customer.subscription.deleted"
-    ) {
+    if (event.type === "customer.subscription.updated") {
+      const stripeSubEvent = event.data.object as any;
+      const latestStripeSub = await stripe.subscriptions.retrieve(
+        String(stripeSubEvent.id)
+      );
+
+      await upsertSubscriptionFromStripeSubscription(latestStripeSub);
+    }
+
+    if (event.type === "customer.subscription.deleted") {
       const stripeSub = event.data.object as any;
       await upsertSubscriptionFromStripeSubscription(stripeSub);
     }
