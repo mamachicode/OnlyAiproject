@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 function safeCallbackUrl(value: string | null) {
   if (!value) return "/account";
@@ -12,23 +13,32 @@ function safeCallbackUrl(value: string | null) {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [signupHref, setSignupHref] = useState("/signup");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const callbackUrl = safeCallbackUrl(params.get("callbackUrl"));
+    const authError = params.get("error");
 
     if (callbackUrl !== "/account") {
       setSignupHref(`/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+    }
+
+    if (authError === "CredentialsSignin") {
+      setError("Invalid email or password");
     }
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     const params = new URLSearchParams(window.location.search);
     const callbackUrl = safeCallbackUrl(params.get("callbackUrl"));
@@ -36,13 +46,18 @@ export default function LoginPage() {
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: true,
+      redirect: false,
       callbackUrl,
     });
 
     if (result?.error) {
       setError("Invalid email or password");
+      setLoading(false);
+      return;
     }
+
+    router.push(callbackUrl);
+    router.refresh();
   }
 
   return (
@@ -123,10 +138,11 @@ export default function LoginPage() {
                 </div>
 
                 <button
-                  className="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4 text-center font-black text-white shadow-xl shadow-pink-500/20"
+                  className="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-6 py-4 text-center font-black text-white shadow-xl shadow-pink-500/20 disabled:opacity-60"
                   type="submit"
+                  disabled={loading}
                 >
-                  Log in
+                  {loading ? "Logging in..." : "Log in"}
                 </button>
               </div>
 
