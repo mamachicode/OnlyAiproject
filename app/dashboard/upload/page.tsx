@@ -18,11 +18,11 @@ function getUploadErrorMessage(error?: string) {
   }
 
   if (error === "moderation") {
-    return "That image could not be added. Use a clean, polished image and try again.";
+    return "That image could not be added by the SFW safety check. Try a cleaner crop or a different image.";
   }
 
   if (error === "text") {
-    return "Your title or caption could not be saved. Keep it clean and try again.";
+    return "Some words in your title, caption, or file name are blocked for the SFW soft launch. Try a simple title like “New drop”, “Exclusive AI art”, or “Members-only set”.";
   }
 
   if (error === "video") {
@@ -95,10 +95,13 @@ export default async function UploadPostPage({
             </label>
             <input
               name="title"
-              placeholder="Exclusive post"
+              placeholder="New drop"
               maxLength={90}
               className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
             />
+            <p className="mt-2 text-xs leading-5 text-zinc-500">
+              Keep titles simple during the SFW soft launch, like “New drop” or “Exclusive AI art”.
+            </p>
           </div>
 
           <div>
@@ -109,9 +112,12 @@ export default async function UploadPostPage({
               name="content"
               rows={5}
               maxLength={1500}
-              placeholder="Write a caption or story intro..."
+              placeholder="Write a clean SFW caption or leave this empty..."
               className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-4 leading-7 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
             />
+            <p className="mt-2 text-xs leading-5 text-zinc-500">
+              Optional. Avoid adult or explicit wording while OnlyAi is in the SFW Stripe launch.
+            </p>
           </div>
 
           <div>
@@ -127,7 +133,7 @@ export default async function UploadPostPage({
               className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
             />
             <p className="mt-2 text-xs leading-5 text-zinc-500">
-              Upload images or one short video.
+              Upload images up to 20MB, or one MP4/MOV/WebM video up to 25MB. File names are checked by the SFW safety filter too.
             </p>
           </div>
 
