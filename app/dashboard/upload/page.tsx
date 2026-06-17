@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import UploadPostForm from "./UploadPostForm";
 import { requireCreatorPage } from "@/src/lib/creatorGuard";
 
 type UploadPostPageProps = {
@@ -83,76 +84,7 @@ export default async function UploadPostPage({
           </div>
         ) : null}
 
-        <form
-          action="/api/posts/upload"
-          method="POST"
-          encType="multipart/form-data"
-          className="mt-8 space-y-6 rounded-[2rem] border border-white/10 bg-white/[0.05] p-6 shadow-2xl shadow-black/20"
-        >
-          <div>
-            <label className="block text-sm font-bold text-zinc-300">
-              Title
-            </label>
-            <input
-              name="title"
-              placeholder="New drop"
-              maxLength={90}
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
-            />
-            <p className="mt-2 text-xs leading-5 text-zinc-500">
-              Keep titles simple during the SFW soft launch, like “New drop” or “Exclusive AI art”.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-zinc-300">
-              Caption / story text
-            </label>
-            <textarea
-              name="content"
-              rows={5}
-              maxLength={1500}
-              placeholder="Write a clean SFW caption or leave this empty..."
-              className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-4 leading-7 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
-            />
-            <p className="mt-2 text-xs leading-5 text-zinc-500">
-              Optional. Avoid adult or explicit wording while OnlyAi is in the SFW Stripe launch.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-zinc-300">
-              Images or video
-            </label>
-            <input
-              name="files"
-              type="file"
-              accept="image/*,video/mp4,video/quicktime,video/webm"
-              multiple
-              required
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
-            />
-            <p className="mt-2 text-xs leading-5 text-zinc-500">
-              Upload images up to 20MB, or one MP4/MOV/WebM video up to 25MB. File names are checked by the SFW safety filter too.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button
-              type="submit"
-              className="rounded-full bg-pink-500 px-6 py-3 text-sm font-black text-white shadow-lg shadow-pink-950/30 hover:bg-pink-400"
-            >
-              Upload post
-            </button>
-
-            <Link
-              href="/dashboard/posts"
-              className="rounded-full border border-white/10 px-6 py-3 text-center text-sm font-black text-white hover:bg-white/10"
-            >
-              Back to posts
-            </Link>
-          </div>
-        </form>
+        <UploadPostForm />
       </section>
     </main>
   );

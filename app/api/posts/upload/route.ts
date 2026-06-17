@@ -160,6 +160,8 @@ export async function POST(req: Request) {
       return redirectToUpload(req, "nofile");
     }
 
+    assertVideoUploadRules(files);
+
     const uploadedMedia = [];
 
     for (let i = 0; i < files.length; i++) {
