@@ -251,10 +251,19 @@ export default function UploadPostForm() {
             className="sr-only"
           />
 
-          <p className="text-base font-black text-white">
+          <p className="text-base font-black text-white sm:hidden">
+            Tap to choose from your photos
+          </p>
+
+          <p className="hidden text-base font-black text-white sm:block">
             Click to choose, drag images here, or paste from clipboard
           </p>
-          <p className="mt-2 text-xs leading-5 text-zinc-500">
+
+          <p className="mt-2 text-xs leading-5 text-zinc-500 sm:hidden">
+            Images up to 20MB, or one short video up to 25MB.
+          </p>
+
+          <p className="mt-2 hidden text-xs leading-5 text-zinc-500 sm:block">
             Images up to 20MB, or one MP4/MOV/WebM video up to 25MB. File names are checked by the SFW safety filter too.
           </p>
         </div>
