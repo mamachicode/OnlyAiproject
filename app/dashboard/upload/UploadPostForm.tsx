@@ -18,7 +18,7 @@ const ALLOWED_VIDEO_MIMES = new Set([
 ]);
 
 function makeFileId(file: File) {
-  return `${file.name}-${file.size}-${file.lastModified}`;
+  return `${file.name || "pasted-image"}-${file.type || "unknown"}-${file.size}`;
 }
 
 function isAllowedMedia(file: File) {
