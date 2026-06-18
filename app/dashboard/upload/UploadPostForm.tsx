@@ -102,25 +102,32 @@ export default function UploadPostForm() {
       return;
     }
 
-    const existingIds = new Set(selected.map((item) => item.id));
-    const freshFiles = allowed.filter((file) => !existingIds.has(makeFileId(file)));
-    const combinedFiles = [...selected.map((item) => item.file), ...freshFiles];
+    setSelected((current) => {
+      const existingIds = new Set(current.map((item) => item.id));
+      const freshFiles = allowed.filter((file) => !existingIds.has(makeFileId(file)));
+      const combinedFiles = [...current.map((item) => item.file), ...freshFiles];
 
-    const mixError = validateUploadMix(combinedFiles);
+      const mixError = validateUploadMix(combinedFiles);
 
-    if (mixError) {
-      setLocalError(mixError);
-      return;
-    }
+      if (mixError) {
+        setLocalError(mixError);
+        return current;
+      }
 
-    const nextItems = freshFiles.map((file) => ({
-      id: makeFileId(file),
-      file,
-      previewUrl: URL.createObjectURL(file),
-    }));
+      if (!freshFiles.length) {
+        setLocalError("");
+        return current;
+      }
 
-    setSelected((current) => [...current, ...nextItems]);
-    setLocalError("");
+      const nextItems = freshFiles.map((file) => ({
+        id: makeFileId(file),
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+
+      setLocalError("");
+      return [...current, ...nextItems];
+    });
   }
 
   function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -132,17 +139,6 @@ export default function UploadPostForm() {
     event.preventDefault();
     setDragging(false);
     appendFiles(Array.from(event.dataTransfer.files || []));
-  }
-
-  function handlePaste(event: React.ClipboardEvent<HTMLFormElement>) {
-    const files = Array.from(event.clipboardData.files || []).filter(
-      isAllowedMedia
-    );
-
-    if (!files.length) return;
-
-    event.preventDefault();
-    appendFiles(files);
   }
 
   function removeFile(id: string) {
@@ -182,7 +178,6 @@ export default function UploadPostForm() {
       method="POST"
       encType="multipart/form-data"
       onSubmit={handleSubmit}
-      onPaste={handlePaste}
       className="mt-8 space-y-6 rounded-[2rem] border border-white/10 bg-white/[0.05] p-6 shadow-2xl shadow-black/20"
     >
       <div>
