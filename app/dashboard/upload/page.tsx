@@ -30,6 +30,10 @@ function getUploadErrorMessage(error?: string) {
     return "That video could not be added. Use MP4, MOV, or WebM under 25MB.";
   }
 
+  if (error === "url") {
+    return "That image URL could not be added. Use a direct HTTPS link to a JPG, PNG, WebP, or GIF image.";
+  }
+
   if (error === "storage") {
     return "We could not process that image right now. Try a smaller image or upload one image first.";
   }

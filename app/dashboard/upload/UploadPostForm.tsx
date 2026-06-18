@@ -44,6 +44,7 @@ export default function UploadPostForm() {
   const selectedRef = useRef<any[]>([]);
 
   const [selected, setSelected] = useState<any[]>([]);
+  const [imageUrl, setImageUrl] = useState("");
   const [dragging, setDragging] = useState(false);
   const [localError, setLocalError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -166,9 +167,9 @@ export default function UploadPostForm() {
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (!selected.length) {
+    if (!selected.length && !imageUrl.trim()) {
       event.preventDefault();
-      setLocalError("Add at least one image or short video before uploading.");
+      setLocalError("Add media by choosing a file or pasting a direct image URL.");
       return;
     }
 
@@ -215,6 +216,27 @@ export default function UploadPostForm() {
 
       <div>
         <label className="block text-sm font-bold text-zinc-300">
+          Image URL
+        </label>
+        <input
+          name="imageUrl"
+          type="url"
+          inputMode="url"
+          value={imageUrl}
+          onChange={(event) => {
+            setImageUrl(event.target.value);
+            setLocalError("");
+          }}
+          placeholder="Paste a direct image link..."
+          className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
+        />
+        <p className="mt-2 text-xs leading-5 text-zinc-500">
+          Optional. Use a direct HTTPS image link if you do not want to download the image first.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-bold text-zinc-300">
           Images or video
         </label>
 
@@ -246,7 +268,7 @@ export default function UploadPostForm() {
             type="file"
             accept="image/*,video/mp4,video/quicktime,video/webm"
             multiple
-            required={!selected.length}
+            required={!selected.length && !imageUrl.trim()}
             onChange={handleInputChange}
             className="sr-only"
           />
