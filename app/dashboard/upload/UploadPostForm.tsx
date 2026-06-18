@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import Link from "next/link";
@@ -6,10 +5,48 @@ import {
   ChangeEvent,
   DragEvent,
   FormEvent,
+  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
+
+type SelectedMedia = {
+  id: string;
+  file: File;
+  previewUrl: string;
+};
+
+type UploadSignature = {
+  apiKey: string;
+  cloudName: string;
+  context: string;
+  folder: string;
+  signature: string;
+  timestamp: number;
+  uploadUrl: string;
+};
+
+type UploadedCloudinaryMedia = {
+  url: string;
+  publicId: string;
+  type: "IMAGE" | "VIDEO";
+  resourceType: "image" | "video";
+  bytes: number;
+  format?: string;
+};
+
+const MAX_IMAGES_PER_POST = 10;
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 25 * 1024 * 1024;
+
+const ALLOWED_IMAGE_MIMES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 
 const ALLOWED_VIDEO_MIMES = new Set([
   "video/mp4",
@@ -17,84 +54,171 @@ const ALLOWED_VIDEO_MIMES = new Set([
   "video/webm",
 ]);
 
-function makeFileId(file: File) {
-  return `${file.name || "pasted-image"}-${file.type || "unknown"}-${file.size}`;
-}
-
 function isAllowedMedia(file: File) {
-  return file.type.startsWith("image/") || ALLOWED_VIDEO_MIMES.has(file.type);
+  return ALLOWED_IMAGE_MIMES.has(file.type) || ALLOWED_VIDEO_MIMES.has(file.type);
 }
 
-function validateUploadMix(files: File[]) {
-  const videoFiles = files.filter((file) => file.type.startsWith("video/"));
+function isImage(file: File) {
+  return ALLOWED_IMAGE_MIMES.has(file.type);
+}
 
-  if (videoFiles.length > 1) {
-    return "For now, upload one short video at a time.";
+function isVideo(file: File) {
+  return ALLOWED_VIDEO_MIMES.has(file.type);
+}
+
+function makeFileId(file: File) {
+  return `${file.name || "pasted-image"}|${file.type}|${file.size}`;
+}
+
+function formatBytes(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "";
+
+  const mb = bytes / (1024 * 1024);
+  return `${mb.toFixed(mb >= 10 ? 0 : 1)}MB`;
+}
+
+function validateUploadMix(files: File[], hasImageUrl = false) {
+  const imageCount = files.filter(isImage).length + (hasImageUrl ? 1 : 0);
+  const videoCount = files.filter(isVideo).length;
+
+  if (videoCount > 1) {
+    return "Only one video can be added per post right now.";
   }
 
-  if (videoFiles.length === 1 && files.length > 1) {
-    return "For now, upload either multiple images or one short video.";
+  if (videoCount === 1 && imageCount > 0) {
+    return "Upload either multiple images or one short video for now.";
+  }
+
+  if (imageCount > MAX_IMAGES_PER_POST) {
+    return "Add up to 10 images per post.";
+  }
+
+  const oversizedImage = files.find(
+    (file) => isImage(file) && file.size > MAX_IMAGE_BYTES
+  );
+
+  if (oversizedImage) {
+    return "One image is too large. Images can be up to 20MB each.";
+  }
+
+  const oversizedVideo = files.find(
+    (file) => isVideo(file) && file.size > MAX_VIDEO_BYTES
+  );
+
+  if (oversizedVideo) {
+    return "That video is too large for the current beta. Max 25MB.";
   }
 
   return "";
 }
 
+function uploadErrorMessage(code: string) {
+  const messages: Record<string, string> = {
+    auth: "Please log in as a creator before uploading.",
+    count: "Add up to 10 images per post.",
+    failed: "Upload failed. Try again with a different image or a smaller batch.",
+    moderation:
+      "That image could not be added. Keep it SFW and try a different image or simpler crop.",
+    nofile: "Add media by choosing files, pasting an image, or using a direct image URL.",
+    size: "One file is too large. Images can be up to 20MB each, and videos up to 25MB.",
+    storage: "Media storage had a problem. Try again in a moment.",
+    text: "Your title, caption, or file name hit the SFW safety filter. Keep the wording simple and try again.",
+    url: "Use a direct HTTPS image link, not a page link. Try copying the image address.",
+    video: "Upload either up to 10 images, or one MP4/MOV/WebM video.",
+  };
+
+  return messages[code] || messages.failed;
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) return error.message;
+  return uploadErrorMessage("failed");
+}
+
+async function getUploadSignature() {
+  const res = await fetch("/api/cloudinary/sign-post-upload", {
+    method: "POST",
+  });
+
+  const payload = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    if (payload?.redirectTo) {
+      window.location.href = payload.redirectTo;
+      throw new Error("Redirecting...");
+    }
+
+    throw new Error(
+      uploadErrorMessage(payload?.error || "storage")
+    );
+  }
+
+  return payload as UploadSignature;
+}
+
+async function uploadFileToCloudinary(
+  file: File,
+  signature: UploadSignature
+): Promise<UploadedCloudinaryMedia> {
+  const formData = new FormData();
+
+  formData.append("file", file);
+  formData.append("api_key", signature.apiKey);
+  formData.append("context", signature.context);
+  formData.append("folder", signature.folder);
+  formData.append("signature", signature.signature);
+  formData.append("timestamp", String(signature.timestamp));
+
+  const res = await fetch(signature.uploadUrl, {
+    method: "POST",
+    body: formData,
+  });
+
+  const payload = await res.json().catch(() => null);
+
+  if (!res.ok || !payload?.secure_url || !payload?.public_id) {
+    throw new Error(
+      payload?.error?.message ||
+        "This media could not be uploaded. Try again with a different file."
+    );
+  }
+
+  const resourceType = payload.resource_type === "video" ? "video" : "image";
+
+  return {
+    url: payload.secure_url,
+    publicId: payload.public_id,
+    type: resourceType === "video" ? "VIDEO" : "IMAGE",
+    resourceType,
+    bytes: Number(payload.bytes || file.size || 0),
+    format: payload.format,
+  };
+}
+
 export default function UploadPostForm() {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const selectedRef = useRef<any[]>([]);
-
-  const [selected, setSelected] = useState<any[]>([]);
+  const selectedRef = useRef<SelectedMedia[]>([]);
+  const [selected, setSelected] = useState<SelectedMedia[]>([]);
   const [imageUrl, setImageUrl] = useState("");
-  const [dragging, setDragging] = useState(false);
   const [localError, setLocalError] = useState("");
+  const [dragging, setDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     selectedRef.current = selected;
-
-    if (!inputRef.current || typeof DataTransfer === "undefined") return;
-
-    const transfer = new DataTransfer();
-
-    for (const item of selected) {
-      transfer.items.add(item.file);
-    }
-
-    inputRef.current.files = transfer.files;
   }, [selected]);
 
   useEffect(() => {
-    function handleWindowPaste(event: ClipboardEvent) {
-      const target = event.target as HTMLElement | null;
-      const isTyping =
-        target?.tagName === "INPUT" ||
-        target?.tagName === "TEXTAREA" ||
-        target?.isContentEditable;
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
 
-      if (isTyping) return;
-
-      const files = Array.from(event.clipboardData?.files || []).filter(
-        isAllowedMedia
-      );
-
-      if (!files.length) return;
-
-      event.preventDefault();
-      appendFiles(files);
+    if (error) {
+      setLocalError(uploadErrorMessage(error));
     }
-
-    window.addEventListener("paste", handleWindowPaste);
-
-    return () => {
-      window.removeEventListener("paste", handleWindowPaste);
-
-      for (const item of selectedRef.current) {
-        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-      }
-    };
   }, []);
 
-  function appendFiles(nextFiles: File[]) {
+  const appendFiles = useCallback((nextFiles: File[]) => {
     const allowed = nextFiles.filter(isAllowedMedia);
 
     if (!allowed.length) {
@@ -104,7 +228,9 @@ export default function UploadPostForm() {
 
     setSelected((current) => {
       const existingIds = new Set(current.map((item) => item.id));
-      const freshFiles = allowed.filter((file) => !existingIds.has(makeFileId(file)));
+      const freshFiles = allowed.filter(
+        (file) => !existingIds.has(makeFileId(file))
+      );
       const combinedFiles = [...current.map((item) => item.file), ...freshFiles];
 
       const mixError = validateUploadMix(combinedFiles);
@@ -128,7 +254,30 @@ export default function UploadPostForm() {
       setLocalError("");
       return [...current, ...nextItems];
     });
-  }
+  }, []);
+
+  useEffect(() => {
+    function handleWindowPaste(event: ClipboardEvent) {
+      const files = Array.from(event.clipboardData?.files || []).filter(
+        isAllowedMedia
+      );
+
+      if (!files.length) return;
+
+      event.preventDefault();
+      appendFiles(files);
+    }
+
+    window.addEventListener("paste", handleWindowPaste);
+
+    return () => {
+      window.removeEventListener("paste", handleWindowPaste);
+
+      for (const item of selectedRef.current) {
+        if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      }
+    };
+  }, [appendFiles]);
 
   function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
     appendFiles(Array.from(event.target.files || []));
@@ -160,23 +309,90 @@ export default function UploadPostForm() {
 
     setSelected([]);
     setLocalError("");
+    setStatusMessage("");
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    if (!selected.length && !imageUrl.trim()) {
-      event.preventDefault();
-      setLocalError("Add media by choosing a file or pasting a direct image URL.");
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (submitting) return;
+
+    const form = event.currentTarget;
+    const selectedFiles = selected.map((item) => item.file);
+    const trimmedImageUrl = imageUrl.trim();
+
+    if (!selectedFiles.length && !trimmedImageUrl) {
+      setLocalError("Add media by choosing files, pasting an image, or using a direct image URL.");
+      return;
+    }
+
+    const mixError = validateUploadMix(selectedFiles, Boolean(trimmedImageUrl));
+
+    if (mixError) {
+      setLocalError(mixError);
       return;
     }
 
     setSubmitting(true);
+    setLocalError("");
+    setStatusMessage(
+      selectedFiles.length
+        ? `Preparing ${selectedFiles.length} media upload${selectedFiles.length === 1 ? "" : "s"}...`
+        : "Saving post..."
+    );
+
+    try {
+      const formData = new FormData(form);
+      const title = String(formData.get("title") || "");
+      const content = String(formData.get("content") || "");
+
+      let uploadedMedia: UploadedCloudinaryMedia[] = [];
+
+      if (selectedFiles.length) {
+        const signature = await getUploadSignature();
+
+        for (let i = 0; i < selectedFiles.length; i++) {
+          setStatusMessage(`Uploading media ${i + 1} of ${selectedFiles.length}...`);
+          uploadedMedia.push(await uploadFileToCloudinary(selectedFiles[i], signature));
+        }
+      }
+
+      setStatusMessage("Checking media safety and saving post...");
+
+      const res = await fetch("/api/posts/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          imageUrl: trimmedImageUrl,
+          media: uploadedMedia,
+        }),
+      });
+
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok || !payload?.ok) {
+        if (payload?.redirectTo) {
+          window.location.href = payload.redirectTo;
+          return;
+        }
+
+        throw new Error(uploadErrorMessage(payload?.error || "failed"));
+      }
+
+      window.location.href = payload.redirectTo || "/dashboard/posts?uploaded=1";
+    } catch (error) {
+      setSubmitting(false);
+      setStatusMessage("");
+      setLocalError(getErrorMessage(error));
+    }
   }
 
   return (
     <form
-      action="/api/posts/upload"
-      method="POST"
-      encType="multipart/form-data"
       onSubmit={handleSubmit}
       className="mt-8 space-y-6 rounded-[2rem] border border-white/10 bg-white/[0.05] p-6 shadow-2xl shadow-black/20"
     >
@@ -219,14 +435,21 @@ export default function UploadPostForm() {
           inputMode="url"
           value={imageUrl}
           onChange={(event) => {
-            setImageUrl(event.target.value);
-            setLocalError("");
+            const nextValue = event.target.value;
+            setImageUrl(nextValue);
+
+            const mixError = validateUploadMix(
+              selected.map((item) => item.file),
+              Boolean(nextValue.trim())
+            );
+
+            setLocalError(mixError);
           }}
           placeholder="Paste a direct image link..."
           className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
         />
         <p className="mt-2 text-xs leading-5 text-zinc-500">
-          Optional. Use a direct HTTPS image link if you do not want to download the image first.
+          Optional. Use a direct HTTPS image link. It counts as 1 image in the 10-image post limit.
         </p>
       </div>
 
@@ -263,7 +486,6 @@ export default function UploadPostForm() {
             type="file"
             accept="image/*,video/mp4,video/quicktime,video/webm"
             multiple
-            required={!selected.length && !imageUrl.trim()}
             onChange={handleInputChange}
             className="sr-only"
           />
@@ -277,17 +499,23 @@ export default function UploadPostForm() {
           </p>
 
           <p className="mt-2 text-xs leading-5 text-zinc-500 sm:hidden">
-            Images up to 20MB, or one short video up to 25MB.
+            Add up to 10 images, or one short video.
           </p>
 
           <p className="mt-2 hidden text-xs leading-5 text-zinc-500 sm:block">
-            Images up to 20MB, or one MP4/MOV/WebM video up to 25MB. File names are checked by the SFW safety filter too.
+            Add up to 10 images up to 20MB each, or one MP4/MOV/WebM video up to 25MB.
           </p>
         </div>
 
         {localError ? (
           <div className="mt-3 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm font-bold text-red-100">
             {localError}
+          </div>
+        ) : null}
+
+        {statusMessage ? (
+          <div className="mt-3 rounded-2xl border border-pink-400/20 bg-pink-400/10 p-4 text-sm font-bold text-pink-100">
+            {statusMessage}
           </div>
         ) : null}
 
@@ -301,7 +529,8 @@ export default function UploadPostForm() {
               <button
                 type="button"
                 onClick={clearFiles}
-                className="rounded-full border border-white/10 px-4 py-2 text-xs font-black text-zinc-300 hover:bg-white/10"
+                disabled={submitting}
+                className="rounded-full border border-white/10 px-4 py-2 text-xs font-black text-zinc-300 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Clear
               </button>
@@ -324,7 +553,7 @@ export default function UploadPostForm() {
                     ) : (
                       <img
                         src={item.previewUrl}
-                        alt={item.file.name}
+                        alt={item.file.name || "Selected image"}
                         className="h-full w-full object-cover"
                       />
                     )}
@@ -335,10 +564,15 @@ export default function UploadPostForm() {
                       {item.file.name || "Pasted image"}
                     </p>
 
+                    <p className="text-xs font-bold text-zinc-500">
+                      {formatBytes(item.file.size)}
+                    </p>
+
                     <button
                       type="button"
                       onClick={() => removeFile(item.id)}
-                      className="w-full rounded-full border border-white/10 px-4 py-2 text-xs font-black text-white hover:bg-white/10"
+                      disabled={submitting}
+                      className="w-full rounded-full border border-white/10 px-4 py-2 text-xs font-black text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Remove
                     </button>
