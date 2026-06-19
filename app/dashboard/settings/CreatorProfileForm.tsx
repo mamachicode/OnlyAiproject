@@ -549,6 +549,7 @@ export default function CreatorProfileForm({
             required
             min={1}
             max={500}
+            step={0.01}
             type="number"
             defaultValue={currentMonthlyPrice}
             className="w-full bg-transparent px-4 py-5 font-semibold text-white outline-none"

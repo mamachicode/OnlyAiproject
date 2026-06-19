@@ -62,7 +62,7 @@ export default async function CreatorSettingsPage({
 
   const currentMonthlyPrice =
     user.creator?.priceCents != null
-      ? Math.round(user.creator.priceCents / 100)
+      ? user.creator.priceCents / 100
       : user.sfwPrice ?? 5;
 
   return (

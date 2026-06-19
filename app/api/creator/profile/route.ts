@@ -31,12 +31,12 @@ function cleanPrice(value: FormDataEntryValue | null) {
 
   if (!Number.isFinite(parsed)) return 5;
 
-  const rounded = Math.round(parsed);
+  const roundedToCents = Math.round(parsed * 100) / 100;
 
-  if (rounded < 1) return 1;
-  if (rounded > 500) return 500;
+  if (roundedToCents < 1) return 1;
+  if (roundedToCents > 500) return 500;
 
-  return rounded;
+  return roundedToCents;
 }
 
 function getUploadFile(value: FormDataEntryValue | null) {
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
     const handle = cleanHandle(formData.get("handle"));
     const sfwPrice = cleanPrice(formData.get("sfwPrice"));
-    const priceCents = sfwPrice * 100;
+    const priceCents = Math.round(sfwPrice * 100);
     const displayName = cleanDisplayName(formData.get("displayName"), handle);
     const bio = cleanBio(formData.get("bio"));
 
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
         },
         data: {
           username: handle,
-          sfwPrice,
+          sfwPrice: Math.round(sfwPrice),
         },
       }),
 
