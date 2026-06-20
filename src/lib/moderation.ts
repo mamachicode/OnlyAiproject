@@ -46,11 +46,28 @@ function normalizeText(value: any) {
     .trim();
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function hasBlockedSfwTerm(text: string, term: string) {
+  const normalizedTerm = normalizeText(term);
+
+  if (!normalizedTerm) return false;
+
+  const pattern = new RegExp(
+    `(^|[^a-z0-9])${escapeRegExp(normalizedTerm)}($|[^a-z0-9])`,
+    "i"
+  );
+
+  return pattern.test(text);
+}
+
 export function assertSafeText(values: any[]) {
   const combined = normalizeText(values.filter(Boolean).join(" "));
 
   const hit = BLOCKED_SFW_TERMS.find((term) =>
-    combined.includes(normalizeText(term))
+    hasBlockedSfwTerm(combined, term)
   );
 
   if (hit) {
