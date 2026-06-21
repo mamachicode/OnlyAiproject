@@ -5,6 +5,8 @@ import {
   useRef,
   useState,
   type ChangeEvent,
+  type ClipboardEvent,
+  type DragEvent,
   type FormEvent,
   type PointerEvent,
 } from "react";
@@ -80,6 +82,10 @@ function clampPercent(value: number) {
   if (value < 0) return 0;
   if (value > 100) return 100;
   return value;
+}
+
+function isImageFile(file: File | null | undefined) {
+  return Boolean(file && file.type.startsWith("image/"));
 }
 
 async function cropAndCompressImage(
@@ -296,12 +302,16 @@ export default function CreatorProfileForm({
 }: CreatorProfileFormProps) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement | null>(null);
   const [avatarFocusX, setAvatarFocusX] = useState(50);
   const [avatarFocusY, setAvatarFocusY] = useState(50);
   const [bannerFocusX, setBannerFocusX] = useState(50);
   const [bannerFocusY, setBannerFocusY] = useState(22);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState("");
+  const [avatarDragging, setAvatarDragging] = useState(false);
+  const [bannerDragging, setBannerDragging] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -315,32 +325,78 @@ export default function CreatorProfileForm({
     };
   }, [bannerPreviewUrl]);
 
-  function handleAvatarFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+  function setInputFile(kind: "avatar" | "banner", file: File) {
+    const input = kind === "avatar" ? avatarInputRef.current : bannerInputRef.current;
 
-    if (!file || !file.type.startsWith("image/")) {
-      setAvatarPreviewUrl("");
-      return;
-    }
+    if (!input) return;
 
-    setError("");
-    setAvatarFocusX(50);
-    setAvatarFocusY(50);
-    setAvatarPreviewUrl(URL.createObjectURL(file));
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
   }
 
-  function handleBannerFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-
-    if (!file || !file.type.startsWith("image/")) {
-      setBannerPreviewUrl("");
+  function selectProfileImage(kind: "avatar" | "banner", file: File | null | undefined) {
+    if (!isImageFile(file)) {
+      setError("Use an image file for your avatar or banner.");
       return;
     }
 
+    setInputFile(kind, file);
     setError("");
+
+    if (kind === "avatar") {
+      if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+      setAvatarFocusX(50);
+      setAvatarFocusY(50);
+      setAvatarPreviewUrl(URL.createObjectURL(file));
+      return;
+    }
+
+    if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
     setBannerFocusX(50);
     setBannerFocusY(22);
     setBannerPreviewUrl(URL.createObjectURL(file));
+  }
+
+  function handleAvatarFileChange(event: ChangeEvent<HTMLInputElement>) {
+    selectProfileImage("avatar", event.target.files?.[0]);
+  }
+
+  function handleBannerFileChange(event: ChangeEvent<HTMLInputElement>) {
+    selectProfileImage("banner", event.target.files?.[0]);
+  }
+
+  function handleProfileDrop(
+    kind: "avatar" | "banner",
+    event: DragEvent<HTMLLabelElement>
+  ) {
+    event.preventDefault();
+
+    if (kind === "avatar") {
+      setAvatarDragging(false);
+    } else {
+      setBannerDragging(false);
+    }
+
+    const file = Array.from(event.dataTransfer.files || []).find((item) =>
+      item.type.startsWith("image/")
+    );
+
+    selectProfileImage(kind, file);
+  }
+
+  function handleProfilePaste(
+    kind: "avatar" | "banner",
+    event: ClipboardEvent<HTMLLabelElement>
+  ) {
+    const file = Array.from(event.clipboardData.files || []).find((item) =>
+      item.type.startsWith("image/")
+    );
+
+    if (!file) return;
+
+    event.preventDefault();
+    selectProfileImage(kind, file);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -473,18 +529,42 @@ export default function CreatorProfileForm({
 
       <div className="mt-8 grid gap-8 md:grid-cols-2">
         <div>
-          <label className="block">
-            <span className="text-sm font-bold text-zinc-100">
-              Avatar image
-            </span>
+          <span className="text-sm font-bold text-zinc-100">
+            Avatar image
+          </span>
 
+          <label
+            htmlFor="avatar-upload"
+            tabIndex={0}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setAvatarDragging(true);
+            }}
+            onDragLeave={() => setAvatarDragging(false)}
+            onDrop={(event) => handleProfileDrop("avatar", event)}
+            onPaste={(event) => handleProfilePaste("avatar", event)}
+            className={
+              avatarDragging
+                ? "mt-3 block cursor-pointer rounded-3xl border border-pink-300/60 bg-pink-500/10 p-5 text-center outline-none transition"
+                : "mt-3 block cursor-pointer rounded-3xl border border-dashed border-white/15 bg-black/30 p-5 text-center outline-none transition hover:border-pink-400/40 hover:bg-white/[0.04]"
+            }
+          >
             <input
+              ref={avatarInputRef}
+              id="avatar-upload"
               name="avatar"
               type="file"
               accept="image/*"
               onChange={handleAvatarFileChange}
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
+              className="sr-only"
             />
+
+            <p className="text-sm font-black text-white">
+              Click to choose, drag here, or paste an avatar image
+            </p>
+            <p className="mt-2 text-xs leading-5 text-zinc-500">
+              Square images work best. You can frame the crop before saving.
+            </p>
           </label>
 
           {avatarPreviewUrl ? (
@@ -505,18 +585,42 @@ export default function CreatorProfileForm({
         </div>
 
         <div>
-          <label className="block">
-            <span className="text-sm font-bold text-zinc-100">
-              Banner image
-            </span>
+          <span className="text-sm font-bold text-zinc-100">
+            Banner image
+          </span>
 
+          <label
+            htmlFor="banner-upload"
+            tabIndex={0}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setBannerDragging(true);
+            }}
+            onDragLeave={() => setBannerDragging(false)}
+            onDrop={(event) => handleProfileDrop("banner", event)}
+            onPaste={(event) => handleProfilePaste("banner", event)}
+            className={
+              bannerDragging
+                ? "mt-3 block cursor-pointer rounded-3xl border border-pink-300/60 bg-pink-500/10 p-5 text-center outline-none transition"
+                : "mt-3 block cursor-pointer rounded-3xl border border-dashed border-white/15 bg-black/30 p-5 text-center outline-none transition hover:border-pink-400/40 hover:bg-white/[0.04]"
+            }
+          >
             <input
+              ref={bannerInputRef}
+              id="banner-upload"
               name="banner"
               type="file"
               accept="image/*"
               onChange={handleBannerFileChange}
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white file:mr-4 file:rounded-full file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:font-bold file:text-white"
+              className="sr-only"
             />
+
+            <p className="text-sm font-black text-white">
+              Click to choose, drag here, or paste a banner image
+            </p>
+            <p className="mt-2 text-xs leading-5 text-zinc-500">
+              Wide images work best. You can drag the crop before saving.
+            </p>
           </label>
 
           {bannerPreviewUrl ? (
