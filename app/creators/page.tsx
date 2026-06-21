@@ -31,6 +31,22 @@ export default async function CreatorsPage() {
     },
   });
 
+  const activeMemberCounts = await Promise.all(
+    creators.map((creator) =>
+      prisma.subscription.count({
+        where: {
+          creatorId: creator.id,
+          processor: "STRIPE",
+          status: "ACTIVE",
+          OR: [
+            { currentPeriodEnd: null },
+            { currentPeriodEnd: { gt: new Date() } },
+          ],
+        },
+      })
+    )
+  );
+
   return (
     <main className="min-h-screen bg-[#07050d] text-white">
       <section className="mx-auto max-w-6xl px-6 py-10">
@@ -77,9 +93,10 @@ export default async function CreatorsPage() {
           </div>
         ) : (
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {creators.map((creator) => {
+            {creators.map((creator, index) => {
               const displayName = creator.displayName || creator.handle;
               const price = formatPrice(creator.priceCents);
+              const activeMemberCount = activeMemberCounts[index] || 0;
 
               return (
                 <Link
@@ -115,6 +132,9 @@ export default async function CreatorsPage() {
                         </h2>
                         <p className="mt-1 truncate text-sm text-zinc-500">
                           @{creator.handle}
+                        </p>
+                        <p className="mt-1 text-xs font-bold text-zinc-600">
+                          {activeMemberCount} member{activeMemberCount === 1 ? "" : "s"}
                         </p>
                       </div>
                     </div>

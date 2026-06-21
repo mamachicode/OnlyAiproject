@@ -101,6 +101,20 @@ export default async function PublicCreatorPage({ params }: PageProps) {
   const lockedCount = posts.filter((post) => post.isLocked).length;
   const freeCount = posts.length - lockedCount;
 
+  const activeMemberCount = creator
+    ? await prisma.subscription.count({
+        where: {
+          creatorId: creator.id,
+          processor: "STRIPE",
+          status: "ACTIVE",
+          OR: [
+            { currentPeriodEnd: null },
+            { currentPeriodEnd: { gt: new Date() } },
+          ],
+        },
+      })
+    : 0;
+
   const activeSubscription =
     fanUserId && creator
       ? await prisma.subscription.findFirst({
@@ -190,9 +204,13 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                       {displayName}
                     </h1>
 
-                    <p className="mt-2 text-base font-semibold text-zinc-400">
-                      @{publicHandle}
-                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-base font-semibold text-zinc-400">
+                      <p>@{publicHandle}</p>
+                      <span className="hidden text-zinc-700 sm:inline">•</span>
+                      <p>
+                        {activeMemberCount} member{activeMemberCount === 1 ? "" : "s"}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
