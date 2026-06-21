@@ -1,7 +1,10 @@
 import Link from "next/link";
 import OnlyAiLogo, { NeonAi } from "@/components/OnlyAiLogo";
+import { auth } from "@/src/auth";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth();
+  const isLoggedIn = Boolean(session?.user?.id);
   const highlights = [
     "Private creator feeds",
     "Monthly subscriptions",
@@ -19,16 +22,33 @@ export default function HomePage() {
             <OnlyAiLogo size="md" showIcon={false} />
 
             <div className="flex items-center gap-5 text-sm font-semibold text-zinc-200 md:text-base">
-              <Link href="/login" className="hover:text-pink-300">
-                Log in
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <Link href="/creators" className="hover:text-pink-300">
+                    Find creators
+                  </Link>
 
-              <Link
-                href="/signup"
-                className="rounded-full border border-white/10 bg-white/10 px-5 py-2 hover:bg-white/15"
-              >
-                Sign up
-              </Link>
+                  <Link
+                    href="/dashboard"
+                    className="rounded-full border border-white/10 bg-white/10 px-5 py-2 hover:bg-white/15"
+                  >
+                    Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="hover:text-pink-300">
+                    Log in
+                  </Link>
+
+                  <Link
+                    href="/signup"
+                    className="rounded-full border border-white/10 bg-white/10 px-5 py-2 hover:bg-white/15"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
 
@@ -46,7 +66,7 @@ export default function HomePage() {
 
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                 <Link
-                  href="/signup"
+                  href={isLoggedIn ? "/dashboard/settings" : "/signup"}
                   className="rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 text-center text-lg font-black text-white shadow-2xl shadow-pink-500/20 transition hover:scale-[1.02]"
                 >
                   Start as a Creator
