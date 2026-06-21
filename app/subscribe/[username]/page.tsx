@@ -104,9 +104,22 @@ export default async function SubscribePage({ params, searchParams }) {
           </Link>
         </div>
 
-        <p className="mt-5 text-sm text-zinc-500">
-          Secure checkout powered by Stripe.
-        </p>
+        <div className="mt-5 space-y-3 text-sm text-zinc-500">
+          <p>Secure checkout powered by Stripe.</p>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm leading-6 text-zinc-400">
+            <p className="font-bold text-white">Need help?</p>
+            <p className="mt-1">
+              If checkout, login, or locked posts do not work, contact OnlyAi support.
+            </p>
+            <Link
+              href="/contact"
+              className="mt-3 inline-flex font-black text-pink-200 hover:text-pink-100"
+            >
+              Contact support
+            </Link>
+          </div>
+        </div>
       </section>
     </main>
   );

@@ -319,9 +319,15 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                 )}
 
                 {!isOwner && isCreatorSfw ? (
-                  <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
-                    Cancel anytime.
-                  </p>
+                  <div className="mt-4 space-y-3 text-center text-xs leading-5 text-zinc-500">
+                    <p>Cancel anytime.</p>
+                    <Link
+                      href="/contact"
+                      className="inline-flex font-bold text-pink-200 hover:text-pink-100"
+                    >
+                      Need help with checkout, login, or locked posts?
+                    </Link>
+                  </div>
                 ) : null}
               </aside>
             </div>
