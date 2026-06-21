@@ -15,7 +15,7 @@ export async function middleware(req: any) {
 
   if (isLegacyCreatorArea || isExclusiveArea) {
     if (!token?.email) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
+      return NextResponse.redirect(new URL("/login", req.url));
     }
 
     // Temporarily skip Prisma check — handled in API routes instead.

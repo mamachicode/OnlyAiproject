@@ -9,14 +9,14 @@ export async function middleware(req) {
   // Protect dashboard pages
   if (url.pathname.startsWith("/dashboard")) {
     if (!token) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
+      return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
   // Protect NSFW creator pages
   if (url.pathname.startsWith("/nsfw")) {
     if (!token) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
+      return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 

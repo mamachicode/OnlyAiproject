@@ -36,7 +36,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-[#07050d] text-white">
       <div className="flex min-h-screen">
         <aside className="hidden w-72 border-r border-white/10 bg-black/20 p-6 md:block">
-          <Link href="/" className="text-3xl font-black tracking-tight">
+          <Link href="/dashboard" className="text-3xl font-black tracking-tight">
             Only<span className="text-pink-400">Ai</span>
           </Link>
 
@@ -88,7 +88,7 @@ export default async function DashboardLayout({
 
         <main className="flex-1">
           <div className="border-b border-white/10 bg-black/20 px-6 py-4 md:hidden">
-            <Link href="/" className="text-2xl font-black">
+            <Link href="/dashboard" className="text-2xl font-black">
               Only<span className="text-pink-400">Ai</span>
             </Link>
           </div>
