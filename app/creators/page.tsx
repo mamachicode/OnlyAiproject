@@ -24,16 +24,8 @@ export default async function CreatorsPage() {
     },
     include: {
       user: {
-        include: {
-          posts: {
-            where: {
-              isNsfw: false,
-            },
-            select: {
-              id: true,
-              isLocked: true,
-            },
-          },
+        select: {
+          username: true,
         },
       },
     },
@@ -72,7 +64,7 @@ export default async function CreatorsPage() {
             Discover creator pages
           </h1>
           <p className="mt-4 max-w-2xl text-zinc-400">
-            Browse private memberships, exclusive posts, and creator updates.
+            Explore AI creator memberships and private art pages.
           </p>
         </div>
 
@@ -87,8 +79,6 @@ export default async function CreatorsPage() {
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {creators.map((creator) => {
               const displayName = creator.displayName || creator.handle;
-              const lockedCount = creator.user.posts.filter((post) => post.isLocked).length;
-              const totalPosts = creator.user.posts.length;
               const price = formatPrice(creator.priceCents);
 
               return (
@@ -130,20 +120,11 @@ export default async function CreatorsPage() {
                     </div>
 
                     <p className="mt-5 line-clamp-3 text-sm leading-6 text-zinc-400">
-                      {creator.bio ||
-                        "Private creator posts, member updates, and exclusive drops."}
+                      {creator.bio || "Private AI creator page."}
                     </p>
 
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-zinc-300">
-                        {totalPosts} posts
-                      </span>
-                      <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-bold text-zinc-300">
-                        {lockedCount} member posts
-                      </span>
-                      <span className="rounded-full border border-pink-300/20 bg-pink-500/10 px-3 py-1 text-xs font-black text-pink-100">
-                        ${price}/month
-                      </span>
+                    <div className="mt-5 text-sm font-black text-pink-100">
+                      ${price} <span className="text-xs font-bold text-zinc-500">/ month</span>
                     </div>
 
                     <div className="mt-6 rounded-full bg-white px-5 py-3 text-center text-sm font-black text-black group-hover:bg-pink-200">
