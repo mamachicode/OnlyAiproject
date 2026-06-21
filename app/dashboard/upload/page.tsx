@@ -23,7 +23,7 @@ function getUploadErrorMessage(error?: string) {
   }
 
   if (error === "text") {
-    return "Some words in your title, caption, or file name are blocked for the SFW soft launch. Try a simple title like “New drop”, “Exclusive AI art”, or “Members-only set”.";
+    return "Some wording could not be saved. Edit the title or description and try again.";
   }
 
   if (error === "video") {
@@ -63,8 +63,7 @@ export default async function UploadPostPage({
             </h1>
 
             <p className="mt-3 max-w-2xl text-zinc-400">
-              Create a new post with images or a short video. Use this
-              for comics, stories, photo sets, or private creator updates.
+              Create a new post with images, photo sets, stories, or a short video.
             </p>
           </div>
 

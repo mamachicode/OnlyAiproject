@@ -254,7 +254,7 @@ export async function prepareSafeUploadFile(file: any) {
   }
 
   if (isVideo && Number(file.size || 0) > MAX_VIDEO_BYTES) {
-    throw new Error("Video is too large for the current beta. Max 25MB.");
+    throw new Error("Video is too large. Max 25MB.");
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());

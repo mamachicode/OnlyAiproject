@@ -246,7 +246,7 @@ async function verifyDirectCloudinaryMedia(item: any, userId: string) {
   const bytes = Number(resource?.bytes || item.bytes || 0);
 
   if (resourceType === "video" && bytes > MAX_VIDEO_BYTES) {
-    throw new Error("Video is too large for the current beta. Max 25MB.");
+    throw new Error("Video is too large. Max 25MB.");
   }
 
   if (resourceType === "image" && bytes > MAX_IMAGE_BYTES) {

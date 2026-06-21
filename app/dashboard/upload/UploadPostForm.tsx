@@ -106,7 +106,7 @@ function validateUploadMix(files: File[], hasImageUrl = false) {
   );
 
   if (oversizedVideo) {
-    return "That video is too large for the current beta. Max 25MB.";
+    return "That video is too large. Max 25MB.";
   }
 
   return "";
@@ -122,7 +122,7 @@ function uploadErrorMessage(code: string) {
     nofile: "Add media by choosing files, pasting an image, or using a direct image URL.",
     size: "One file is too large. Images can be up to 20MB each, and videos up to 25MB.",
     storage: "Media storage had a problem. Try again in a moment.",
-    text: "Your title, caption, or file name hit the SFW safety filter. Keep the wording simple and try again.",
+    text: "Some wording could not be saved. Edit the title or description and try again.",
     url: "Use a direct HTTPS image link, not a page link. Try copying the image address.",
     video: "Upload either up to 10 images, or one MP4/MOV/WebM video.",
   };
@@ -400,34 +400,30 @@ export default function UploadPostForm() {
         <label className="block text-sm font-bold text-zinc-300">Title</label>
         <input
           name="title"
-          placeholder="New drop"
+          placeholder="Add a title..."
           maxLength={90}
           className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
         />
-        <p className="mt-2 text-xs leading-5 text-zinc-500">
-          Keep titles simple during the SFW soft launch, like “New drop” or “Exclusive AI art”.
-        </p>
+
       </div>
 
       <div>
         <label className="block text-sm font-bold text-zinc-300">
-          Caption / story text
+          Description
         </label>
         <textarea
           name="content"
           rows={5}
           maxLength={1500}
-          placeholder="Write a clean SFW caption or leave this empty..."
+          placeholder="Write something..."
           className="mt-2 w-full resize-none rounded-2xl border border-white/10 bg-black/30 px-4 py-4 leading-7 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
         />
-        <p className="mt-2 text-xs leading-5 text-zinc-500">
-          Optional. Avoid adult or explicit wording while OnlyAi is in the SFW Stripe launch.
-        </p>
+
       </div>
 
       <div>
         <label className="block text-sm font-bold text-zinc-300">
-          Image URL
+          Image link
         </label>
         <input
           name="imageUrl"
@@ -445,17 +441,17 @@ export default function UploadPostForm() {
 
             setLocalError(mixError);
           }}
-          placeholder="Paste a direct image link..."
+          placeholder="Paste an image link..."
           className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white outline-none placeholder:text-zinc-600 focus:border-pink-400/40"
         />
         <p className="mt-2 text-xs leading-5 text-zinc-500">
-          Optional. Use a direct HTTPS image link. It counts as 1 image in the 10-image post limit.
+          Direct image links only.
         </p>
       </div>
 
       <div>
         <label className="block text-sm font-bold text-zinc-300">
-          Images or video
+          Add media
         </label>
 
         <div
@@ -495,15 +491,15 @@ export default function UploadPostForm() {
           </p>
 
           <p className="hidden text-base font-black text-white sm:block">
-            Click to choose, drag images here, or paste from clipboard
+            Choose files, drag, or paste
           </p>
 
           <p className="mt-2 text-xs leading-5 text-zinc-500 sm:hidden">
-            Add up to 10 images, or one short video.
+            Up to 10 images or 1 video.
           </p>
 
           <p className="mt-2 hidden text-xs leading-5 text-zinc-500 sm:block">
-            Add up to 10 images up to 20MB each, or one MP4/MOV/WebM video up to 25MB.
+            Up to 10 images or 1 video.
           </p>
         </div>
 

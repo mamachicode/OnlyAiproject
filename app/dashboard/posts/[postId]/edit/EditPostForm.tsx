@@ -102,7 +102,7 @@ function uploadErrorMessage(code: string) {
       "That image could not be added. Keep it SFW and try a different image or simpler crop.",
     size: "One file is too large. Images can be up to 20MB each, and videos up to 25MB.",
     storage: "Media storage had a problem. Try again in a moment.",
-    text: "Your title, caption, or file name hit the SFW safety filter. Keep the wording simple and try again.",
+    text: "Some wording could not be saved. Edit the title or description and try again.",
     video: "Use either up to 10 images, or one MP4/MOV/WebM video.",
   };
 
@@ -153,7 +153,7 @@ function validateEditMedia(
   );
 
   if (oversizedVideo) {
-    return "That video is too large for the current beta. Max 25MB.";
+    return "That video is too large. Max 25MB.";
   }
 
   return "";
@@ -453,7 +453,7 @@ export default function EditPostForm({ post }: { post: EditPost }) {
 
         <div>
           <label className="block text-sm font-bold text-zinc-300">
-            Caption / story text
+            Description
           </label>
           <textarea
             name="content"
@@ -476,7 +476,7 @@ export default function EditPostForm({ post }: { post: EditPost }) {
 
         <div>
           <label className="block text-sm font-bold text-zinc-300">
-            Add more media to this post
+            Add media
           </label>
 
           <div
@@ -516,11 +516,11 @@ export default function EditPostForm({ post }: { post: EditPost }) {
             </p>
 
             <p className="hidden text-base font-black text-white sm:block">
-              Click to choose, drag images here, or paste from clipboard
+              Choose files, drag, or paste
             </p>
 
             <p className="mt-2 text-xs leading-5 text-zinc-500">
-              Posts can have up to 10 images, or one MP4/MOV/WebM video.
+              Up to 10 images or 1 video.
             </p>
           </div>
 
