@@ -200,27 +200,6 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   {bio}
                 </p>
 
-                <div className="mt-4 flex flex-wrap gap-2 sm:mt-5 sm:gap-3">
-                  <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-zinc-200 sm:px-4 sm:text-sm">
-                    {isOwner
-                      ? `🔒 ${lockedCount} locked posts`
-                      : `🔒 ${lockedCount} member posts`}
-                  </div>
-
-                  {freeCount > 0 ? (
-                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-zinc-200 sm:px-4 sm:text-sm">
-                      ✨ {freeCount} previews
-                    </div>
-                  ) : (
-                    <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-zinc-200 sm:px-4 sm:text-sm">
-                      ✨ Private feed
-                    </div>
-                  )}
-
-                  <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs font-bold text-zinc-200 sm:px-4 sm:text-sm">
-                    💌 Creator updates
-                  </div>
-                </div>
 
                 {isOwner ? (
                   <div className="mt-4 rounded-2xl border border-pink-400/20 bg-pink-500/10 p-3 sm:mt-6 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
