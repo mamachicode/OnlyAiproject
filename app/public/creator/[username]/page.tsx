@@ -208,7 +208,8 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                       <p>@{publicHandle}</p>
                       <span className="hidden text-zinc-700 sm:inline">•</span>
                       <p>
-                        {activeMemberCount} member{activeMemberCount === 1 ? "" : "s"}
+                        {activeMemberCount} member{activeMemberCount === 1 ? "" : "s"}{" · "}
+                        {posts.length} post{posts.length === 1 ? "" : "s"}
                       </p>
                     </div>
                   </div>
