@@ -47,6 +47,17 @@ export default async function CreatorsPage() {
     )
   );
 
+    const postCounts = await Promise.all(
+      creators.map((creator) =>
+        prisma.post.count({
+          where: {
+            authorId: creator.userId,
+            isNsfw: false,
+          },
+        })
+      )
+    );
+
   return (
     <main className="min-h-screen bg-[#07050d] text-white">
       <section className="mx-auto max-w-6xl px-6 py-10">
@@ -97,6 +108,7 @@ export default async function CreatorsPage() {
               const displayName = creator.displayName || creator.handle;
               const price = formatPrice(creator.priceCents);
               const activeMemberCount = activeMemberCounts[index] || 0;
+              const postCount = postCounts[index] || 0;
 
               return (
                 <Link
@@ -134,7 +146,8 @@ export default async function CreatorsPage() {
                           @{creator.handle}
                         </p>
                         <p className="mt-1 text-xs font-bold text-zinc-600">
-                          {activeMemberCount} member{activeMemberCount === 1 ? "" : "s"}
+                          {activeMemberCount} member{activeMemberCount === 1 ? "" : "s"}{" · "}
+                          {postCount} post{postCount === 1 ? "" : "s"}
                         </p>
                       </div>
                     </div>
