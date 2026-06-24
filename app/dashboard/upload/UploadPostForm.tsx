@@ -204,6 +204,7 @@ export default function UploadPostForm() {
   const [dragging, setDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [previewItem, setPreviewItem] = useState<SelectedMedia | null>(null);
 
   useEffect(() => {
     selectedRef.current = selected;
@@ -217,6 +218,22 @@ export default function UploadPostForm() {
       setLocalError(uploadErrorMessage(error));
     }
   }, []);
+
+  useEffect(() => {
+    if (!previewItem) return;
+
+    function handlePreviewKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setPreviewItem(null);
+      }
+    }
+
+    window.addEventListener("keydown", handlePreviewKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handlePreviewKeyDown);
+    };
+  }, [previewItem]);
 
   const appendFiles = useCallback((nextFiles: File[]) => {
     const allowed = nextFiles.filter(isAllowedMedia);
@@ -291,6 +308,10 @@ export default function UploadPostForm() {
   }
 
   function removeFile(id: string) {
+    if (previewItem?.id === id) {
+      setPreviewItem(null);
+    }
+
     setSelected((current) => {
       const removed = current.find((item) => item.id === id);
 
@@ -307,6 +328,7 @@ export default function UploadPostForm() {
       if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
     }
 
+    setPreviewItem(null);
     setSelected([]);
     setLocalError("");
     setStatusMessage("");
