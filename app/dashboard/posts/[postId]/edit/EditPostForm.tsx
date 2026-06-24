@@ -226,10 +226,31 @@ export default function EditPostForm({ post }: { post: EditPost }) {
   const [dragging, setDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+  const [previewMedia, setPreviewMedia] = useState<{
+    url: string;
+    type: "IMAGE" | "VIDEO";
+    label: string;
+  } | null>(null);
 
   useEffect(() => {
     selectedRef.current = selected;
   }, [selected]);
+
+  useEffect(() => {
+    if (!previewMedia) return;
+
+    function handlePreviewKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setPreviewMedia(null);
+      }
+    }
+
+    window.addEventListener("keydown", handlePreviewKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handlePreviewKeyDown);
+    };
+  }, [previewMedia]);
 
   const appendFiles = useCallback(
     (nextFiles: File[]) => {
@@ -331,6 +352,7 @@ export default function EditPostForm({ post }: { post: EditPost }) {
       if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
     }
 
+    setPreviewMedia(null);
     setSelected([]);
     setLocalError("");
     setStatusMessage("");
