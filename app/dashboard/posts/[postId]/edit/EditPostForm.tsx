@@ -581,7 +581,17 @@ export default function EditPostForm({ post }: { post: EditPost }) {
                     key={item.id}
                     className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-950"
                   >
-                    <div className="aspect-[4/3] bg-black">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMedia({
+                        url: item.previewUrl,
+                        type: item.file.type.startsWith("video/") ? "VIDEO" : "IMAGE",
+                        label: item.file.name || "Selected media",
+                      })}
+                      disabled={submitting}
+                      className="aspect-[4/3] w-full cursor-zoom-in bg-black disabled:cursor-not-allowed disabled:opacity-70"
+                      aria-label="Preview selected media"
+                    >
                       {item.file.type.startsWith("video/") ? (
                         <video
                           src={item.previewUrl}
@@ -596,8 +606,7 @@ export default function EditPostForm({ post }: { post: EditPost }) {
                           className="h-full w-full object-cover"
                         />
                       )}
-                    </div>
-
+                    </button>
                     <div className="space-y-3 p-3">
                       <p className="truncate text-xs font-bold text-zinc-300">
                         {item.file.name || "Pasted image"}
@@ -606,6 +615,20 @@ export default function EditPostForm({ post }: { post: EditPost }) {
                       <p className="text-xs font-bold text-zinc-500">
                         {formatBytes(item.file.size)}
                       </p>
+
+                      <button
+                        type="button"
+                        onClick={() => setPreviewMedia({
+                          url: item.previewUrl,
+                          type: item.file.type.startsWith("video/") ? "VIDEO" : "IMAGE",
+                          label: item.file.name || "Selected media",
+                        })}
+                        disabled={submitting}
+                        className="w-full rounded-full border border-pink-400/30 bg-pink-500/10 px-4 py-2 text-xs font-black text-pink-100 hover:bg-pink-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        aria-label="Preview selected upload"
+                      >
+                        Preview
+                      </button>
 
                       <button
                         type="button"
@@ -622,6 +645,46 @@ export default function EditPostForm({ post }: { post: EditPost }) {
             </div>
           ) : null}
         </div>
+
+          {previewMedia ? (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Selected media preview"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+              onClick={() => setPreviewMedia(null)}
+            >
+              <div
+                className="relative w-full max-w-5xl"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  onClick={() => setPreviewMedia(null)}
+                  className="absolute right-0 top-0 z-10 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black text-white hover:bg-white/20"
+                >
+                  Close
+                </button>
+
+                <div className="mt-14 overflow-hidden rounded-3xl border border-white/10 bg-black">
+                  {previewMedia.type === "VIDEO" ? (
+                    <video
+                      src={previewMedia.url}
+                      controls
+                      playsInline
+                      className="max-h-[82vh] w-full object-contain"
+                    />
+                  ) : (
+                    <img
+                      src={previewMedia.url}
+                      alt={previewMedia.label}
+                      className="max-h-[82vh] w-full object-contain"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : null}
 
         <button
           type="submit"
