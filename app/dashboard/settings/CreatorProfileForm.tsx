@@ -312,6 +312,8 @@ export default function CreatorProfileForm({
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState("");
   const [avatarDragging, setAvatarDragging] = useState(false);
   const [bannerDragging, setBannerDragging] = useState(false);
+  const [activeProfileImageTarget, setActiveProfileImageTarget] =
+    useState<"avatar" | "banner">("banner");
 
   useEffect(() => {
     return () => {
@@ -357,6 +359,36 @@ export default function CreatorProfileForm({
     setBannerFocusY(22);
     setBannerPreviewUrl(URL.createObjectURL(file));
   }
+
+  useEffect(() => {
+    function handleWindowProfilePaste(event: globalThis.ClipboardEvent) {
+      const target = event.target as HTMLElement | null;
+      const tagName = target?.tagName?.toLowerCase();
+
+      if (
+        target?.isContentEditable ||
+        tagName === "input" ||
+        tagName === "textarea"
+      ) {
+        return;
+      }
+
+      const file = Array.from(event.clipboardData?.files || []).find((item) =>
+        isImageFile(item)
+      );
+
+      if (!file) return;
+
+      event.preventDefault();
+      selectProfileImage(activeProfileImageTarget, file);
+    }
+
+    window.addEventListener("paste", handleWindowProfilePaste);
+
+    return () => {
+      window.removeEventListener("paste", handleWindowProfilePaste);
+    };
+  }, [activeProfileImageTarget, avatarPreviewUrl, bannerPreviewUrl]);
 
   function handleAvatarFileChange(event: ChangeEvent<HTMLInputElement>) {
     selectProfileImage("avatar", event.target.files?.[0]);
