@@ -17,6 +17,9 @@ type Post = {
   isLocked: boolean;
   createdAt?: string;
   media: PostMedia[];
+  _count?: {
+    likes?: number;
+  };
 };
 
 export default function DashboardPostsPage() {
@@ -164,7 +167,7 @@ export default function DashboardPostsPage() {
 
                       <div className="mt-4 flex items-center justify-between text-xs text-zinc-500">
                         <span>{post.isLocked ? "Locked" : "Public"}</span>
-                        <span>Post</span>
+                        <span>♥ {post._count?.likes || 0}</span>
                       </div>
 
                       <div className="mt-5 grid grid-cols-2 gap-3">

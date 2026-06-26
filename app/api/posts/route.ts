@@ -33,6 +33,11 @@ export async function GET() {
             order: "asc",
           },
         },
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
       },
     });
 

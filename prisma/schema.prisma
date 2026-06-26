@@ -40,6 +40,7 @@ model User {
 
   creator       Creator?
   posts         Post[]         @relation("UserPosts")
+  postLikes     PostLike[]
   subscriptions Subscription[]
   webhookEvents WebhookEvent[]
 
@@ -80,6 +81,21 @@ model Post {
 
   author User        @relation("UserPosts", fields: [authorId], references: [id])
   media  PostMedia[]
+  likes  PostLike[]
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
 }
 
 model PostMedia {

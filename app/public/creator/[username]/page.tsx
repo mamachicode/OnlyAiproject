@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/src/auth";
 import { prisma } from "@/src/lib/prisma";
 import MediaLightbox from "./MediaLightbox";
+import PostLikeButton from "./PostLikeButton";
 
 type PageProps = {
   params: Promise<{
@@ -49,6 +50,24 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   order: "asc",
                 },
               },
+              _count: {
+                select: {
+                  likes: true,
+                },
+              },
+              ...(fanUserId
+                ? {
+                    likes: {
+                      where: {
+                        userId: fanUserId,
+                      },
+                      select: {
+                        id: true,
+                      },
+                      take: 1,
+                    },
+                  }
+                : {}),
             },
           },
         },
@@ -76,6 +95,24 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                   order: "asc",
                 },
               },
+              _count: {
+                select: {
+                  likes: true,
+                },
+              },
+              ...(fanUserId
+                ? {
+                    likes: {
+                      where: {
+                        userId: fanUserId,
+                      },
+                      select: {
+                        id: true,
+                      },
+                      take: 1,
+                    },
+                  }
+                : {}),
             },
           },
         },
@@ -441,6 +478,13 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                           {post.content}
                         </p>
                       ) : null}
+
+                      <PostLikeButton
+                        postId={post.id}
+                        initialLikeCount={post._count?.likes || 0}
+                        initialLiked={Boolean(post.likes?.length)}
+                        isLoggedIn={Boolean(fanUserId)}
+                      />
                     </div>
                   </article>
                 );
