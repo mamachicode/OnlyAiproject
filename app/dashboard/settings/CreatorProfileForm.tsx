@@ -37,6 +37,7 @@ type CropFrameProps = {
   focusY: number;
   setFocusX: (value: number) => void;
   setFocusY: (value: number) => void;
+  onActivate: () => void;
 };
 
 function loadImage(file: File): Promise<HTMLImageElement> {
@@ -192,6 +193,7 @@ function CropFrame({
   focusY,
   setFocusX,
   setFocusY,
+  onActivate,
 }: CropFrameProps) {
   const dragRef = useRef<{
     pointerId: number;
@@ -202,6 +204,8 @@ function CropFrame({
   } | null>(null);
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    onActivate();
+
     if (!previewUrl) return;
 
     dragRef.current = {
@@ -252,6 +256,8 @@ function CropFrame({
         role="button"
         tabIndex={0}
         onPointerDown={handlePointerDown}
+        onMouseEnter={onActivate}
+        onFocus={onActivate}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
@@ -319,7 +325,7 @@ export default function CreatorProfileForm({
   const [avatarDragging, setAvatarDragging] = useState(false);
   const [bannerDragging, setBannerDragging] = useState(false);
   const [activeProfileImageTarget, setActiveProfileImageTarget] =
-    useState<"avatar" | "banner">("banner");
+    useState<"avatar" | "banner">("avatar");
 
   useEffect(() => {
     return () => {
@@ -621,7 +627,15 @@ export default function CreatorProfileForm({
         </p>
       </label>
 
-      <div className="mt-8 grid gap-8 md:grid-cols-2">
+      <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-4 text-xs font-bold text-zinc-300">
+        Paste target:{" "}
+        <span className="text-pink-200">
+          {activeProfileImageTarget === "avatar" ? "Avatar image" : "Banner image"}
+        </span>
+        . Click or hover Avatar/Banner before pasting.
+      </div>
+
+      <div className="mt-4 grid gap-8 md:grid-cols-2">
         <div>
           <span className="text-sm font-bold text-zinc-100">
             Avatar image
@@ -630,12 +644,19 @@ export default function CreatorProfileForm({
           <label
             htmlFor="avatar-upload"
             tabIndex={0}
+            onClick={() => setActiveProfileImageTarget("avatar")}
+            onFocus={() => setActiveProfileImageTarget("avatar")}
+            onMouseEnter={() => setActiveProfileImageTarget("avatar")}
             onDragOver={(event) => {
               event.preventDefault();
+              setActiveProfileImageTarget("avatar");
               setAvatarDragging(true);
             }}
             onDragLeave={() => setAvatarDragging(false)}
-            onDrop={(event) => handleProfileDrop("avatar", event)}
+            onDrop={(event) => {
+              setActiveProfileImageTarget("avatar");
+              handleProfileDrop("avatar", event);
+            }}
             onPaste={(event) => handleProfilePaste("avatar", event)}
             className={
               avatarDragging
@@ -671,6 +692,7 @@ export default function CreatorProfileForm({
                 focusY={avatarFocusY}
                 setFocusX={setAvatarFocusX}
                 setFocusY={setAvatarFocusY}
+                onActivate={() => setActiveProfileImageTarget("avatar")}
               />
 
               <button
@@ -724,12 +746,19 @@ export default function CreatorProfileForm({
           <label
             htmlFor="banner-upload"
             tabIndex={0}
+            onClick={() => setActiveProfileImageTarget("banner")}
+            onFocus={() => setActiveProfileImageTarget("banner")}
+            onMouseEnter={() => setActiveProfileImageTarget("banner")}
             onDragOver={(event) => {
               event.preventDefault();
+              setActiveProfileImageTarget("banner");
               setBannerDragging(true);
             }}
             onDragLeave={() => setBannerDragging(false)}
-            onDrop={(event) => handleProfileDrop("banner", event)}
+            onDrop={(event) => {
+              setActiveProfileImageTarget("banner");
+              handleProfileDrop("banner", event);
+            }}
             onPaste={(event) => handleProfilePaste("banner", event)}
             className={
               bannerDragging
@@ -765,6 +794,7 @@ export default function CreatorProfileForm({
                 focusY={bannerFocusY}
                 setFocusX={setBannerFocusX}
                 setFocusY={setBannerFocusY}
+                onActivate={() => setActiveProfileImageTarget("banner")}
               />
 
               <button
