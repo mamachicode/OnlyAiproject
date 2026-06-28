@@ -98,6 +98,8 @@ export async function POST(req: Request) {
 
     const avatarFile = getUploadFile(formData.get("avatar"));
     const bannerFile = getUploadFile(formData.get("banner"));
+    const shouldRemoveAvatar = formData.get("removeAvatar") === "1" && !avatarFile;
+    const shouldRemoveBanner = formData.get("removeBanner") === "1" && !bannerFile;
 
     const avatarUrl = avatarFile
       ? await uploadProfileImage(avatarFile, "onlyai/creators/avatars")
@@ -130,8 +132,8 @@ export async function POST(req: Request) {
           priceCents,
           currency: "USD",
           billingPeriodDays: 30,
-          ...(avatarUrl ? { avatarUrl } : {}),
-          ...(bannerUrl ? { bannerUrl } : {}),
+          ...(shouldRemoveAvatar ? { avatarUrl: null } : avatarUrl ? { avatarUrl } : {}),
+          ...(shouldRemoveBanner ? { bannerUrl: null } : bannerUrl ? { bannerUrl } : {}),
         },
         create: {
           userId,
@@ -142,8 +144,8 @@ export async function POST(req: Request) {
           priceCents,
           currency: "USD",
           billingPeriodDays: 30,
-          avatarUrl,
-          bannerUrl,
+          avatarUrl: shouldRemoveAvatar ? null : avatarUrl,
+          bannerUrl: shouldRemoveBanner ? null : bannerUrl,
         },
       }),
     ]);

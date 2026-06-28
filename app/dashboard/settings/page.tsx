@@ -159,6 +159,8 @@ export default async function CreatorSettingsPage({
           currentHandle={currentHandle}
           currentBio={currentBio}
           currentMonthlyPrice={currentMonthlyPrice}
+          currentAvatarUrl={currentAvatarUrl}
+          currentBannerUrl={currentBannerUrl}
         />
       </div>
     </main>

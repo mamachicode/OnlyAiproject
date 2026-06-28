@@ -16,6 +16,8 @@ type CreatorProfileFormProps = {
   currentHandle: string;
   currentBio: string;
   currentMonthlyPrice: number;
+  currentAvatarUrl: string;
+  currentBannerUrl: string;
 };
 
 type CropOptions = {
@@ -299,6 +301,8 @@ export default function CreatorProfileForm({
   currentHandle,
   currentBio,
   currentMonthlyPrice,
+  currentAvatarUrl,
+  currentBannerUrl,
 }: CreatorProfileFormProps) {
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -310,6 +314,8 @@ export default function CreatorProfileForm({
   const [bannerFocusY, setBannerFocusY] = useState(22);
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState("");
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState("");
+  const [removeAvatar, setRemoveAvatar] = useState(false);
+  const [removeBanner, setRemoveBanner] = useState(false);
   const [avatarDragging, setAvatarDragging] = useState(false);
   const [bannerDragging, setBannerDragging] = useState(false);
   const [activeProfileImageTarget, setActiveProfileImageTarget] =
@@ -337,6 +343,52 @@ export default function CreatorProfileForm({
     input.files = transfer.files;
   }
 
+  function clearInputFile(kind: "avatar" | "banner") {
+    const input = kind === "avatar" ? avatarInputRef.current : bannerInputRef.current;
+
+    if (input) {
+      input.value = "";
+    }
+  }
+
+  function clearSelectedProfileImage(kind: "avatar" | "banner") {
+    clearInputFile(kind);
+    setError("");
+
+    if (kind === "avatar") {
+      if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+      setAvatarPreviewUrl("");
+      setAvatarFocusX(50);
+      setAvatarFocusY(50);
+      return;
+    }
+
+    if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
+    setBannerPreviewUrl("");
+    setBannerFocusX(50);
+    setBannerFocusY(22);
+  }
+
+  function removeCurrentProfileImage(kind: "avatar" | "banner") {
+    clearSelectedProfileImage(kind);
+
+    if (kind === "avatar") {
+      setRemoveAvatar(true);
+      return;
+    }
+
+    setRemoveBanner(true);
+  }
+
+  function keepCurrentProfileImage(kind: "avatar" | "banner") {
+    if (kind === "avatar") {
+      setRemoveAvatar(false);
+      return;
+    }
+
+    setRemoveBanner(false);
+  }
+
   function selectProfileImage(kind: "avatar" | "banner", file: File | null | undefined) {
     if (!isImageFile(file)) {
       setError("Use an image file for your avatar or banner.");
@@ -348,6 +400,7 @@ export default function CreatorProfileForm({
 
     if (kind === "avatar") {
       if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+      setRemoveAvatar(false);
       setAvatarFocusX(50);
       setAvatarFocusY(50);
       setAvatarPreviewUrl(URL.createObjectURL(file));
@@ -355,6 +408,7 @@ export default function CreatorProfileForm({
     }
 
     if (bannerPreviewUrl) URL.revokeObjectURL(bannerPreviewUrl);
+    setRemoveBanner(false);
     setBannerFocusX(50);
     setBannerFocusY(22);
     setBannerPreviewUrl(URL.createObjectURL(file));
@@ -449,6 +503,14 @@ export default function CreatorProfileForm({
 
       const avatar = source.get("avatar");
       const banner = source.get("banner");
+
+      if (removeAvatar) {
+        next.set("removeAvatar", "1");
+      }
+
+      if (removeBanner) {
+        next.set("removeBanner", "1");
+      }
 
       if (avatar instanceof File && avatar.size > 0) {
         const croppedAvatar = await cropAndCompressImage(avatar, {
@@ -600,15 +662,53 @@ export default function CreatorProfileForm({
           </label>
 
           {avatarPreviewUrl ? (
-            <CropFrame
-              title="Avatar preview"
-              previewUrl={avatarPreviewUrl}
-              shape="avatar"
-              focusX={avatarFocusX}
-              focusY={avatarFocusY}
-              setFocusX={setAvatarFocusX}
-              setFocusY={setAvatarFocusY}
-            />
+            <>
+              <CropFrame
+                title="Avatar preview"
+                previewUrl={avatarPreviewUrl}
+                shape="avatar"
+                focusX={avatarFocusX}
+                focusY={avatarFocusY}
+                setFocusX={setAvatarFocusX}
+                setFocusY={setAvatarFocusY}
+              />
+
+              <button
+                type="button"
+                onClick={() => clearSelectedProfileImage("avatar")}
+                className="mt-3 rounded-full border border-white/10 px-4 py-2 text-xs font-black text-zinc-200 transition hover:border-pink-300/40 hover:bg-white/5"
+              >
+                Clear selected avatar
+              </button>
+            </>
+          ) : removeAvatar && currentAvatarUrl ? (
+            <div className="mt-3 rounded-2xl border border-red-400/20 bg-red-500/10 p-4">
+              <p className="text-xs font-bold text-red-100">
+                Avatar will be removed when you save.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => keepCurrentProfileImage("avatar")}
+                className="mt-3 rounded-full border border-white/10 px-4 py-2 text-xs font-black text-zinc-200 transition hover:border-pink-300/40 hover:bg-white/5"
+              >
+                Keep current avatar
+              </button>
+            </div>
+          ) : currentAvatarUrl ? (
+            <div className="mt-3 flex flex-col gap-3">
+              <p className="text-xs text-zinc-500">
+                Current avatar is active. Choose a new one or remove it.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => removeCurrentProfileImage("avatar")}
+                className="w-fit rounded-full border border-red-400/30 px-4 py-2 text-xs font-black text-red-100 transition hover:bg-red-500/10"
+              >
+                Remove avatar
+              </button>
+            </div>
           ) : (
             <p className="mt-3 text-xs text-zinc-500">
               Choose an avatar to preview the crop before saving.
@@ -656,15 +756,53 @@ export default function CreatorProfileForm({
           </label>
 
           {bannerPreviewUrl ? (
-            <CropFrame
-              title="Banner preview"
-              previewUrl={bannerPreviewUrl}
-              shape="banner"
-              focusX={bannerFocusX}
-              focusY={bannerFocusY}
-              setFocusX={setBannerFocusX}
-              setFocusY={setBannerFocusY}
-            />
+            <>
+              <CropFrame
+                title="Banner preview"
+                previewUrl={bannerPreviewUrl}
+                shape="banner"
+                focusX={bannerFocusX}
+                focusY={bannerFocusY}
+                setFocusX={setBannerFocusX}
+                setFocusY={setBannerFocusY}
+              />
+
+              <button
+                type="button"
+                onClick={() => clearSelectedProfileImage("banner")}
+                className="mt-3 rounded-full border border-white/10 px-4 py-2 text-xs font-black text-zinc-200 transition hover:border-pink-300/40 hover:bg-white/5"
+              >
+                Clear selected banner
+              </button>
+            </>
+          ) : removeBanner && currentBannerUrl ? (
+            <div className="mt-3 rounded-2xl border border-red-400/20 bg-red-500/10 p-4">
+              <p className="text-xs font-bold text-red-100">
+                Banner will be removed when you save.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => keepCurrentProfileImage("banner")}
+                className="mt-3 rounded-full border border-white/10 px-4 py-2 text-xs font-black text-zinc-200 transition hover:border-pink-300/40 hover:bg-white/5"
+              >
+                Keep current banner
+              </button>
+            </div>
+          ) : currentBannerUrl ? (
+            <div className="mt-3 flex flex-col gap-3">
+              <p className="text-xs text-zinc-500">
+                Current banner is active. Choose a new one or remove it.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => removeCurrentProfileImage("banner")}
+                className="w-fit rounded-full border border-red-400/30 px-4 py-2 text-xs font-black text-red-100 transition hover:bg-red-500/10"
+              >
+                Remove banner
+              </button>
+            </div>
           ) : (
             <p className="mt-3 text-xs text-zinc-500">
               Choose a banner to preview the crop before saving.
