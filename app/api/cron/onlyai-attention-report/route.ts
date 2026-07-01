@@ -6,15 +6,6 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-function cleanHandle(value: unknown) {
-  return String(value || "")
-    .trim()
-    .replace(/^@+/, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9_]/g, "")
-    .slice(0, 30);
-}
-
 function appUrl(req: NextRequest) {
   const fromEnv =
     process.env.NEXT_PUBLIC_APP_URL ||
@@ -244,9 +235,6 @@ export async function GET(req: NextRequest) {
   const since7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   const baseUrl = appUrl(req);
-  const creatorHandle =
-    cleanHandle(process.env.ONLYAI_REPORT_CREATOR_HANDLE || "sexygurlai") ||
-    "sexygurlai";
 
   const activeSubscriptionWhere = {
     processor: "STRIPE",
@@ -258,27 +246,12 @@ export async function GET(req: NextRequest) {
   const warnings: string[] = [];
   const info: string[] = [];
 
-  const pageChecks = await Promise.all([
+  let pageChecks = await Promise.all([
     checkPage(baseUrl, "Homepage", "/"),
     checkPage(baseUrl, "Creators", "/creators"),
-    checkPage(baseUrl, "Creator page", `/public/creator/${creatorHandle}`),
-    checkPage(baseUrl, "Subscribe page", `/subscribe/${creatorHandle}`),
     checkPage(baseUrl, "Login", "/login"),
     checkPage(baseUrl, "Signup", "/signup"),
   ]);
-
-  for (const page of pageChecks) {
-    if (page.ok) continue;
-
-    const detail =
-      page.error || `${page.status || "NO_STATUS"} ${page.statusText || ""}`.trim();
-
-    if (!page.status || page.status >= 500) {
-      critical.push(`${page.label} is broken: ${page.path} (${detail})`);
-    } else {
-      warnings.push(`${page.label} needs attention: ${page.path} (${detail})`);
-    }
-  }
 
   const [
     creators,
@@ -421,6 +394,36 @@ export async function GET(req: NextRequest) {
       },
     }),
   ]);
+
+  const creatorPageChecks = await Promise.all(
+    creators.flatMap((creator: any) => {
+      const handle = creator.handle || creator.user?.username;
+
+      if (!handle) {
+        return [];
+      }
+
+      return [
+        checkPage(baseUrl, `Creator @${handle}`, `/public/creator/${handle}`),
+        checkPage(baseUrl, `Subscribe @${handle}`, `/subscribe/${handle}`),
+      ];
+    })
+  );
+
+  pageChecks = [...pageChecks, ...creatorPageChecks];
+
+  for (const page of pageChecks) {
+    if (page.ok) continue;
+
+    const detail =
+      page.error || `${page.status || "NO_STATUS"} ${page.statusText || ""}`.trim();
+
+    if (!page.status || page.status >= 500) {
+      critical.push(`${page.label} is broken: ${page.path} (${detail})`);
+    } else {
+      warnings.push(`${page.label} needs attention: ${page.path} (${detail})`);
+    }
+  }
 
   const creatorRows = creators.map((creator: any) => {
     const activeSubscribers = creator.subscriptions.length;
