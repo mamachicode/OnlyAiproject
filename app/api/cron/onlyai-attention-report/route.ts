@@ -85,6 +85,31 @@ async function checkPage(baseUrl: string, label: string, path: string) {
   }
 }
 
+async function wait(ms: number) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function checkPageWithRetry(
+  baseUrl: string,
+  label: string,
+  path: string,
+  attempts = 2
+) {
+  let lastResult = await checkPage(baseUrl, label, path);
+
+  for (let attempt = 1; attempt < attempts; attempt += 1) {
+    if (lastResult.ok) return lastResult;
+
+    // Retry transient production/serverless failures, but do not retry 404-style misses.
+    if (lastResult.status && lastResult.status < 500) return lastResult;
+
+    await wait(750);
+    lastResult = await checkPage(baseUrl, label, path);
+  }
+
+  return lastResult;
+}
+
 function buildTextReport(report: any) {
   const lines: string[] = [];
 
@@ -247,10 +272,10 @@ export async function GET(req: NextRequest) {
   const info: string[] = [];
 
   let pageChecks = await Promise.all([
-    checkPage(baseUrl, "Homepage", "/"),
-    checkPage(baseUrl, "Creators", "/creators"),
-    checkPage(baseUrl, "Login", "/login"),
-    checkPage(baseUrl, "Signup", "/signup"),
+    checkPageWithRetry(baseUrl, "Homepage", "/"),
+    checkPageWithRetry(baseUrl, "Creators", "/creators"),
+    checkPageWithRetry(baseUrl, "Login", "/login"),
+    checkPageWithRetry(baseUrl, "Signup", "/signup"),
   ]);
 
   const [
@@ -395,20 +420,27 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
-  const creatorPageChecks = await Promise.all(
-    creators.flatMap((creator: any) => {
-      const handle = creator.handle || creator.user?.username;
+  const creatorPageChecks: any[] = [];
 
-      if (!handle) {
-        return [];
-      }
+  for (const creator of creators) {
+    const handle = creator.handle || creator.user?.username;
 
-      return [
-        checkPage(baseUrl, `Creator @${handle}`, `/public/creator/${handle}`),
-        checkPage(baseUrl, `Subscribe @${handle}`, `/subscribe/${handle}`),
-      ];
-    })
-  );
+    if (!handle) {
+      continue;
+    }
+
+    creatorPageChecks.push(
+      await checkPageWithRetry(baseUrl, `Creator @${handle}`, `/public/creator/${handle}`)
+    );
+
+    await wait(150);
+
+    creatorPageChecks.push(
+      await checkPageWithRetry(baseUrl, `Subscribe @${handle}`, `/subscribe/${handle}`)
+    );
+
+    await wait(150);
+  }
 
   pageChecks = [...pageChecks, ...creatorPageChecks];
 
