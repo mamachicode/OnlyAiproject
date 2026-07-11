@@ -407,9 +407,11 @@ export default function UploadPostForm() {
 
       const redirectTo =
         payload.redirectTo ||
-        (payload?.moderation?.level === "suggestive"
-          ? "/dashboard/posts?uploaded=1&moderation=suggestive"
-          : "/dashboard/posts?uploaded=1");
+        (payload?.moderation?.level === "manual_review"
+          ? "/dashboard/posts?uploaded=1&moderation=manual_review"
+          : payload?.moderation?.level === "suggestive"
+            ? "/dashboard/posts?uploaded=1&moderation=suggestive"
+            : "/dashboard/posts?uploaded=1");
 
       window.location.href = redirectTo;
     } catch (error) {

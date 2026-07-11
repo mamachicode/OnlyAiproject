@@ -230,7 +230,11 @@ export default function EditPostForm({ post }: { post: EditPost }) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
-    if (params.get("moderation") === "suggestive") {
+    if (params.get("moderation") === "manual_review") {
+      setStatusMessage(
+        "Your post was saved and is pending a routine manual safety review."
+      );
+    } else if (params.get("moderation") === "suggestive") {
       setStatusMessage(
         "Some viewers may consider this content suggestive, but it complies with the current SFW guidelines."
       );

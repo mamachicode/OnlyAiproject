@@ -255,6 +255,29 @@ async function moderateImageWithSightengine({
         ""
       ).trim();
 
+    const normalizedMessage = apiMessage.toLowerCase();
+
+    const quotaReached =
+      normalizedMessage.includes("amount of operations included in your plan") ||
+      normalizedMessage.includes("rolling 30-day period") ||
+      normalizedMessage.includes("usage limit") ||
+      normalizedMessage.includes("quota reached") ||
+      normalizedMessage.includes("quota exceeded");
+
+    if (quotaReached) {
+      console.warn("SIGHTENGINE_QUOTA_MANUAL_REVIEW", {
+        status: res.status,
+        filename,
+        message: apiMessage,
+      });
+
+      return {
+        allowed: true,
+        level: "manual_review",
+        reason: "Sightengine quota reached; manual review required",
+      };
+    }
+
     console.error("SIGHTENGINE_MODERATION_FAILURE", {
       status: res.status,
       error: data?.error || data?.message || data || null,

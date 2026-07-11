@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { getCreatorForApi } from "@/src/lib/creatorGuard";
 import { assertSafeText, prepareSafeUploadFile } from "@/src/lib/moderation";
+import { sendManualReviewAlert } from "@/src/lib/manualReviewAlert";
 import cloudinary from "@/src/lib/cloudinary";
 
 export const runtime = "nodejs";
@@ -26,12 +27,14 @@ function updateSuccessResponse(
   req: Request,
   postId: string,
   wantsJson: boolean,
-  moderationLevel: "safe" | "suggestive" = "safe"
+  moderationLevel: "safe" | "suggestive" | "manual_review" = "safe"
 ) {
   const redirectTo =
-    moderationLevel === "suggestive"
-      ? `/dashboard/posts/${postId}/edit?saved=1&moderation=suggestive`
-      : `/dashboard/posts/${postId}/edit?saved=1`;
+    moderationLevel === "manual_review"
+      ? `/dashboard/posts/${postId}/edit?saved=1&moderation=manual_review`
+      : moderationLevel === "suggestive"
+        ? `/dashboard/posts/${postId}/edit?saved=1&moderation=suggestive`
+        : `/dashboard/posts/${postId}/edit?saved=1`;
 
   if (wantsJson) {
     return NextResponse.json({
@@ -549,10 +552,14 @@ export async function POST(req: Request) {
     }
 
     const moderationLevel = newMedia.some(
-      (item) => item?.moderation?.level === "suggestive"
+      (item) => item?.moderation?.level === "manual_review"
     )
-      ? "suggestive"
-      : "safe";
+      ? "manual_review"
+      : newMedia.some(
+          (item) => item?.moderation?.level === "suggestive"
+        )
+        ? "suggestive"
+        : "safe";
 
     await prisma.post.update({
       where: { id: post.id },
@@ -568,6 +575,29 @@ export async function POST(req: Request) {
           : {}),
       },
     });
+
+    if (moderationLevel === "manual_review") {
+      const manualReviewMedia = newMedia.filter(
+        (item) => item?.moderation?.level === "manual_review"
+      );
+
+      console.warn("MANUAL_REVIEW_REQUIRED", {
+        source: "post_update",
+        postId: post.id,
+        userId,
+        mediaCount: manualReviewMedia.length,
+      });
+
+      await sendManualReviewAlert({
+        source: "post_update",
+        postId: post.id,
+        userId,
+        mediaCount: manualReviewMedia.length,
+        publicIds: manualReviewMedia
+          .map((item) => String(item?.publicId || "").trim())
+          .filter(Boolean),
+      });
+    }
 
     directCleanupMedia = [];
     newMedia = [];

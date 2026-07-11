@@ -53,7 +53,11 @@ export default function DashboardPostsPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
-    if (params.get("moderation") === "suggestive") {
+    if (params.get("moderation") === "manual_review") {
+      setUploadNotice(
+        "Your post was uploaded and is pending a routine manual safety review."
+      );
+    } else if (params.get("moderation") === "suggestive") {
       setUploadNotice(
         "Some viewers may consider this content suggestive, but it complies with the current SFW guidelines."
       );
