@@ -247,8 +247,24 @@ async function moderateImageWithSightengine({
   const data = await res.json().catch(() => null);
 
   if (!res.ok || !data || data.status === "failure") {
-    console.error("SIGHTENGINE_MODERATION_FAILURE", data);
-    throw new Error("That image could not be checked. Try again with a different image.");
+    const apiMessage =
+      String(
+        data?.error?.message ||
+        data?.error?.type ||
+        data?.message ||
+        ""
+      ).trim();
+
+    console.error("SIGHTENGINE_MODERATION_FAILURE", {
+      status: res.status,
+      error: data?.error || data?.message || data || null,
+    });
+
+    throw new Error(
+      apiMessage
+        ? `Image safety check failed: ${apiMessage}`
+        : "That image could not be checked. Try again with a different image."
+    );
   }
 
   const result = evaluateSightengineResult(data);
