@@ -226,6 +226,18 @@ export default function EditPostForm({ post }: { post: EditPost }) {
   const [dragging, setDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("moderation") === "suggestive") {
+      setStatusMessage(
+        "Some viewers may consider this content suggestive, but it complies with the current SFW guidelines."
+      );
+    } else if (params.get("saved") === "1") {
+      setStatusMessage("Post saved successfully.");
+    }
+  }, []);
   const [previewMedia, setPreviewMedia] = useState<{
     url: string;
     type: "IMAGE" | "VIDEO";

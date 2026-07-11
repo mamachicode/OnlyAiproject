@@ -22,11 +22,25 @@ function jsonError(error: string, message: string, status = 400) {
   return NextResponse.json({ error, message }, { status });
 }
 
-function updateSuccessResponse(req: Request, postId: string, wantsJson: boolean) {
-  const redirectTo = `/dashboard/posts/${postId}/edit?saved=1`;
+function updateSuccessResponse(
+  req: Request,
+  postId: string,
+  wantsJson: boolean,
+  moderationLevel: "safe" | "suggestive" = "safe"
+) {
+  const redirectTo =
+    moderationLevel === "suggestive"
+      ? `/dashboard/posts/${postId}/edit?saved=1&moderation=suggestive`
+      : `/dashboard/posts/${postId}/edit?saved=1`;
 
   if (wantsJson) {
-    return NextResponse.json({ ok: true, redirectTo });
+    return NextResponse.json({
+      ok: true,
+      redirectTo,
+      moderation: {
+        level: moderationLevel,
+      },
+    });
   }
 
   return NextResponse.redirect(new URL(redirectTo, req.url), 303);
@@ -195,6 +209,7 @@ async function uploadToCloudinary(file: any, order: number) {
     order,
     publicId: result.public_id,
     resourceType,
+    moderation: safeFile.moderation,
   };
 }
 
@@ -273,44 +288,76 @@ function filenameFromCloudinary(item: any) {
 }
 
 async function fetchCloudinaryImageAsFile(item: any) {
-  const res = await fetch(item.url, {
-    method: "GET",
-    signal: AbortSignal.timeout(15000),
-    headers: {
-      accept: "image/jpeg,image/png,image/webp,image/gif",
-    },
+  let lastStatus = 0;
+  let lastError: unknown = null;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(item.url, {
+        method: "GET",
+        signal: AbortSignal.timeout(15000),
+        headers: {
+          accept: "image/jpeg,image/png,image/webp,image/gif",
+          "cache-control": "no-cache",
+        },
+      });
+
+      lastStatus = res.status;
+
+      if (!res.ok) {
+        if (attempt < 3) {
+          await new Promise((resolve) => setTimeout(resolve, attempt * 750));
+          continue;
+        }
+
+        break;
+      }
+
+      const mime = String(res.headers.get("content-type") || "")
+        .split(";")[0]
+        .trim()
+        .toLowerCase();
+
+      const buffer = Buffer.from(await res.arrayBuffer());
+
+      if (!buffer.length) {
+        throw new Error("Upload file is empty.");
+      }
+
+      if (buffer.length > MAX_IMAGE_BYTES) {
+        throw new Error("Image is too large. Max 20MB.");
+      }
+
+      return {
+        name: filenameFromCloudinary(item),
+        type: mime || "image/jpeg",
+        size: buffer.length,
+        async arrayBuffer() {
+          return buffer.buffer.slice(
+            buffer.byteOffset,
+            buffer.byteOffset + buffer.byteLength
+          );
+        },
+      };
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < 3) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 750));
+        continue;
+      }
+    }
+  }
+
+  console.error("EDIT_CLOUDINARY_FETCH_FAILURE", {
+    publicId: item?.publicId,
+    status: lastStatus,
+    error: lastError instanceof Error ? lastError.message : String(lastError || ""),
   });
 
-  if (!res.ok) {
-    throw new Error("That image could not be checked. Try again with a different image.");
-  }
-
-  const mime = String(res.headers.get("content-type") || "")
-    .split(";")[0]
-    .trim()
-    .toLowerCase();
-
-  const buffer = Buffer.from(await res.arrayBuffer());
-
-  if (!buffer.length) {
-    throw new Error("Upload file is empty.");
-  }
-
-  if (buffer.length > MAX_IMAGE_BYTES) {
-    throw new Error("Image is too large. Max 20MB.");
-  }
-
-  return {
-    name: filenameFromCloudinary(item),
-    type: mime || "image/jpeg",
-    size: buffer.length,
-    async arrayBuffer() {
-      return buffer.buffer.slice(
-        buffer.byteOffset,
-        buffer.byteOffset + buffer.byteLength
-      );
-    },
-  };
+  throw new Error(
+    "The uploaded image could not be retrieved for its safety check. Please try saving again."
+  );
 }
 
 async function prepareVerifiedDirectMedia(item: any, order: number) {
@@ -325,7 +372,7 @@ async function prepareVerifiedDirectMedia(item: any, order: number) {
   }
 
   const imageFile = await fetchCloudinaryImageAsFile(item);
-  await prepareSafeUploadFile(imageFile);
+  const safeFile = await prepareSafeUploadFile(imageFile);
 
   return {
     url: item.url,
@@ -333,6 +380,7 @@ async function prepareVerifiedDirectMedia(item: any, order: number) {
     order,
     publicId: item.publicId,
     resourceType: "image",
+    moderation: safeFile.moderation,
   };
 }
 
@@ -500,6 +548,12 @@ export async function POST(req: Request) {
       mediaUpdate.create = newMedia.map(toPostMediaCreate);
     }
 
+    const moderationLevel = newMedia.some(
+      (item) => item?.moderation?.level === "suggestive"
+    )
+      ? "suggestive"
+      : "safe";
+
     await prisma.post.update({
       where: { id: post.id },
       data: {
@@ -518,7 +572,12 @@ export async function POST(req: Request) {
     directCleanupMedia = [];
     newMedia = [];
 
-    return updateSuccessResponse(req, post.id, wantsJson);
+    return updateSuccessResponse(
+      req,
+      post.id,
+      wantsJson,
+      moderationLevel
+    );
   } catch (error) {
     console.error("POST_UPDATE_ERROR", error);
 
