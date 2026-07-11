@@ -27,6 +27,7 @@ export default function DashboardPostsPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [uploadNotice, setUploadNotice] = useState("");
 
   async function loadPosts() {
     setLoading(true);
@@ -50,6 +51,16 @@ export default function DashboardPostsPage() {
   }
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("moderation") === "suggestive") {
+      setUploadNotice(
+        "Some viewers may consider this content suggestive, but it complies with the current SFW guidelines."
+      );
+    } else if (params.get("uploaded") === "1") {
+      setUploadNotice("Your post was uploaded successfully.");
+    }
+
     loadPosts();
   }, []);
 
@@ -102,6 +113,12 @@ export default function DashboardPostsPage() {
               Upload new post
             </Link>
           </div>
+
+          {uploadNotice ? (
+            <div className="mt-6 rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm font-bold leading-6 text-amber-100">
+              {uploadNotice}
+            </div>
+          ) : null}
 
           {error ? (
             <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm font-bold text-red-100">

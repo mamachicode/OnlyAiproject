@@ -405,7 +405,13 @@ export default function UploadPostForm() {
         throw new Error(uploadErrorMessage(payload?.error || "failed"));
       }
 
-      window.location.href = payload.redirectTo || "/dashboard/posts?uploaded=1";
+      const redirectTo =
+        payload.redirectTo ||
+        (payload?.moderation?.level === "suggestive"
+          ? "/dashboard/posts?uploaded=1&moderation=suggestive"
+          : "/dashboard/posts?uploaded=1");
+
+      window.location.href = redirectTo;
     } catch (error) {
       setSubmitting(false);
       setStatusMessage("");

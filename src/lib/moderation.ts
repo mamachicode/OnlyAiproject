@@ -111,29 +111,23 @@ function evaluateSightengineResult(data: any) {
     path.endsWith(".none") ||
     path.includes(".context.") ||
     path.startsWith("context.") ||
-    path.includes("safe") ||
     path.includes("not_") ||
     path.includes("no_");
 
-  const rules = [
+  const hardBlockRules = [
     {
-      // Hard SFW block: actual explicit sexual/nude content.
-      // Keep this strict for the public Stripe lane.
-      label: "explicit sexual or nudity content",
+      label: "explicit sexual activity",
       threshold: 0.35,
       pattern:
-        /(explicit|erotica|porn|genital|sexual_activity|sexual_display|sexual_act|exposed|bare_breast|bare_chest|sexual)/,
+        /(porn|genital|sexual_activity|sexual_act|explicit_nudity|exposed_genital|bare_breast|exposed_breast)/,
     },
     {
-      // Allow gothic/fantasy poster art with skulls, candles, dark rooms, and horror styling.
-      // Do not block generic gore.prob because it false-positives on SFW goth artwork.
-      // Block only clear graphic injury/body-harm signals.
       label: "graphic injury",
       threshold: 0.70,
-      pattern: /(graphic_gore|severe_blood|open_wound|fresh_wound|dismember|dismemberment|body_part|body_parts)/,
+      pattern:
+        /(graphic_gore|severe_blood|open_wound|fresh_wound|dismember|dismemberment|body_part|body_parts)/,
     },
     {
-      // Weapons can false-positive in fantasy/anime art, so require a high score.
       label: "weapon content",
       threshold: 0.90,
       pattern: /(weapon|firearm|gun|knife)/,
@@ -145,21 +139,63 @@ function evaluateSightengineResult(data: any) {
     },
   ];
 
+  const suggestiveRules = [
+    {
+      label: "suggestive presentation",
+      threshold: 0.35,
+      hardBlockThreshold: 0.90,
+      pattern: /(sexual_display|erotica|suggestive)/,
+    },
+  ];
+
+  let suggestiveReason = "";
+
   for (const score of scores) {
     if (safePath(score.path)) continue;
 
-    const rule = rules.find((item) => item.pattern.test(score.path));
+    const hardRule = hardBlockRules.find((item) =>
+      item.pattern.test(score.path)
+    );
 
-    if (rule && score.value >= rule.threshold) {
+    if (hardRule && score.value >= hardRule.threshold) {
       return {
         allowed: false,
-        reason: `${rule.label} flagged at ${score.path}=${score.value}`,
+        level: "blocked",
+        reason: `${hardRule.label} flagged at ${score.path}=${score.value}`,
       };
     }
+
+    const suggestiveRule = suggestiveRules.find((item) =>
+      item.pattern.test(score.path)
+    );
+
+    if (suggestiveRule) {
+      if (score.value >= suggestiveRule.hardBlockThreshold) {
+        return {
+          allowed: false,
+          level: "blocked",
+          reason: `${suggestiveRule.label} was extremely high at ${score.path}=${score.value}`,
+        };
+      }
+
+      if (score.value >= suggestiveRule.threshold) {
+        suggestiveReason =
+          `${suggestiveRule.label} flagged at ${score.path}=${score.value}`;
+      }
+    }
+  }
+
+  if (suggestiveReason) {
+    return {
+      allowed: true,
+      level: "suggestive",
+      reason: suggestiveReason,
+    };
   }
 
   return {
     allowed: true,
+    level: "safe",
     reason: "passed",
   };
 }
@@ -221,8 +257,12 @@ async function moderateImageWithSightengine({
     console.error("SFW_IMAGE_BLOCKED_REASON", result.reason);
 
     throw new Error(
-      "That image could not be added. Try a different image or a simpler crop."
+      "This upload contains explicit sexual content or nudity that isn't allowed on the OnlyAi SFW platform."
     );
+  }
+
+  if (result.level === "suggestive") {
+    console.warn("SFW_IMAGE_SUGGESTIVE_WARNING", result.reason);
   }
 
   return result;
@@ -259,13 +299,17 @@ export async function prepareSafeUploadFile(file: any) {
 
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  if (isImage) {
-    await moderateImageWithSightengine({
-      buffer,
-      mime,
-      filename,
-    });
-  }
+  const moderation = isImage
+    ? await moderateImageWithSightengine({
+        buffer,
+        mime,
+        filename,
+      })
+    : {
+        allowed: true,
+        level: "safe",
+        reason: "video moderation not configured",
+      };
 
   return {
     buffer,
@@ -273,5 +317,6 @@ export async function prepareSafeUploadFile(file: any) {
     filename,
     type: isVideo ? "VIDEO" : "IMAGE",
     resourceType: isVideo ? "video" : "image",
+    moderation,
   };
 }

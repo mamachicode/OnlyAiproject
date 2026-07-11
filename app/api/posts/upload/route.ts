@@ -35,11 +35,24 @@ function uploadErrorResponse(
   return redirectToUpload(req, errorCode);
 }
 
-function uploadSuccessResponse(req: Request, wantsJson: boolean) {
-  const redirectTo = "/dashboard/posts?uploaded=1";
+function uploadSuccessResponse(
+  req: Request,
+  wantsJson: boolean,
+  moderationLevel: "safe" | "suggestive" = "safe"
+) {
+  const redirectTo =
+    moderationLevel === "suggestive"
+      ? "/dashboard/posts?uploaded=1&moderation=suggestive"
+      : "/dashboard/posts?uploaded=1";
 
   if (wantsJson) {
-    return NextResponse.json({ ok: true, redirectTo });
+    return NextResponse.json({
+      ok: true,
+      redirectTo,
+      moderation: {
+        level: moderationLevel,
+      },
+    });
   }
 
   return NextResponse.redirect(new URL(redirectTo, req.url), 303);
@@ -416,6 +429,7 @@ async function uploadToCloudinary(file: any, order: number) {
     order,
     publicId: result.public_id,
     resourceType,
+    moderation: safeFile.moderation,
   };
 }
 
@@ -495,7 +509,7 @@ async function prepareVerifiedDirectMedia(item: any, order: number) {
   }
 
   const imageFile = await fetchRemoteImageAsFile(item.url);
-  await prepareSafeUploadFile(imageFile);
+  const safeFile = await prepareSafeUploadFile(imageFile);
 
   return {
     url: item.url,
@@ -503,6 +517,7 @@ async function prepareVerifiedDirectMedia(item: any, order: number) {
     order,
     publicId: item.publicId,
     resourceType: "image",
+    moderation: safeFile.moderation,
   };
 }
 
@@ -640,6 +655,12 @@ export async function POST(req: Request) {
       );
     }
 
+    const moderationLevel = uploadedMedia.some(
+      (item) => item?.moderation?.level === "suggestive"
+    )
+      ? "suggestive"
+      : "safe";
+
     await prisma.post.create({
       data: {
         title: title || "Members-only post",
@@ -657,7 +678,7 @@ export async function POST(req: Request) {
     directCleanupMedia = [];
     uploadedMedia = [];
 
-    return uploadSuccessResponse(req, wantsJson);
+    return uploadSuccessResponse(req, wantsJson, moderationLevel);
   } catch (error) {
     console.error("POST_UPLOAD_ERROR", error);
 
