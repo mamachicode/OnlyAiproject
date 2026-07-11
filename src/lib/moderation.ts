@@ -261,9 +261,7 @@ async function moderateImageWithSightengine({
     });
 
     throw new Error(
-      apiMessage
-        ? `Image safety check failed: ${apiMessage}`
-        : "That image could not be checked. Try again with a different image."
+      "Image safety checks are temporarily unavailable. Please try again later."
     );
   }
 
