@@ -23,17 +23,23 @@ enum SubscriptionStatus {
   EXPIRED
 }
 
+enum ModerationReviewStatus {
+  PENDING
+  APPROVED
+  REMOVED
+}
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  password  String
+  id                     String    @id @default(cuid())
+  email                  String    @unique
+  username               String    @unique
+  password               String
   resetPasswordTokenHash String?
   resetPasswordExpiresAt DateTime?
 
-  sfwPrice  Int      @default(5)
-  nsfwPrice Int      @default(10)
-  isNsfw    Boolean  @default(false)
+  sfwPrice  Int     @default(5)
+  nsfwPrice Int     @default(10)
+  isNsfw    Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -79,9 +85,10 @@ model Post {
   priceCents Int?
   updatedAt  DateTime @updatedAt
 
-  author User        @relation("UserPosts", fields: [authorId], references: [id])
-  media  PostMedia[]
-  likes  PostLike[]
+  author            User               @relation("UserPosts", fields: [authorId], references: [id])
+  media             PostMedia[]
+  likes             PostLike[]
+  moderationReviews ModerationReview[]
 }
 
 model PostLike {
@@ -111,6 +118,28 @@ model PostMedia {
 
   @@index([postId, order])
   @@index([publicId])
+}
+
+model ModerationReview {
+  id              String                 @id @default(cuid())
+  postId          String?
+  pendingKey      String?                @unique
+  creatorUserId   String
+  creatorHandle   String?
+  postTitle       String?
+  source          String
+  reason          String
+  status          ModerationReviewStatus @default(PENDING)
+  mediaPublicIds  Json?
+  createdAt       DateTime               @default(now())
+  reviewedAt      DateTime?
+  reviewedByEmail String?
+
+  post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([postId, status])
+  @@index([creatorUserId, createdAt])
 }
 
 model Subscription {
@@ -153,7 +182,6 @@ model WebhookEvent {
   @@unique([processor, eventId])
   @@index([processor, receivedAt])
 }
-
 
 model CreatorMessage {
   id        String   @id @default(cuid())

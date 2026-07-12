@@ -5,15 +5,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/src/lib/prisma";
 import { requireAdminPage } from "@/src/lib/adminGuard";
+import ReviewActions from "./ReviewActions";
 
 type PageProps = {
   params: Promise<{
     postId: string;
   }>;
+  searchParams?: Promise<{
+    reviewed?: string;
+  }>;
 };
 
-export default async function ManualReviewPage({ params }: PageProps) {
+export default async function ManualReviewPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { postId } = await params;
+  const query = searchParams ? await searchParams : {};
 
   await requireAdminPage(`/admin/manual-review/${postId}`);
 
@@ -39,6 +47,13 @@ export default async function ManualReviewPage({ params }: PageProps) {
     notFound();
   }
 
+  const pendingReview =
+    await prisma.moderationReview.findUnique({
+      where: {
+        pendingKey: post.id,
+      },
+    });
+
   const handle =
     post.author?.creator?.handle ||
     post.author?.username ||
@@ -47,13 +62,26 @@ export default async function ManualReviewPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-[#07050d] text-white">
       <section className="mx-auto max-w-6xl px-6 py-12">
-        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-amber-300">
+        <Link
+          href="/admin/manual-review"
+          className="text-sm font-bold text-zinc-400 hover:text-white"
+        >
+          ← Back to moderation queue
+        </Link>
+
+        <p className="mt-8 text-sm font-semibold uppercase tracking-[0.35em] text-amber-300">
           Manual safety review
         </p>
 
         <h1 className="mt-4 text-4xl font-black">
           {post.title || "Untitled post"}
         </h1>
+
+        {query?.reviewed === "approved" ? (
+          <div className="mt-6 rounded-2xl border border-green-400/25 bg-green-400/10 p-5 font-bold text-green-100">
+            Review approved.
+          </div>
+        ) : null}
 
         <div className="mt-6 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-5">
           <p className="font-bold text-amber-100">
@@ -118,6 +146,14 @@ export default async function ManualReviewPage({ params }: PageProps) {
           >
             View creator profile
           </Link>
+
+          {pendingReview?.status === "PENDING" ? (
+            <ReviewActions postId={post.id} />
+          ) : (
+            <span className="rounded-full border border-white/10 px-5 py-3 text-sm font-black text-zinc-500">
+              Review completed
+            </span>
+          )}
         </div>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2">

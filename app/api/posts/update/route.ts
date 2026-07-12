@@ -588,6 +588,54 @@ export async function POST(req: Request) {
         mediaCount: manualReviewMedia.length,
       });
 
+      const creatorSnapshot = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          username: true,
+          creator: {
+            select: {
+              handle: true,
+            },
+          },
+        },
+      });
+
+      const reviewPublicIds = manualReviewMedia
+        .map((item) => String(item?.publicId || "").trim())
+        .filter(Boolean);
+
+      await prisma.moderationReview.upsert({
+        where: {
+          pendingKey: post.id,
+        },
+        update: {
+          postId: post.id,
+          creatorUserId: userId,
+          creatorHandle:
+            creatorSnapshot?.creator?.handle ||
+            creatorSnapshot?.username ||
+            null,
+          postTitle: title || post.title || null,
+          source: "post_update",
+          reason: "Sightengine quota reached",
+          mediaPublicIds: reviewPublicIds,
+          createdAt: new Date(),
+        },
+        create: {
+          postId: post.id,
+          pendingKey: post.id,
+          creatorUserId: userId,
+          creatorHandle:
+            creatorSnapshot?.creator?.handle ||
+            creatorSnapshot?.username ||
+            null,
+          postTitle: title || post.title || null,
+          source: "post_update",
+          reason: "Sightengine quota reached",
+          mediaPublicIds: reviewPublicIds,
+        },
+      });
+
       await sendManualReviewAlert({
         source: "post_update",
         postId: post.id,
