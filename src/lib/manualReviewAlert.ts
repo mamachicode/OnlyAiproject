@@ -24,7 +24,7 @@ export async function sendManualReviewAlert({
   const token = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
   const chatId = String(process.env.TELEGRAM_ADMIN_CHAT_ID || "").trim();
 
-  const reviewUrl = `${getBaseUrl()}/dashboard/posts/${postId}/edit`;
+  const reviewUrl = `${getBaseUrl()}/admin/manual-review/${postId}`;
 
   if (!token || !chatId) {
     console.warn("TELEGRAM_MANUAL_REVIEW_NOT_CONFIGURED", {
