@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/src/lib/prisma";
 import { requireAdminPage } from "@/src/lib/adminGuard";
 import ReviewActions from "./ReviewActions";
+import MediaReviewAction from "./MediaReviewAction";
 
 type PageProps = {
   params: Promise<{
@@ -80,6 +81,14 @@ export default async function ManualReviewPage({
         {query?.reviewed === "approved" ? (
           <div className="mt-6 rounded-2xl border border-green-400/25 bg-green-400/10 p-5 font-bold text-green-100">
             Review approved.
+          </div>
+        ) : query?.reviewed === "media_removed_completed" ? (
+          <div className="mt-6 rounded-2xl border border-green-400/25 bg-green-400/10 p-5 font-bold text-green-100">
+            The flagged media was removed and the review is now completed.
+          </div>
+        ) : query?.reviewed === "media_removed" ? (
+          <div className="mt-6 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-5 font-bold text-amber-100">
+            The selected media was removed. Review the remaining flagged media.
           </div>
         ) : null}
 
@@ -188,6 +197,15 @@ export default async function ManualReviewPage({
                   <p className="mt-2 break-all text-xs text-zinc-500">
                     {item.publicId}
                   </p>
+                ) : null}
+
+                {pendingReview?.status === "PENDING" ? (
+                  <MediaReviewAction
+                    postId={post.id}
+                    mediaId={item.id}
+                    mediaType={item.type}
+                    isLastMedia={post.media.length === 1}
+                  />
                 ) : null}
               </div>
             </article>

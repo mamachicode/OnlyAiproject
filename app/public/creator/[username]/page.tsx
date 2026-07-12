@@ -479,12 +479,23 @@ export default async function PublicCreatorPage({ params }: PageProps) {
                         </p>
                       ) : null}
 
-                      <PostLikeButton
-                        postId={post.id}
-                        initialLikeCount={post._count?.likes || 0}
-                        initialLiked={Boolean(post.likes?.length)}
-                        isLoggedIn={Boolean(fanUserId)}
-                      />
+                      <div className="mt-4 flex flex-wrap items-center gap-3">
+                        <PostLikeButton
+                          postId={post.id}
+                          initialLikeCount={post._count?.likes || 0}
+                          initialLiked={Boolean(post.likes?.length)}
+                          isLoggedIn={Boolean(fanUserId)}
+                        />
+
+                        {isOwner ? (
+                          <Link
+                            href={`/dashboard/posts/${post.id}/edit`}
+                            className="inline-flex rounded-full border border-white/15 px-4 py-2 text-sm font-black text-zinc-200 hover:border-pink-400/40 hover:bg-pink-500/10 hover:text-white"
+                          >
+                            Edit post
+                          </Link>
+                        ) : null}
+                      </div>
                     </div>
                   </article>
                 );

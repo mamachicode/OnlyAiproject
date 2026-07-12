@@ -27,11 +27,22 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const postId = String(formData.get("postId") || "").trim();
+    const mediaId = String(formData.get("mediaId") || "").trim();
     const action = String(formData.get("action") || "").trim();
 
-    if (!postId || !["approve", "remove"].includes(action)) {
+    if (
+      !postId ||
+      !["approve", "remove", "remove_media"].includes(action)
+    ) {
       return NextResponse.json(
         { error: "Invalid review action." },
+        { status: 400 }
+      );
+    }
+
+    if (action === "remove_media" && !mediaId) {
+      return NextResponse.json(
+        { error: "Missing media id." },
         { status: 400 }
       );
     }
@@ -81,6 +92,134 @@ export async function POST(req: Request) {
       return NextResponse.redirect(
         new URL(
           `/admin/manual-review/${postId}?reviewed=approved`,
+          req.url
+        ),
+        303
+      );
+    }
+
+    if (action === "remove_media") {
+      const media = post.media.find(
+        (item) => item.id === mediaId
+      );
+
+      if (!media) {
+        return NextResponse.json(
+          { error: "Media not found in this post." },
+          { status: 404 }
+        );
+      }
+
+      const isLastMedia = post.media.length === 1;
+
+      const reviewPublicIds = Array.isArray(
+        pendingReview.mediaPublicIds
+      )
+        ? pendingReview.mediaPublicIds
+            .map((value) => String(value || "").trim())
+            .filter(Boolean)
+        : [];
+
+      const removedWasFlagged = Boolean(
+        media.publicId &&
+        reviewPublicIds.includes(media.publicId)
+      );
+
+      const remainingReviewPublicIds = removedWasFlagged
+        ? reviewPublicIds.filter(
+            (publicId) => publicId !== media.publicId
+          )
+        : reviewPublicIds;
+
+      if (isLastMedia) {
+        await prisma.$transaction([
+          prisma.moderationReview.update({
+            where: {
+              id: pendingReview.id,
+            },
+            data: {
+              pendingKey: null,
+              status: "REMOVED",
+              mediaPublicIds: remainingReviewPublicIds,
+              reviewedAt: new Date(),
+              reviewedByEmail: email,
+            },
+          }),
+          prisma.post.delete({
+            where: {
+              id: postId,
+            },
+          }),
+        ]);
+      } else {
+        const reviewCompleted =
+          removedWasFlagged &&
+          remainingReviewPublicIds.length === 0;
+
+        await prisma.$transaction([
+          prisma.postMedia.delete({
+            where: {
+              id: media.id,
+            },
+          }),
+          prisma.moderationReview.update({
+            where: {
+              id: pendingReview.id,
+            },
+            data: reviewCompleted
+              ? {
+                  pendingKey: null,
+                  status: "APPROVED",
+                  mediaPublicIds: [],
+                  reviewedAt: new Date(),
+                  reviewedByEmail: email,
+                }
+              : {
+                  mediaPublicIds: remainingReviewPublicIds,
+                },
+          }),
+        ]);
+      }
+
+      if (media.publicId) {
+        try {
+          await cloudinary.uploader.destroy(media.publicId, {
+            resource_type:
+              media.type === "VIDEO" ? "video" : "image",
+          });
+        } catch (error) {
+          console.warn(
+            "ADMIN_REVIEW_SINGLE_MEDIA_DELETE_WARNING",
+            {
+              publicId: media.publicId,
+              error:
+                error instanceof Error
+                  ? error.message
+                  : String(error),
+            }
+          );
+        }
+      }
+
+      if (isLastMedia) {
+        return NextResponse.redirect(
+          new URL(
+            "/admin/manual-review?removed=1",
+            req.url
+          ),
+          303
+        );
+      }
+
+      const reviewCompleted =
+        removedWasFlagged &&
+        remainingReviewPublicIds.length === 0;
+
+      return NextResponse.redirect(
+        new URL(
+          reviewCompleted
+            ? `/admin/manual-review/${postId}?reviewed=media_removed_completed`
+            : `/admin/manual-review/${postId}?reviewed=media_removed`,
           req.url
         ),
         303
