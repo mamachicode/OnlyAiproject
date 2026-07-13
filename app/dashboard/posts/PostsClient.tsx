@@ -130,6 +130,50 @@ export default function DashboardPostsPage() {
             </div>
           ) : null}
 
+          {!loading && posts.length > 0 ? (
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  Total posts
+                </p>
+                <p className="mt-3 text-3xl font-black text-white">
+                  {posts.length}
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  Total likes
+                </p>
+                <p className="mt-3 text-3xl font-black text-pink-300">
+                  {posts.reduce(
+                    (total, post) =>
+                      total + Number(post._count?.likes || 0),
+                    0
+                  )}
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  Subscribers-only
+                </p>
+                <p className="mt-3 text-3xl font-black text-amber-200">
+                  {posts.filter((post) => post.isLocked).length}
+                </p>
+              </div>
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  Public posts
+                </p>
+                <p className="mt-3 text-3xl font-black text-green-200">
+                  {posts.filter((post) => !post.isLocked).length}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           {loading ? (
             <p className="mt-10 text-zinc-400">Loading posts...</p>
           ) : posts.length === 0 ? (
@@ -186,9 +230,29 @@ export default function DashboardPostsPage() {
                         </p>
                       ) : null}
 
-                      <div className="mt-4 flex items-center justify-between text-xs text-zinc-500">
-                        <span>{post.isLocked ? "Locked" : "Public"}</span>
-                        <span>♥ {post._count?.likes || 0}</span>
+                      <div className="mt-4 grid gap-2 text-xs text-zinc-500">
+                        <div className="flex items-center justify-between">
+                          <span>
+                            {post.isLocked
+                              ? "Subscribers-only"
+                              : "Public"}
+                          </span>
+                          <span>♥ {post._count?.likes || 0}</span>
+                        </div>
+
+                        {post.createdAt ? (
+                          <span>
+                            Published{" "}
+                            {new Date(post.createdAt).toLocaleDateString(
+                              undefined,
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}
+                          </span>
+                        ) : null}
                       </div>
 
                       <div className="mt-5 grid grid-cols-2 gap-3">
