@@ -156,7 +156,7 @@ export default function DashboardPostsPage() {
 
               <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
                 <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Subscribers-only
+                  Locked posts
                 </p>
                 <p className="mt-3 text-3xl font-black text-amber-200">
                   {posts.filter((post) => post.isLocked).length}
@@ -165,7 +165,7 @@ export default function DashboardPostsPage() {
 
               <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
                 <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  Public posts
+                  Free posts
                 </p>
                 <p className="mt-3 text-3xl font-black text-green-200">
                   {posts.filter((post) => !post.isLocked).length}
@@ -234,8 +234,8 @@ export default function DashboardPostsPage() {
                         <div className="flex items-center justify-between">
                           <span>
                             {post.isLocked
-                              ? "Subscribers-only"
-                              : "Public"}
+                              ? "Locked"
+                              : "Free"}
                           </span>
                           <span>♥ {post._count?.likes || 0}</span>
                         </div>
