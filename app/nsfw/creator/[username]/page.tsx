@@ -126,10 +126,6 @@ export default async function PrivateNsfwCreatorPage({
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(127,29,29,0.28),transparent_38%),linear-gradient(180deg,#1a070b_0%,#0d0508_45%,#070305_100%)] text-white">
-      <div className="border-b border-red-500/20 bg-black px-6 py-3 text-center text-sm font-black text-red-100">
-        18+ area — age verification required
-      </div>
-
       <section className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Link
