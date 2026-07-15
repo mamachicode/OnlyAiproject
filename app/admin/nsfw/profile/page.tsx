@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/src/lib/prisma";
 import { requireAdminPage } from "@/src/lib/adminGuard";
+import NsfwProfileForm from "./NsfwProfileForm";
 
 export const dynamic = "force-dynamic";
 
@@ -97,132 +98,24 @@ export default async function PrivateNsfwProfileSettingsPage({
           </div>
         ) : null}
 
-        <form
-          action="/api/admin/nsfw/profile"
-          method="POST"
-          encType="multipart/form-data"
-          className="mt-8 space-y-7 rounded-3xl border border-white/10 bg-black/25 p-6 sm:p-8"
-        >
-          <label className="block">
-            <span className="text-sm font-black">
-              NSFW display name
-            </span>
-
-            <input
-              name="nsfwDisplayName"
-              maxLength={50}
-              defaultValue={
-                creator.nsfwDisplayName ||
-                creator.displayName ||
-                handle
-              }
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 font-semibold text-white outline-none focus:border-red-400/50"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-sm font-black">
-              NSFW bio
-            </span>
-
-            <textarea
-              name="nsfwBio"
-              rows={5}
-              maxLength={280}
-              defaultValue={
-                creator.nsfwBio ||
-                creator.bio ||
-                ""
-              }
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 font-semibold text-white outline-none focus:border-red-400/50"
-            />
-
-            <span className="mt-2 block text-xs text-zinc-500">
-              Maximum 280 characters.
-            </span>
-          </label>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-              <p className="text-sm font-black">
-                NSFW avatar
-              </p>
-
-              {creator.nsfwAvatarUrl ? (
-                <img
-                  src={creator.nsfwAvatarUrl}
-                  alt="Current NSFW avatar"
-                  className="mt-4 h-28 w-28 rounded-full border border-white/10 object-cover"
-                />
-              ) : (
-                <p className="mt-4 text-sm text-zinc-500">
-                  Currently using the SFW avatar as a fallback.
-                </p>
-              )}
-
-              <input
-                name="nsfwAvatar"
-                type="file"
-                accept="image/*"
-                className="mt-5 block w-full text-sm text-zinc-400 file:mr-4 file:rounded-full file:border-0 file:bg-red-500/15 file:px-4 file:py-2 file:font-black file:text-red-100"
-              />
-
-              {creator.nsfwAvatarUrl ? (
-                <label className="mt-4 flex items-center gap-3 text-sm text-zinc-300">
-                  <input
-                    type="checkbox"
-                    name="removeNsfwAvatar"
-                    value="1"
-                  />
-                  Remove NSFW avatar and use SFW fallback
-                </label>
-              ) : null}
-            </div>
-
-            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-              <p className="text-sm font-black">
-                NSFW banner
-              </p>
-
-              {creator.nsfwBannerUrl ? (
-                <img
-                  src={creator.nsfwBannerUrl}
-                  alt="Current NSFW banner"
-                  className="mt-4 aspect-[16/6] w-full rounded-2xl border border-white/10 object-cover"
-                />
-              ) : (
-                <p className="mt-4 text-sm text-zinc-500">
-                  Currently using the SFW banner as a fallback.
-                </p>
-              )}
-
-              <input
-                name="nsfwBanner"
-                type="file"
-                accept="image/*"
-                className="mt-5 block w-full text-sm text-zinc-400 file:mr-4 file:rounded-full file:border-0 file:bg-red-500/15 file:px-4 file:py-2 file:font-black file:text-red-100"
-              />
-
-              {creator.nsfwBannerUrl ? (
-                <label className="mt-4 flex items-center gap-3 text-sm text-zinc-300">
-                  <input
-                    type="checkbox"
-                    name="removeNsfwBanner"
-                    value="1"
-                  />
-                  Remove NSFW banner and use SFW fallback
-                </label>
-              ) : null}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full rounded-2xl bg-gradient-to-r from-red-500 to-purple-600 px-6 py-4 text-base font-black text-white hover:opacity-90"
-          >
-            Save NSFW profile
-          </button>
-        </form>
+        <NsfwProfileForm
+          displayName={
+            creator.nsfwDisplayName ||
+            creator.displayName ||
+            handle
+          }
+          bio={
+            creator.nsfwBio ||
+            creator.bio ||
+            ""
+          }
+          currentAvatarUrl={
+            creator.nsfwAvatarUrl || ""
+          }
+          currentBannerUrl={
+            creator.nsfwBannerUrl || ""
+          }
+        />
       </section>
     </main>
   );
