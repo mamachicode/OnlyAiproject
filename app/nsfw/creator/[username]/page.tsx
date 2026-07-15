@@ -116,7 +116,7 @@ export default async function PrivateNsfwCreatorPage({
     admin.userId === creator.userId;
 
   return (
-    <main className="min-h-screen bg-[#07050d] text-white">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(127,29,29,0.28),transparent_38%),linear-gradient(180deg,#1a070b_0%,#0d0508_45%,#070305_100%)] text-white">
       <div className="border-b border-red-500/20 bg-black px-6 py-3 text-center text-sm font-black text-red-100">
         18+ area — age verification required
       </div>
@@ -201,9 +201,19 @@ export default async function PrivateNsfwCreatorPage({
                     Private 18+ creator
                   </p>
 
-                  <h1 className="mt-2 break-words text-4xl font-black tracking-tight sm:text-5xl md:text-6xl">
-                    {displayName}
-                  </h1>
+                  <div className="mt-2 flex flex-wrap items-center gap-3">
+                    <h1 className="break-words text-4xl font-black tracking-tight sm:text-5xl md:text-6xl">
+                      {displayName}
+                    </h1>
+
+                    <span
+                      className="inline-flex shrink-0 items-center rounded-md border border-red-400/40 bg-red-500/20 px-2.5 py-1 text-xs font-black uppercase tracking-[0.14em] text-red-100 shadow-lg shadow-red-950/30"
+                      aria-label="Adult content creator"
+                      title="Adult content"
+                    >
+                      18+
+                    </span>
+                  </div>
 
                   <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-base font-semibold text-zinc-400">
                     <p>@{publicHandle}</p>
