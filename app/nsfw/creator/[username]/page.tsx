@@ -81,6 +81,7 @@ export default async function PrivateNsfwCreatorPage({
   }
 
   const displayName =
+    creator.nsfwDisplayName ||
     creator.displayName ||
     creator.handle ||
     creator.user.username;
@@ -89,11 +90,19 @@ export default async function PrivateNsfwCreatorPage({
     creator.handle || creator.user.username;
 
   const bio =
+    creator.nsfwBio ||
     creator.bio ||
     "Subscribe for private creator posts, exclusive adult image sets, and members-only releases.";
 
-  const avatarUrl = creator.avatarUrl || "";
-  const bannerUrl = creator.bannerUrl || "";
+  const avatarUrl =
+    creator.nsfwAvatarUrl ||
+    creator.avatarUrl ||
+    "";
+
+  const bannerUrl =
+    creator.nsfwBannerUrl ||
+    creator.bannerUrl ||
+    "";
   const posts = creator.user.posts;
 
   const priceDollars = Number(
@@ -132,12 +141,21 @@ export default async function PrivateNsfwCreatorPage({
 
           <div className="flex flex-col gap-2 sm:flex-row">
             {isMasterAccount ? (
-              <Link
-                href="/admin/nsfw/upload"
-                className="rounded-full border border-red-400/30 bg-red-500/15 px-5 py-2 text-center text-sm font-black text-red-100 hover:bg-red-500/25"
-              >
-                Add post
-              </Link>
+              <>
+                <Link
+                  href="/admin/nsfw/profile"
+                  className="rounded-full border border-white/10 bg-white/[0.05] px-5 py-2 text-center text-sm font-black text-white hover:bg-white/10"
+                >
+                  Edit NSFW profile
+                </Link>
+
+                <Link
+                  href="/admin/nsfw/upload"
+                  className="rounded-full border border-red-400/30 bg-red-500/15 px-5 py-2 text-center text-sm font-black text-red-100 hover:bg-red-500/25"
+                >
+                  Add post
+                </Link>
+              </>
             ) : null}
 
             <Link

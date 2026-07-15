@@ -61,6 +61,10 @@ model Creator {
   bio               String?
   avatarUrl         String?
   bannerUrl         String?
+  nsfwDisplayName   String?
+  nsfwBio           String?
+  nsfwAvatarUrl     String?
+  nsfwBannerUrl     String?
   classification    String   @default("SFW")
   platformFeeBps    Int      @default(2000)
   priceCents        Int      @default(1000)
