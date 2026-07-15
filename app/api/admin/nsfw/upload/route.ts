@@ -141,16 +141,12 @@ export async function POST(req: Request) {
       .trim()
       .slice(0, 2000);
 
-    const confirmations = body?.confirmations || {};
-
-    if (
-      confirmations.adult !== true ||
-      confirmations.likeness !== true ||
-      confirmations.rights !== true ||
-      confirmations.policy !== true
-    ) {
+    if (body?.policyAccepted !== true) {
       return NextResponse.json(
-        { error: "All compliance confirmations are required." },
+        {
+          error:
+            "Confirm that this upload follows the adult content policy.",
+        },
         { status: 400 }
       );
     }

@@ -231,18 +231,9 @@ export default function NsfwUploadForm({
     const form = event.currentTarget;
     const formData = new FormData(form);
 
-    const confirmations = [
-      "adultConfirmation",
-      "likenessConfirmation",
-      "rightsConfirmation",
-      "policyConfirmation",
-    ];
-
-    for (const name of confirmations) {
-      if (formData.get(name) !== "on") {
-        setError("All compliance confirmations are required.");
-        return;
-      }
+    if (formData.get("policyAccepted") !== "on") {
+      setError("Confirm that this upload follows the adult content policy.");
+      return;
     }
 
     setUploading(true);
@@ -328,16 +319,8 @@ export default function NsfwUploadForm({
             title: String(formData.get("title") || ""),
             content: String(formData.get("content") || ""),
             isLocked: formData.get("isLocked") === "on",
-            confirmations: {
-              adult:
-                formData.get("adultConfirmation") === "on",
-              likeness:
-                formData.get("likenessConfirmation") === "on",
-              rights:
-                formData.get("rightsConfirmation") === "on",
-              policy:
-                formData.get("policyConfirmation") === "on",
-            },
+            policyAccepted:
+              formData.get("policyAccepted") === "on",
             media: uploadedMedia,
           }),
         }
@@ -562,54 +545,38 @@ export default function NsfwUploadForm({
         </span>
       </label>
 
-      <div className="space-y-3 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-5">
-        <p className="text-sm font-black text-amber-100">
-          Required compliance confirmations
-        </p>
+      <div className="space-y-4 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-5">
+        <div>
+          <p className="text-sm font-black text-amber-100">
+            Adult content policy reminder
+          </p>
 
-        <label className="flex items-start gap-3 text-sm leading-6 text-amber-100/80">
+          <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-100/80">
+            <li>Every depicted subject must clearly be an adult aged 18 or older.</li>
+            <li>No unauthorized identifiable real-person likenesses, deepfakes, or face swaps.</li>
+            <li>You must own or be authorized to use every uploaded image.</li>
+            <li>The upload must comply with the Prohibited Content Policy.</li>
+          </ul>
+
+          <a
+            href="/nsfw/prohibited-content"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-3 inline-block text-sm font-black text-amber-100 underline decoration-amber-300/50 underline-offset-4"
+          >
+            Read the Prohibited Content Policy
+          </a>
+        </div>
+
+        <label className="flex items-start gap-3 rounded-2xl border border-amber-300/20 bg-black/20 p-4 text-sm leading-6 text-amber-100">
           <input
             type="checkbox"
-            name="adultConfirmation"
+            name="policyAccepted"
             required
             disabled={uploading}
             className="mt-1"
           />
-          Every depicted subject is clearly an adult aged 18 or older.
-        </label>
-
-        <label className="flex items-start gap-3 text-sm leading-6 text-amber-100/80">
-          <input
-            type="checkbox"
-            name="likenessConfirmation"
-            required
-            disabled={uploading}
-            className="mt-1"
-          />
-          No image depicts or intentionally resembles an identifiable real
-          person without documented authorization.
-        </label>
-
-        <label className="flex items-start gap-3 text-sm leading-6 text-amber-100/80">
-          <input
-            type="checkbox"
-            name="rightsConfirmation"
-            required
-            disabled={uploading}
-            className="mt-1"
-          />
-          OnlyAi owns or is authorized to use every uploaded image.
-        </label>
-
-        <label className="flex items-start gap-3 text-sm leading-6 text-amber-100/80">
-          <input
-            type="checkbox"
-            name="policyConfirmation"
-            required
-            disabled={uploading}
-            className="mt-1"
-          />
-          The content complies with the Prohibited Content Policy.
+          I confirm that this upload follows the adult content policy.
         </label>
       </div>
 
