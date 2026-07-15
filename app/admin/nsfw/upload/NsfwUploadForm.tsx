@@ -1,10 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import type { FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import type {
+  ChangeEvent,
+  DragEvent,
+  FormEvent,
+} from "react";
 
 type Props = {
   publicHandle: string;
+};
+
+type SelectedImage = {
+  id: string;
+  file: File;
+  previewUrl: string;
 };
 
 type UploadedMedia = {
@@ -26,16 +41,175 @@ const ALLOWED_TYPES = new Set([
   "image/gif",
 ]);
 
+function isAllowedImage(file: File) {
+  return ALLOWED_TYPES.has(file.type.toLowerCase());
+}
+
+function makeFileId(file: File) {
+  return `${file.name || "pasted-image"}|${file.type}|${file.size}`;
+}
+
+function formatBytes(bytes: number) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "";
+
+  const mb = bytes / (1024 * 1024);
+  return `${mb.toFixed(mb >= 10 ? 0 : 1)}MB`;
+}
+
 export default function NsfwUploadForm({
   publicHandle,
 }: Props) {
-  const [files, setFiles] = useState<File[]>([]);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const selectedRef = useRef<SelectedImage[]>([]);
+
+  const [selected, setSelected] = useState<SelectedImage[]>([]);
+  const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [previewItem, setPreviewItem] =
+    useState<SelectedImage | null>(null);
+
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  useEffect(() => {
+    if (!previewItem) return;
+
+    function handlePreviewKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setPreviewItem(null);
+      }
+    }
+
+    window.addEventListener("keydown", handlePreviewKeyDown);
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handlePreviewKeyDown
+      );
+    };
+  }, [previewItem]);
+
+  const appendFiles = useCallback((nextFiles: File[]) => {
+    const allowed = nextFiles.filter(isAllowedImage);
+
+    if (!allowed.length) {
+      setError("Use JPEG, PNG, WebP, or GIF images.");
+      return;
+    }
+
+    setSelected((current) => {
+      const existingIds = new Set(
+        current.map((item) => item.id)
+      );
+
+      const freshFiles = allowed.filter(
+        (file) => !existingIds.has(makeFileId(file))
+      );
+
+      const combinedCount = current.length + freshFiles.length;
+
+      if (combinedCount > MAX_IMAGES) {
+        setError("Add up to 5 images per private post.");
+        return current;
+      }
+
+      const oversized = freshFiles.find(
+        (file) => file.size > MAX_IMAGE_BYTES
+      );
+
+      if (oversized) {
+        setError("Each image must be 20 MB or smaller.");
+        return current;
+      }
+
+      if (!freshFiles.length) {
+        setError("");
+        return current;
+      }
+
+      const nextItems = freshFiles.map((file) => ({
+        id: makeFileId(file),
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+
+      setError("");
+      return [...current, ...nextItems];
+    });
+  }, []);
+
+  useEffect(() => {
+    function handleWindowPaste(event: ClipboardEvent) {
+      const pastedFiles = Array.from(
+        event.clipboardData?.files || []
+      ).filter(isAllowedImage);
+
+      if (!pastedFiles.length) return;
+
+      event.preventDefault();
+      appendFiles(pastedFiles);
+    }
+
+    window.addEventListener("paste", handleWindowPaste);
+
+    return () => {
+      window.removeEventListener("paste", handleWindowPaste);
+
+      for (const item of selectedRef.current) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+    };
+  }, [appendFiles]);
+
+  function handleInputChange(
+    event: ChangeEvent<HTMLInputElement>
+  ) {
+    appendFiles(Array.from(event.target.files || []));
+    event.currentTarget.value = "";
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setDragging(false);
+    appendFiles(Array.from(event.dataTransfer.files || []));
+  }
+
+  function removeFile(id: string) {
+    if (previewItem?.id === id) {
+      setPreviewItem(null);
+    }
+
+    setSelected((current) => {
+      const removed = current.find((item) => item.id === id);
+
+      if (removed) {
+        URL.revokeObjectURL(removed.previewUrl);
+      }
+
+      return current.filter((item) => item.id !== id);
+    });
+  }
+
+  function clearFiles() {
+    for (const item of selected) {
+      URL.revokeObjectURL(item.previewUrl);
+    }
+
+    setPreviewItem(null);
+    setSelected([]);
+    setError("");
+    setStatusMessage("");
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+
+    const files = selected.map((item) => item.file);
 
     if (!files.length || files.length > MAX_IMAGES) {
       setError("Choose between 1 and 5 images.");
@@ -72,6 +246,11 @@ export default function NsfwUploadForm({
     }
 
     setUploading(true);
+    setStatusMessage(
+      `Preparing ${files.length} image upload${
+        files.length === 1 ? "" : "s"
+      }...`
+    );
 
     try {
       const signResponse = await fetch(
@@ -91,7 +270,13 @@ export default function NsfwUploadForm({
 
       const uploadedMedia: UploadedMedia[] = [];
 
-      for (const file of files) {
+      for (let index = 0; index < files.length; index++) {
+        const file = files[index];
+
+        setStatusMessage(
+          `Uploading image ${index + 1} of ${files.length}...`
+        );
+
         const cloudinaryForm = new FormData();
 
         cloudinaryForm.append("file", file);
@@ -129,6 +314,8 @@ export default function NsfwUploadForm({
           bytes: Number(uploadData.bytes || file.size),
         });
       }
+
+      setStatusMessage("Saving private post...");
 
       const saveResponse = await fetch(
         "/api/admin/nsfw/upload",
@@ -173,6 +360,7 @@ export default function NsfwUploadForm({
           ? uploadError.message
           : "The post could not be created."
       );
+      setStatusMessage("");
       setUploading(false);
     }
   }
@@ -227,30 +415,131 @@ export default function NsfwUploadForm({
       </div>
 
       <div>
-        <label
-          htmlFor="media"
-          className="text-sm font-black text-white"
-        >
-          Images
+        <label className="block text-sm font-black text-white">
+          Add images
         </label>
 
-        <input
-          id="media"
-          name="media"
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          multiple
-          required
-          disabled={uploading}
-          onChange={(event) =>
-            setFiles(Array.from(event.target.files || []))
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => inputRef.current?.click()}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={handleDrop}
+          className={
+            dragging
+              ? "mt-2 cursor-pointer rounded-3xl border border-red-300/60 bg-red-500/10 p-7 text-center outline-none transition"
+              : "mt-2 cursor-pointer rounded-3xl border border-dashed border-white/20 bg-black/30 p-7 text-center outline-none transition hover:border-red-400/40 hover:bg-white/[0.04]"
           }
-          className="mt-2 block w-full rounded-2xl border border-dashed border-white/20 bg-black/30 p-5 text-sm text-zinc-300 file:mr-4 file:rounded-full file:border-0 file:bg-red-500/15 file:px-4 file:py-2 file:font-black file:text-red-100 disabled:opacity-60"
-        />
+        >
+          <input
+            ref={inputRef}
+            id="media"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            disabled={uploading}
+            onChange={handleInputChange}
+            className="sr-only"
+          />
 
-        <p className="mt-2 text-xs leading-5 text-zinc-500">
-          Add 1–5 images. Each image must be 20 MB or smaller.
-        </p>
+          <p className="text-base font-black text-white sm:hidden">
+            Tap to choose from your photos
+          </p>
+
+          <p className="hidden text-base font-black text-white sm:block">
+            Choose images, drag, or paste
+          </p>
+
+          <p className="mt-2 text-xs leading-5 text-zinc-500">
+            Add up to 5 images. Each image can be up to 20 MB.
+          </p>
+        </div>
+
+        {statusMessage ? (
+          <div className="mt-3 rounded-2xl border border-red-400/20 bg-red-400/10 p-4 text-sm font-bold text-red-100">
+            {statusMessage}
+          </div>
+        ) : null}
+
+        {selected.length ? (
+          <div className="mt-4 rounded-3xl border border-white/10 bg-black/20 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-black text-white">
+                Selected images ({selected.length})
+              </p>
+
+              <button
+                type="button"
+                onClick={clearFiles}
+                disabled={uploading}
+                className="rounded-full border border-white/10 px-4 py-2 text-xs font-black text-zinc-300 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Clear
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {selected.map((item) => (
+                <div
+                  key={item.id}
+                  className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-950"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setPreviewItem(item)}
+                    disabled={uploading}
+                    className="aspect-[4/3] w-full cursor-zoom-in bg-black disabled:cursor-not-allowed disabled:opacity-70"
+                    aria-label="Preview selected image"
+                  >
+                    <img
+                      src={item.previewUrl}
+                      alt={item.file.name || "Selected image"}
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+
+                  <div className="space-y-3 p-3">
+                    <p className="truncate text-xs font-bold text-zinc-300">
+                      {item.file.name || "Pasted image"}
+                    </p>
+
+                    <p className="text-xs font-bold text-zinc-500">
+                      {formatBytes(item.file.size)}
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() => setPreviewItem(item)}
+                      disabled={uploading}
+                      className="w-full rounded-full border border-red-400/30 bg-red-500/10 px-4 py-2 text-xs font-black text-red-100 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Preview
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => removeFile(item.id)}
+                      disabled={uploading}
+                      className="w-full rounded-full border border-white/10 px-4 py-2 text-xs font-black text-white hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <label className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -324,9 +613,43 @@ export default function NsfwUploadForm({
         </label>
       </div>
 
+      {previewItem ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Selected image preview"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setPreviewItem(null)}
+        >
+          <div
+            className="relative w-full max-w-5xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setPreviewItem(null)}
+              className="absolute right-0 top-0 z-10 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black text-white hover:bg-white/20"
+            >
+              Close
+            </button>
+
+            <div className="mt-14 overflow-hidden rounded-3xl border border-white/10 bg-black">
+              <img
+                src={previewItem.previewUrl}
+                alt={
+                  previewItem.file.name ||
+                  "Selected image preview"
+                }
+                className="max-h-[82vh] w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <button
         type="submit"
-        disabled={uploading}
+        disabled={uploading || selected.length === 0}
         className="w-full rounded-full bg-red-500 px-6 py-4 text-sm font-black text-white hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {uploading
