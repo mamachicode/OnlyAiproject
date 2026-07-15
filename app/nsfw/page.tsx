@@ -19,7 +19,7 @@ export default async function PrivateNsfwReviewPage() {
 
         <p className="mt-5 max-w-3xl text-base leading-7 text-zinc-400">
           This private area is under development and is available only to
-          authorized OnlyAi administrators and approved payment-processor
+          authorized OnlyAi administrators and authorized payment-processor
           reviewers. It is not publicly launched and no live adult checkout is
           available.
         </p>
