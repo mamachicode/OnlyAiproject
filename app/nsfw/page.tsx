@@ -1,10 +1,47 @@
 import Link from "next/link";
+import { prisma } from "@/src/lib/prisma";
 import { requireAdminPage } from "@/src/lib/adminGuard";
 
 export const dynamic = "force-dynamic";
 
 export default async function PrivateNsfwReviewPage() {
-  await requireAdminPage("/nsfw");
+  const admin = await requireAdminPage("/nsfw");
+
+  const creator = await prisma.creator.findFirst({
+    where: {
+      OR: [
+        {
+          handle: {
+            equals: "demolitionbaby",
+            mode: "insensitive",
+          },
+        },
+        {
+          user: {
+            username: {
+              equals: "demolitionbaby",
+              mode: "insensitive",
+            },
+          },
+        },
+      ],
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+
+  const publicHandle =
+    creator?.handle ||
+    creator?.user.username ||
+    "demolitionbaby";
+
+  const isMasterAccount =
+    Boolean(creator) && admin.userId === creator?.userId;
 
   return (
     <main className="min-h-screen bg-[#080309] px-6 py-16 text-white">
@@ -23,6 +60,24 @@ export default async function PrivateNsfwReviewPage() {
           reviewers. It is not publicly launched and no live adult checkout is
           available.
         </p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Link
+            href={`/nsfw/creator/${encodeURIComponent(publicHandle)}`}
+            className="rounded-full border border-white/10 bg-white/[0.05] px-5 py-3 text-center text-sm font-black text-white hover:bg-white/10"
+          >
+            Open private storefront
+          </Link>
+
+          {isMasterAccount ? (
+            <Link
+              href="/admin/nsfw/upload"
+              className="rounded-full border border-red-400/30 bg-red-500/15 px-5 py-3 text-center text-sm font-black text-red-100 hover:bg-red-500/25"
+            >
+              Upload private content
+            </Link>
+          ) : null}
+        </div>
 
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           <section className="rounded-3xl border border-red-400/20 bg-red-500/10 p-6">
