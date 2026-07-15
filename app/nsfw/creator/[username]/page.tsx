@@ -176,14 +176,11 @@ export default async function PrivateNsfwCreatorReviewPage({
               Private adult feed
             </p>
             <h2 className="mt-2 text-3xl font-black">
-              Processor-review content
+              Private content preview
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-zinc-400">
-              This query loads only posts explicitly stored with{" "}
-              <code className="rounded bg-white/10 px-2 py-1 text-red-200">
-                isNsfw: true
-              </code>
-              . SFW posts are excluded.
+              Adult creator content prepared for authorized compliance and
+              processor review.
             </p>
           </div>
 
@@ -191,25 +188,23 @@ export default async function PrivateNsfwCreatorReviewPage({
             href={`/nsfw/subscribe/${encodeURIComponent(publicHandle)}`}
             className="rounded-full border border-white/10 bg-white/[0.05] px-5 py-3 text-center text-sm font-black text-zinc-300 hover:bg-white/10"
           >
-            View disabled checkout
+            Preview subscription page
           </Link>
         </div>
 
         {posts.length === 0 ? (
           <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8">
             <p className="text-xl font-black text-white">
-              No NSFW review posts yet
+              No private content available yet
             </p>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-400">
-              This creator exists, but no posts marked as NSFW have been
-              created. The page is connected to the real database and will show
-              review content here once an admin-only NSFW upload flow is added.
+              No adult creator content has been published to this private
+              review profile yet.
             </p>
 
             <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-5 text-sm leading-6 text-amber-100/80">
-              Do not modify the existing SFW upload route to create adult
-              content. The next patch should add a separate admin-only NSFW
-              upload route.
+              This creator page remains private. Public access and live billing
+              are disabled during compliance and processor review.
             </div>
           </div>
         ) : (
@@ -218,7 +213,7 @@ export default async function PrivateNsfwCreatorReviewPage({
               const gallery = post.media.map((item, index) => ({
                 src: item.url,
                 type: item.type,
-                alt: `${post.title || "NSFW review post"} media ${index + 1}`,
+                alt: `${post.title || "Private creator post"} media ${index + 1}`,
               }));
 
               return (
@@ -239,7 +234,7 @@ export default async function PrivateNsfwCreatorReviewPage({
                   <div className="p-5">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="rounded-full border border-red-400/25 bg-red-500/10 px-3 py-1 text-xs font-black text-red-200">
-                        NSFW review
+                        Private 18+ content
                       </span>
 
                       <span
