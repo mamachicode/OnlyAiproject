@@ -85,7 +85,6 @@ export default async function PrivateNsfwReviewPage() {
             <ul className="mt-4 space-y-3 text-sm leading-6 text-red-100/80">
               <li>Private and excluded from search indexing</li>
               <li>No public navigation or creator access</li>
-              <li>No Stripe checkout or Stripe subscription access</li>
               <li>Adult-processor integration not yet activated</li>
             </ul>
           </section>
