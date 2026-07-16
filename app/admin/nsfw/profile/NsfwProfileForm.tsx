@@ -7,6 +7,7 @@ import {
   type ChangeEvent,
   type ClipboardEvent,
   type DragEvent,
+  type FormEvent,
 } from "react";
 
 type ImageTarget = "avatar" | "banner";
@@ -16,6 +17,11 @@ type NsfwProfileFormProps = {
   bio: string;
   currentAvatarUrl: string;
   currentBannerUrl: string;
+};
+
+type UploadedImage = {
+  publicId: string;
+  secureUrl: string;
 };
 
 function isImageFile(file: File | null | undefined): file is File {
@@ -39,7 +45,10 @@ export default function NsfwProfileForm({
     useState<ImageTarget>("avatar");
   const [removeAvatar, setRemoveAvatar] = useState(false);
   const [removeBanner, setRemoveBanner] = useState(false);
+  const [dragTarget, setDragTarget] =
+    useState<ImageTarget | null>(null);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!avatarFile) {
@@ -81,26 +90,11 @@ export default function NsfwProfileForm({
     if (target === "avatar") {
       setAvatarFile(file);
       setRemoveAvatar(false);
-
-      const transfer = new DataTransfer();
-      transfer.items.add(file);
-
-      if (avatarInputRef.current) {
-        avatarInputRef.current.files = transfer.files;
-      }
-
       return;
     }
 
     setBannerFile(file);
     setRemoveBanner(false);
-
-    const transfer = new DataTransfer();
-    transfer.items.add(file);
-
-    if (bannerInputRef.current) {
-      bannerInputRef.current.files = transfer.files;
-    }
   }
 
   function handleFileChange(
@@ -119,6 +113,7 @@ export default function NsfwProfileForm({
     event: DragEvent<HTMLLabelElement>
   ) {
     event.preventDefault();
+    setDragTarget(null);
     setActiveTarget(target);
 
     const file = Array.from(event.dataTransfer.files).find(
@@ -130,17 +125,140 @@ export default function NsfwProfileForm({
     }
   }
 
-  function handlePaste(event: ClipboardEvent<HTMLFormElement>) {
+  function handleTargetPaste(
+    target: ImageTarget,
+    event: ClipboardEvent<HTMLElement>
+  ) {
     const file = Array.from(event.clipboardData.files).find(
       isImageFile
     );
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    setActiveTarget(target);
+    assignFile(target, file);
+  }
+
+  function handleFormPaste(event: ClipboardEvent<HTMLFormElement>) {
+    const file = Array.from(event.clipboardData.files).find(
+      isImageFile
+    );
+
+    if (!file) return;
 
     event.preventDefault();
     assignFile(activeTarget, file);
+  }
+
+  async function uploadDirect(
+    target: ImageTarget,
+    file: File
+  ): Promise<UploadedImage> {
+    const signResponse = await fetch(
+      "/api/admin/nsfw/profile/sign-upload",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ target }),
+      }
+    );
+
+    const signData = await signResponse.json();
+
+    if (!signResponse.ok) {
+      throw new Error(
+        signData?.error || "Could not prepare image upload."
+      );
+    }
+
+    const uploadBody = new FormData();
+    uploadBody.append("file", file);
+    uploadBody.append("api_key", signData.apiKey);
+    uploadBody.append("timestamp", String(signData.timestamp));
+    uploadBody.append("signature", signData.signature);
+    uploadBody.append("folder", signData.folder);
+    uploadBody.append("context", signData.context);
+
+    const uploadResponse = await fetch(signData.uploadUrl, {
+      method: "POST",
+      body: uploadBody,
+    });
+
+    const uploadData = await uploadResponse.json();
+
+    if (!uploadResponse.ok) {
+      throw new Error(
+        uploadData?.error?.message ||
+          `${target} upload failed.`
+      );
+    }
+
+    return {
+      publicId: String(uploadData.public_id || ""),
+      secureUrl: String(uploadData.secure_url || ""),
+    };
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (saving) return;
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const form = new FormData(event.currentTarget);
+
+      const avatarUpload = avatarFile
+        ? await uploadDirect("avatar", avatarFile)
+        : null;
+
+      const bannerUpload = bannerFile
+        ? await uploadDirect("banner", bannerFile)
+        : null;
+
+      const response = await fetch(
+        "/api/admin/nsfw/profile",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nsfwDisplayName: form.get("nsfwDisplayName"),
+            nsfwBio: form.get("nsfwBio"),
+            removeNsfwAvatar: removeAvatar,
+            removeNsfwBanner: removeBanner,
+            avatarUpload,
+            bannerUpload,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Could not save the NSFW profile."
+        );
+      }
+
+      window.location.assign(
+        data.redirectTo || "/admin/nsfw/profile?saved=1"
+      );
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Could not save the NSFW profile."
+      );
+      setSaving(false);
+    }
   }
 
   function clearSelected(target: ImageTarget) {
@@ -163,10 +281,8 @@ export default function NsfwProfileForm({
 
   return (
     <form
-      action="/api/admin/nsfw/profile"
-      method="POST"
-      encType="multipart/form-data"
-      onPaste={handlePaste}
+      onSubmit={handleSubmit}
+      onPaste={handleFormPaste}
       className="mt-8 space-y-7 rounded-3xl border border-white/10 bg-black/25 p-6 sm:p-8"
     >
       <label className="block">
@@ -223,14 +339,24 @@ export default function NsfwProfileForm({
           )}
 
           <label
+            tabIndex={0}
             onClick={() => setActiveTarget("avatar")}
-            onDragOver={(event) => event.preventDefault()}
+            onFocus={() => setActiveTarget("avatar")}
+            onMouseEnter={() => setActiveTarget("avatar")}
+            onPaste={(event) =>
+              handleTargetPaste("avatar", event)
+            }
+            onDragOver={(event) => {
+              event.preventDefault();
+              setActiveTarget("avatar");
+              setDragTarget("avatar");
+            }}
+            onDragLeave={() => setDragTarget(null)}
             onDrop={(event) => handleDrop("avatar", event)}
             className="mt-5 block cursor-pointer rounded-2xl border border-dashed border-red-400/30 bg-red-500/5 px-5 py-6 text-center transition hover:bg-red-500/10"
           >
             <input
               ref={avatarInputRef}
-              name="nsfwAvatar"
               type="file"
               accept="image/*"
               onChange={(event) =>
@@ -290,14 +416,24 @@ export default function NsfwProfileForm({
           )}
 
           <label
+            tabIndex={0}
             onClick={() => setActiveTarget("banner")}
-            onDragOver={(event) => event.preventDefault()}
+            onFocus={() => setActiveTarget("banner")}
+            onMouseEnter={() => setActiveTarget("banner")}
+            onPaste={(event) =>
+              handleTargetPaste("banner", event)
+            }
+            onDragOver={(event) => {
+              event.preventDefault();
+              setActiveTarget("banner");
+              setDragTarget("banner");
+            }}
+            onDragLeave={() => setDragTarget(null)}
             onDrop={(event) => handleDrop("banner", event)}
             className="mt-5 block cursor-pointer rounded-2xl border border-dashed border-red-400/30 bg-red-500/5 px-5 py-6 text-center transition hover:bg-red-500/10"
           >
             <input
               ref={bannerInputRef}
-              name="nsfwBanner"
               type="file"
               accept="image/*"
               onChange={(event) =>
@@ -344,9 +480,10 @@ export default function NsfwProfileForm({
 
       <button
         type="submit"
-        className="w-full rounded-2xl bg-gradient-to-r from-red-500 to-purple-600 px-6 py-4 text-base font-black text-white hover:opacity-90"
+        disabled={saving}
+        className="w-full rounded-2xl bg-gradient-to-r from-red-500 to-purple-600 px-6 py-4 text-base font-black text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Save NSFW profile
+        {saving ? "Saving NSFW profile..." : "Save NSFW profile"}
       </button>
     </form>
   );

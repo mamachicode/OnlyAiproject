@@ -6,15 +6,8 @@ import cloudinary from "@/src/lib/cloudinary";
 
 export const runtime = "nodejs";
 
-function cleanText(value: FormDataEntryValue | null, maxLength: number) {
+function cleanText(value: unknown, maxLength: number) {
   return String(value || "").trim().slice(0, maxLength);
-}
-
-function getUploadFile(value: FormDataEntryValue | null) {
-  if (!value || typeof value !== "object") return null;
-  if (typeof (value as any).arrayBuffer !== "function") return null;
-  if (Number((value as any).size || 0) <= 0) return null;
-  return value as any;
 }
 
 async function getMasterCreator() {
@@ -40,94 +33,87 @@ async function getMasterCreator() {
   });
 }
 
-const ALLOWED_IMAGE_MIMES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]);
+function contextValue(resource: any, key: string) {
+  const custom = resource?.context?.custom;
 
-const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
-
-async function prepareNsfwProfileImage(file: any) {
-  if (
-    !file ||
-    typeof file !== "object" ||
-    typeof file.arrayBuffer !== "function"
-  ) {
-    throw new Error("Invalid image file.");
+  if (custom && typeof custom === "object") {
+    return String(custom[key] || "");
   }
 
-  const mime = String(file.type || "")
+  const context = resource?.context;
+
+  if (typeof context === "string") {
+    const entry = context
+      .split("|")
+      .find((item) => item.startsWith(`${key}=`));
+
+    return entry ? entry.slice(key.length + 1) : "";
+  }
+
+  return "";
+}
+
+async function verifyProfileUpload(
+  publicId: string,
+  secureUrl: string,
+  ownerUserId: string,
+  target: "avatar" | "banner"
+) {
+  if (!publicId || !secureUrl) {
+    throw new Error("Uploaded image details are missing.");
+  }
+
+  const resource = await cloudinary.api.resource(publicId, {
+    resource_type: "image",
+    context: true,
+  });
+
+  if (
+    contextValue(resource, "onlyai_user_id") !== ownerUserId ||
+    contextValue(resource, "onlyai_lane") !== "nsfw" ||
+    contextValue(resource, "onlyai_access") !==
+      "private_processor_review" ||
+    contextValue(resource, "onlyai_profile_target") !== target
+  ) {
+    throw new Error("Upload ownership could not be verified.");
+  }
+
+  const verifiedUrl = String(resource?.secure_url || "").trim();
+  const bytes = Number(resource?.bytes || 0);
+  const format = String(resource?.format || "")
     .trim()
     .toLowerCase();
 
-  const size = Number(file.size || 0);
+  const allowedFormats = new Set([
+    "jpg",
+    "jpeg",
+    "png",
+    "webp",
+    "gif",
+  ]);
 
-  if (!ALLOWED_IMAGE_MIMES.has(mime)) {
+  if (!allowedFormats.has(format)) {
     throw new Error(
       "Only JPG, PNG, WebP, and GIF images are allowed."
     );
   }
 
-  if (size <= 0) {
-    throw new Error("Image file is empty.");
+  if (bytes <= 0) {
+    throw new Error("Uploaded image is empty.");
   }
 
-  if (size > MAX_IMAGE_BYTES) {
-    throw new Error("Image is too large. Max 20 MB.");
+  if (bytes > 20 * 1024 * 1024) {
+    throw new Error("Image is too large. Maximum size is 20 MB.");
   }
-
-  const buffer = Buffer.from(
-    await file.arrayBuffer()
-  );
-
-  if (!buffer.length) {
-    throw new Error("Image file is empty.");
-  }
-
-  return {
-    buffer,
-    mime,
-  };
-}
-
-async function uploadImage(file: any, folder: string) {
-  const prepared = await prepareNsfwProfileImage(file);
-
-  const dataUri =
-    `data:${prepared.mime};base64,${prepared.buffer.toString("base64")}`;
-
-  const result = await cloudinary.uploader.upload(dataUri, {
-    folder,
-    resource_type: "image",
-  });
-
-  const secureUrl = String(
-    result.secure_url || ""
-  ).trim();
 
   if (
-    !secureUrl.startsWith(
-      "https://res.cloudinary.com/"
-    )
+    !verifiedUrl.startsWith("https://res.cloudinary.com/") ||
+    verifiedUrl !== secureUrl
   ) {
-    throw new Error(
-      "Uploaded image URL could not be verified."
-    );
+    throw new Error("Uploaded image URL could not be verified.");
   }
 
-  return secureUrl;
-}
-
-function redirectWith(req: Request, values: Record<string, string>) {
-  const url = new URL("/admin/nsfw/profile", req.url);
-
-  for (const [key, value] of Object.entries(values)) {
-    url.searchParams.set(key, value.slice(0, 180));
-  }
-
-  return NextResponse.redirect(url, 303);
+  return verifiedUrl;
 }
 
 export async function POST(req: Request) {
@@ -146,45 +132,39 @@ export async function POST(req: Request) {
       );
     }
 
-    const formData = await req.formData();
+    const body = await req.json();
 
     const nsfwDisplayName = cleanText(
-      formData.get("nsfwDisplayName"),
+      body?.nsfwDisplayName,
       50
     );
 
     const nsfwBio = cleanText(
-      formData.get("nsfwBio"),
+      body?.nsfwBio,
       280
     );
 
-    const avatarFile = getUploadFile(
-      formData.get("nsfwAvatar")
-    );
+    const removeAvatar = body?.removeNsfwAvatar === true;
+    const removeBanner = body?.removeNsfwBanner === true;
 
-    const bannerFile = getUploadFile(
-      formData.get("nsfwBanner")
-    );
+    const avatarUpload = body?.avatarUpload;
+    const bannerUpload = body?.bannerUpload;
 
-    const removeAvatar =
-      formData.get("removeNsfwAvatar") === "1" &&
-      !avatarFile;
-
-    const removeBanner =
-      formData.get("removeNsfwBanner") === "1" &&
-      !bannerFile;
-
-    const nsfwAvatarUrl = avatarFile
-      ? await uploadImage(
-          avatarFile,
-          "onlyai/nsfw-profile/avatars"
+    const nsfwAvatarUrl = avatarUpload
+      ? await verifyProfileUpload(
+          String(avatarUpload.publicId || ""),
+          String(avatarUpload.secureUrl || ""),
+          creator.userId,
+          "avatar"
         )
       : null;
 
-    const nsfwBannerUrl = bannerFile
-      ? await uploadImage(
-          bannerFile,
-          "onlyai/nsfw-profile/banners"
+    const nsfwBannerUrl = bannerUpload
+      ? await verifyProfileUpload(
+          String(bannerUpload.publicId || ""),
+          String(bannerUpload.secureUrl || ""),
+          creator.userId,
+          "banner"
         )
       : null;
 
@@ -208,15 +188,21 @@ export async function POST(req: Request) {
       },
     });
 
-    return redirectWith(req, { saved: "1" });
+    return NextResponse.json({
+      success: true,
+      redirectTo: "/admin/nsfw/profile?saved=1",
+    });
   } catch (error) {
     console.error("ADMIN_NSFW_PROFILE_SAVE_ERROR", error);
 
-    return redirectWith(req, {
-      error:
-        error instanceof Error
-          ? error.message
-          : "Could not save the NSFW profile.",
-    });
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Could not save the NSFW profile.",
+      },
+      { status: 400 }
+    );
   }
 }
