@@ -5,6 +5,33 @@ export async function middleware(req: any) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   const url = new URL(req.url);
 
+  const isNsfwRoute =
+    url.pathname === "/nsfw" ||
+    url.pathname.startsWith("/nsfw/");
+
+  const isNsfwGateOrCompliancePage =
+    url.pathname === "/nsfw/age-gate" ||
+    url.pathname === "/nsfw/prohibited-content" ||
+    url.pathname === "/nsfw/dmca";
+
+  const ageConfirmed =
+    req.cookies.get("onlyai_nsfw_age_confirmed")?.value === "1";
+
+  if (
+    isNsfwRoute &&
+    !isNsfwGateOrCompliancePage &&
+    !ageConfirmed
+  ) {
+    const gateUrl = new URL("/nsfw/age-gate", req.url);
+
+    gateUrl.searchParams.set(
+      "returnTo",
+      `${url.pathname}${url.search}`
+    );
+
+    return NextResponse.redirect(gateUrl);
+  }
+
   // Protected legacy member-only areas.
   // Important: keep /creators public for fan discovery.
   const isLegacyCreatorArea =

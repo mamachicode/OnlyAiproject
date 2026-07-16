@@ -12,7 +12,7 @@ export default function AgeBanner() {
 
   return (
     <div className="w-full border-b border-red-500/20 bg-black px-4 py-3 text-center text-sm font-semibold text-white">
-      18+ area — age verification required
+      18+ area — adults only
     </div>
   );
 }
