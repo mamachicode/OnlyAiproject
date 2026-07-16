@@ -17,6 +17,7 @@ type NsfwProfileFormProps = {
   bio: string;
   currentAvatarUrl: string;
   currentBannerUrl: string;
+  currentMonthlyPrice: number;
 };
 
 type UploadedImage = {
@@ -33,6 +34,7 @@ export default function NsfwProfileForm({
   bio,
   currentAvatarUrl,
   currentBannerUrl,
+  currentMonthlyPrice,
 }: NsfwProfileFormProps) {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -232,6 +234,7 @@ export default function NsfwProfileForm({
           body: JSON.stringify({
             nsfwDisplayName: form.get("nsfwDisplayName"),
             nsfwBio: form.get("nsfwBio"),
+            nsfwPrice: form.get("nsfwPrice"),
             removeNsfwAvatar: removeAvatar,
             removeNsfwBanner: removeBanner,
             avatarUpload,
@@ -313,6 +316,34 @@ export default function NsfwProfileForm({
 
         <span className="mt-2 block text-xs text-zinc-500">
           Maximum 280 characters.
+        </span>
+      </label>
+
+      <label className="block">
+        <span className="text-sm font-black">
+          NSFW monthly price
+        </span>
+
+        <div className="mt-3 flex items-center rounded-2xl border border-white/10 bg-black/40 px-5">
+          <span className="text-zinc-500">$</span>
+
+          <input
+            name="nsfwPrice"
+            required
+            min={1}
+            max={500}
+            step={1}
+            type="number"
+            defaultValue={currentMonthlyPrice}
+            disabled={saving}
+            className="w-full bg-transparent px-4 py-5 font-semibold text-white outline-none disabled:opacity-60"
+          />
+
+          <span className="text-zinc-500">/month</span>
+        </div>
+
+        <span className="mt-2 block text-xs text-zinc-500">
+          Separate from the SFW membership price.
         </span>
       </label>
 

@@ -144,6 +144,22 @@ export async function POST(req: Request) {
       280
     );
 
+    const nsfwPrice = Number(body?.nsfwPrice);
+
+    if (
+      !Number.isInteger(nsfwPrice) ||
+      nsfwPrice < 1 ||
+      nsfwPrice > 500
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "NSFW monthly price must be a whole dollar amount between $1 and $500.",
+        },
+        { status: 400 }
+      );
+    }
+
     const removeAvatar = body?.removeNsfwAvatar === true;
     const removeBanner = body?.removeNsfwBanner === true;
 
@@ -168,11 +184,12 @@ export async function POST(req: Request) {
         )
       : null;
 
-    await prisma.creator.update({
-      where: {
-        id: creator.id,
-      },
-      data: {
+    await prisma.$transaction([
+      prisma.creator.update({
+        where: {
+          id: creator.id,
+        },
+        data: {
         nsfwDisplayName: nsfwDisplayName || null,
         nsfwBio: nsfwBio || null,
         ...(removeAvatar
@@ -180,13 +197,22 @@ export async function POST(req: Request) {
           : nsfwAvatarUrl
             ? { nsfwAvatarUrl }
             : {}),
-        ...(removeBanner
-          ? { nsfwBannerUrl: null }
-          : nsfwBannerUrl
-            ? { nsfwBannerUrl }
-            : {}),
-      },
-    });
+          ...(removeBanner
+            ? { nsfwBannerUrl: null }
+            : nsfwBannerUrl
+              ? { nsfwBannerUrl }
+              : {}),
+        },
+      }),
+      prisma.user.update({
+        where: {
+          id: creator.userId,
+        },
+        data: {
+          nsfwPrice,
+        },
+      }),
+    ]);
 
     return NextResponse.json({
       success: true,

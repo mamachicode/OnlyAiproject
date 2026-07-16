@@ -42,6 +42,7 @@ export default async function PrivateNsfwProfileSettingsPage({
       user: {
         select: {
           username: true,
+          nsfwPrice: true,
         },
       },
     },
@@ -114,6 +115,9 @@ export default async function PrivateNsfwProfileSettingsPage({
           }
           currentBannerUrl={
             creator.nsfwBannerUrl || ""
+          }
+          currentMonthlyPrice={
+            creator.user.nsfwPrice ?? 10
           }
         />
       </section>
